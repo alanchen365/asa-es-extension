@@ -14,5 +14,6 @@ class EasySwooleEvent
         // 载入路由
         HttpRouter::getInstance()->set();
         // 载入全部配置文件
+        Config::initConf();
     }
 }

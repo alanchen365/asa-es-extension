@@ -1,6 +1,6 @@
 <?php
 
-namespace AsaBase\Utility;
+namespace AsaEs\Utility;
 
 class Random
 {

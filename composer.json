@@ -6,7 +6,8 @@
     "license": "MIT",
     "minimum-stability": "dev",
     "require": {
-        "php": ">=7.2"
+        "php": ">=7.2",
+        "easyswoole/easyswoole" : "v2.1.3-stable"
     },
     "autoload": {
         "psr-4": {

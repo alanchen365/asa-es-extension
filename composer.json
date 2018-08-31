@@ -1,0 +1,16 @@
+{
+    "name": "trimble/asa-es-extension",
+    "description": "ASA EASYSWOOLE  EXTENSION SERVICE",
+    "keywords": ["qiniu", "storage", "sdk", "cloud"],
+    "type": "library",
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "AsaEs\\": "src/"
+        }
+    },
+}

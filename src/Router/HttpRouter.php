@@ -5,6 +5,7 @@ namespace AsaEs\Router;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Utility\File;
 use FastRoute\RouteCollector;
+use think\validate\ValidateRule;
 
 class HttpRouter
 {
@@ -68,7 +69,7 @@ class HttpRouter
     {
         $type = strtolower($type);
         $path = EASYSWOOLE_ROOT."/App/HttpController/Router/$type";
-        $files = File::scanDir($path);
+        $files = File::scanDir($path) ?? [];
 
         foreach ($files as $file) {
             $data = require_once $file;

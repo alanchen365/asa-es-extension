@@ -1,0 +1,38 @@
+<?php
+
+namespace AsaEs\Utility;
+
+use AsaEs\Config;
+use AsaEs\Exception\Service\SignException;
+use Firebase\JWT\JWT;
+
+class Token
+{
+    public static function encode(int $uid):string
+    {
+        try {
+            $jwtConf = Config::getInstance()->getConf('JWT') ?? null;
+            if (!$jwtConf) {
+                $code = 1012;
+                throw new SignException($code);
+            }
+
+            $token = JWT::encode(['uid'=>$uid], $jwtConf['KEY'], $jwtConf['ALG']) ?? '';
+            return $token;
+        } catch (\Exception $e) {
+            throw new SignException($e->getCode(), $e->getMessage());
+        }
+    }
+
+    public static function decode(string $token): object
+    {
+        try {
+            $jwtConf = Config::getInstance()->getConf('JWT');
+            $tokenObj = JWT::decode($token, $jwtConf['KEY'], [$jwtConf['ALG']]) ?? (object)[];
+
+            return (object)$tokenObj;
+        } catch (\Exception $e) {
+            throw new SignException($e->getCode(), $e->getMessage());
+        }
+    }
+}

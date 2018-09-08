@@ -1,0 +1,82 @@
+<?php
+
+namespace AsaEs;
+
+use App\AppConst\AppInfo;
+use AsaEs\Config\Router;
+use AsaEs\Exception\Service\SignException;
+use AsaEs\Exception\SystemException;
+use AsaEs\Logger\AccessLogger;
+use AsaEs\Logger\FileLogger;
+use AsaEs\Process\Inotify;
+use AsaEs\Router\HttpRouter;
+use AsaEs\Utility\ArrayUtility;
+use EasySwoole\Core\Component\Di;
+use EasySwoole\Core\Component\SysConst;
+use EasySwoole\Core\Http\Message\Status;
+use EasySwoole\Core\Swoole\EventRegister;
+use EasySwoole\Core\Swoole\Process\ProcessManager;
+use EasySwoole\Core\Swoole\ServerManager;
+use \EasySwoole\Core\Http\Request;
+use \EasySwoole\Core\Http\Response;
+
+class EasySwooleEvent
+{
+    public static function frameInitialize(): void
+    {
+        // 时区设置
+        date_default_timezone_set('Asia/Shanghai');
+        // 注册路由
+        HttpRouter::getInstance()->registered();
+        // 注册配置文件
+        Config::getInstance()->register();
+        // 注册异常
+        Di::getInstance()->set(SysConst::HTTP_EXCEPTION_HANDLER, SystemException::class);
+    }
+    
+    public static function mainServerCreate(ServerManager $server, EventRegister $register): void
+    {
+        // 服务热重启
+        ProcessManager::getInstance()->addProcess(AsaEsConst::PROCESS_AUTO_RELOAD, Inotify::class);
+    }
+
+    public static function onRequest(Request $request, Response $response): void
+    {
+        Di::getInstance()->set(AsaEsConst::DI_REQUEST_OBJ, new \AsaEs\Utility\Request($request));
+        $requestHost = current($request->getHeader('host') ?? null) ?? '';
+        
+        // 获取配置
+        $corsDomain = Config::getInstance()->getConf('auth.CROSS_DOMAIN', true);
+        $whitelistsRoute = Config::getInstance()->getConf('auth.NO_AUTH_ROUTE', true);
+
+        // 判断跨域
+        $origin = current($request->getHeader('origin') ?? null) ?? '';
+        $origin = rtrim($origin, '/');
+        if (ArrayUtility::arrayFlip($corsDomain, $origin)) {
+            $response->withHeader('Access-Control-Allow-Origin', $origin);
+            $response->withHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
+            $response->withHeader('Access-Control-Allow-Credentials', 'true');
+            $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+        }
+
+        // 如果是本机 及 开发环境 模拟一个用户出来
+        if (AppInfo::APP_TOKEN_AUTH_SWITCH) {
+            $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
+            $tokenStr = $esRequest->getHeaderToken();
+
+            if (ArrayUtility::arrayFlip(['LOCAL','DEVELOP'], Config::getInstance()->getConf('ENV')) && !$tokenStr) {
+                $tokenStr = AppInfo::APP_SIMULATION_USER_TOKEN_STRING;
+                $esRequest->setHeaderToken($tokenStr);
+            }
+            
+            if (!$tokenStr) {
+                $response->withStatus(Status::CODE_UNAUTHORIZED);
+                $response->end();
+            }
+        }
+    }
+
+    public static function afterAction(Request $request, Response $response): void
+    {
+    }
+}

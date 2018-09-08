@@ -1,0 +1,693 @@
+<?php
+
+namespace AsaEs\Base;
+
+use App\AppConst\AppInfo;
+use App\Module\Logistics\Bean\LogisticsBean;
+use AsaEs\AsaEsConst;
+use AsaEs\Cache\EsRedis;
+use AsaEs\Config;
+use AsaEs\Db\EsMysqliDb;
+use AsaEs\Exception\Service\MysqlException;
+use AsaEs\Logger\FileLogger;
+use AsaEs\Proxy\DaoProxy;
+use AsaEs\Utility\ArrayUtility;
+use AsaEs\Utility\Time;
+use AsaEs\Utility\Tools;
+use EasySwoole\Core\Component\Di;
+use think\Validate;
+use think\validate\ValidateRule;
+
+class BaseDao
+{
+    /**
+     * @var Bean 对象
+     */
+    protected $beanObj;
+
+    /**
+     * 自动加缓存
+     * @var bool
+     */
+    protected $autoCache = true;
+
+    /**
+     * db实例
+     * @var array
+     */
+    private $db = [];
+
+    /**
+     * getById查询缓存
+     */
+    public function getByIdCache($id)
+    {
+        $redisObj = new EsRedis();
+        $redisKey = $this->getBasicRedisHashKey($id);
+
+        $row = $redisObj->hGetAll($redisKey);
+        $this->getBeanObj()->arrayToBean($row);
+
+        if ($this->getBeanObj()->getId() > 0) {
+            return $this->getBeanObj();
+        }
+
+        return $this->getBeanObj();
+    }
+
+    /**
+     * getById保存缓存
+     */
+    public function setByIdCache($id, $row)
+    {
+        $redisObj = new EsRedis();
+        $redisKey = $this->getBasicRedisHashKey($id);
+
+        // 利用管道机制 一次执行 减少网络请求
+        $pipe = $redisObj->multi(\Redis::PIPELINE);
+        foreach ($row as $column => $value) {
+            $pipe->hSet($redisKey, $column, $value);
+        }
+        $pipe->exec();
+    }
+
+    /**
+     * 获取单条数据
+     * @param int $id
+     * @return object
+     */
+    final public function getById(int $id): object
+    {
+        if ($id < 1) {
+            return (object) [];
+        }
+
+        // 查询条件拼接 检测是否存在逻辑删除 存在则拼接上逻辑删除的条件
+        $this->getDb()->where('id', $id);
+
+        $logicDeleteField = $this->getLogicDeleteField();
+        if ($logicDeleteField) {
+            $this->getDb()->where($logicDeleteField, 0);
+        }
+
+        // 数据填充
+        $row = $this->getDb()->getOne($this->getBeanObj()->getTableName(), $this->getBeanObj()->getFields()) ?? [];
+        $this->getBeanObj()->arrayToBean($row);
+
+        if ($this->getBeanObj()->getId() < 1) {
+            return (object) [];
+        }
+
+        return $this->getBeanObj();
+    }
+
+    /**
+     * 更新单条数据
+     * @param int $id
+     * @param array $params
+     * @throws MysqlException
+     */
+    final public function updateByIds(array $ids, array $params)
+    {
+        // 看变量是否是该属性
+        $params = BaseDao::clearIllegalParams($params);
+        if (empty($params) || empty($ids)) {
+            $code = 4005;
+            throw new MysqlException($code);
+        }
+
+        // 自动加一些属性
+        $params = BaseDao::autoWriteTime(AsaEsConst::MYSQL_AUTO_UPDATETIME, $params);
+        $params = BaseDao::autoWriteUid(AsaEsConst::MYSQL_AUTO_UPDATEUSER, $params);
+
+        // 开始更新
+        $this->getDb()->where('id', $ids, 'IN');
+        $flg = $this->getDb()->update($this->getBeanObj()->getTableName(), $params) ?? [];
+
+        if (!$flg || 0 !== $this->getDb()->getLastErrno()) {
+            $code = 4004;
+            throw new MysqlException($code, $this->getDb()->getLastError());
+        }
+
+        // 批量更新
+        $redisObj = new EsRedis();
+        $pipe = $redisObj->multi(\Redis::PIPELINE);
+
+        foreach ($ids as $id) {
+            $redisKey = $this->getBasicRedisHashKey($id);
+            foreach ($params as $column => $value) {
+                $pipe->hSet($redisKey, $column, $value);
+            }
+        }
+        $pipe->exec();
+    }
+
+    /**
+     * 更新全表中某列等于某个值的所有数据.
+     *
+     * @param string $field
+     * @param string $value
+     *
+     * @throws MysqlException
+     */
+    final public function updateByField(string $field, array $fieldValues, string $updateField, $updateValue): void
+    {
+        if (Tools::superEmpty($field) || Tools::superEmpty($fieldValues)) {
+            $code = 4020;
+            throw new MysqlException($code);
+        }
+
+        // 先找到需要更新哪些条数据
+        $tableName = $this->getBeanObj()->getTableName();
+        $this->getDb()->where($field, $fieldValues, 'IN');
+        $rows = $this->getDb()->get($tableName, null, 'id');
+
+        // 先查出id
+        $ids = ArrayUtility::cols($rows, 'id') ?? [];
+        if (empty($ids)) {
+            return;
+        }
+
+        // 拼接最终更新的数据
+        $params = [];
+        $params = BaseDao::autoWriteTime(AsaEsConst::MYSQL_AUTO_UPDATETIME, $params);
+        $params = BaseDao::autoWriteUid(AsaEsConst::MYSQL_AUTO_UPDATEUSER, $params);
+        $params[$updateField] = $updateValue;
+
+        $this->getDb()->where('id', $ids, 'IN')->update($tableName, $params);
+        if (0 !== $this->getDb()->getLastErrno()) {
+            $code = 4010;
+            throw new MysqlException($code, $this->getDb()->getLastError());
+        }
+
+        // 批量更新
+        $redisObj = new EsRedis();
+        $pipe = $redisObj->multi(\Redis::PIPELINE);
+
+        foreach ($ids as $id) {
+            $redisKey = $this->getBasicRedisHashKey($id);
+            foreach ($params as $column => $value) {
+                $pipe->hSet($redisKey, $column, $value);
+            }
+        }
+        $pipe->exec();
+    }
+
+    /**
+     * 删除单条数据
+     * @param int $id
+     */
+    final public function deleteByIds(array $ids):void
+    {
+        $redisObj = new EsRedis();
+        $pipe = $redisObj->multi(\Redis::PIPELINE);
+
+        // 先删缓存 标注该条数据已删除 写入集合中 减少直接查库的可能 可能存在并发问题 后期可写入lua脚本
+        foreach ($ids as $key => $id) {
+
+            // 如果该数据已经被删除 就不需要再查数据库了
+            if ($this->basicIsDeleted()) {
+                unset($ids[$key]);
+                continue;
+            }
+
+            $redisKey = $this->getBasicRedisHashKey($id);
+            $pipe->hDel($redisKey, $id);
+            $pipe->sAdd(EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_DELETED), $id);
+        }
+        $pipe->exec();
+
+        // 都是空的话 就没有必要再走数据库
+        if (empty($ids)) {
+            return;
+        }
+
+        $this->getDb()->where('id', $ids, 'IN');
+
+        if ($this->getLogicDeleteField()) {
+            // 走更新方法 自动加一些属性
+            $params = [$field=>1];
+            $params = BaseDao::autoWriteTime(AsaEsConst::MYSQL_AUTO_UPDATETIME, $params);
+            $params = BaseDao::autoWriteUid(AsaEsConst::MYSQL_AUTO_UPDATEUSER, $params);
+
+            // 开始更新
+            $flg = $this->getDb()->update($this->getBeanObj()->getTableName(), $params) ?? [];
+        } else {
+            $flg = $this->getDb()->delete($this->getBeanObj()->getTableName());
+        }
+
+        if (!$flg || 0 !== $this->getDb()->getLastErrno()) {
+            $code = 4013;
+            throw new MysqlException($code);
+        }
+    }
+
+    /**
+     * 插入单条数据
+     * @param array $params
+     */
+    final public function insert(array $params) :int
+    {
+        // 看变量是否是该属性
+        $params = BaseDao::clearIllegalParams($params);
+        if (empty($params) || count($params) < 1) {
+            $code = 4001;
+            throw new MysqlException($code);
+        }
+
+        $params = BaseDao::autoWriteTime(AsaEsConst::MYSQL_AUTO_INSERTTIME, $params);
+        $params = BaseDao::autoWriteUid(AsaEsConst::MYSQL_AUTO_INSERTUSER, $params);
+
+        // 逻辑删除
+        $logicDeleteField = $this->getLogicDeleteField();
+        if ($logicDeleteField) {
+            $params[$logicDeleteField] = 0;
+        }
+
+        $id = $this->getDb()->insert($this->getBeanObj()->getTableName(), $params);
+        if ($id < 1 || 0 !== $this->getDb()->getLastErrno()) {
+            $code = 4002;
+            throw new MysqlException($code, $this->getDb()->getLastError());
+        }
+
+        // 不直接写缓存 是因为数据库会有默认值， 直接写会造成数据不同步
+        return $id;
+    }
+
+    /**
+     * 插入一组数据
+     * @param array $params
+     * @return array
+     */
+    final public function insertAll(array $params): array
+    {
+        if (empty($params)) {
+            $code = 4012;
+            throw new MysqlException($code);
+        }
+
+        $logicDeleteField = $this->getLogicDeleteField();
+        foreach ($params as $key => $param) {
+            $params[$key] = BaseDao::autoWriteTime(AsaEsConst::MYSQL_AUTO_INSERTTIME, $params[$key]);
+            $params[$key] = BaseDao::autoWriteUid(AsaEsConst::MYSQL_AUTO_INSERTUSER, $params[$key]);
+
+            // 逻辑删除
+            if ($logicDeleteField) {
+                $params[$key][$logicDeleteField] = 0;
+            }
+        }
+
+        $ids = $this->getDb()->insertMulti($this->getBeanObj()->getTableName(), $params) ?? [];
+
+        if (empty($ids) || !is_array($ids) ||  0 !== $this->getDb()->getLastErrno()) {
+            $code = 4016;
+            throw new MysqlException($code, $this->getDb()->getLastError());
+        }
+
+        return  $ids;
+    }
+
+    /**
+     * 按照某一列删除
+     * @param string $field
+     * @param $value
+     * @return array
+     */
+    final public function deleteByField(string $field, array $values): void
+    {
+        if (empty($field) || empty($values)) {
+            $code = 4009;
+            throw new MysqlException($code);
+        }
+
+        // 先找到需要更新哪些条数据
+        $this->getDb()->where($field, $values, 'IN');
+        $rows = $this->getDb()->get($this->getBeanObj()->getTableName(), null, 'id');
+
+        // 先查出id
+        $ids = ArrayUtility::cols($rows, 'id') ?? [];
+        if (empty($ids)) {
+            return;
+        }
+
+        $this->deleteByIds($ids);
+    }
+
+    /**
+     * 查全部 团队内部调用.
+     */
+    final public function getAll(array $params = [], array $searchLinkType = [], array $page = [], array $orderBys = [], array $groupBys = []): array
+    {
+        // 看变量是否是该属性
+        $params = BaseDao::clearIllegalParams($params);
+
+        // 是否存在空值 每个字段的查询分类
+        foreach ($params as $field => $value) {
+            if (Tools::superEmpty($value)) {
+                $code = 1011;
+                throw new MysqlException($code, $field.'的值不能为空');
+            }
+
+            // 默认是 等号 链接起来
+            $searchType = $searchLinkType[$field]['search_type'] ?? 'IN';
+            switch (strtoupper($searchType)) {
+
+                // ARRAY 绝对等于 绝对不等 BETWEEN
+                case 'IN':
+                case 'NOT IN':
+                    $value = !is_array($value) ? [$value] : $value;
+                    $this->getDb()->where($field, $value, $searchType);
+                    break;
+
+                case 'BETWEEN':
+
+                    if (!isset($value[0]) || !isset($value[1])) {
+                        $code = 1011;
+                        throw new MysqlException($code, $field.'字段的BETWEEN规则传递有误');
+                    }
+
+                    $this->getDb()->where($field, $value, $searchType);
+                    break;
+
+                // 单个值
+                case '>':
+                case '<':
+                case '>=':
+                case '<=':
+                    $this->getDb()->where($field, [$searchType => $value]);
+                    break;
+
+                // 单个值
+                case 'IS NOT':
+                case 'IS':
+                    $this->getDb()->where($field, null, $searchType);
+                    break;
+                default:
+                    // 默认为in 防止抛错的
+                    $value = !is_array($value) ? [$value] : $value;
+                    $this->getDb()->where($field, $value, 'IN');
+            }
+        }
+
+        // 分组规则
+        foreach ($groupBys as $fields) {
+            $this->getDb()->groupBy($fields);
+        }
+
+        // 排序规则
+        foreach ($orderBys as $fields => $orderType) {
+            $this->getDb()->orderBy($fields, $orderType);
+        }
+
+        // 逻辑删除
+        $logicDeleteField = $this->getLogicDeleteField();
+        if ($logicDeleteField) {
+            $this->getDb()->where($logicDeleteField, 0);
+        }
+
+        $rows = $this->getDb()->get($this->getBeanObj()->getTableName(), $page, $this->getBeanObj()->getFields()) ?? [];
+
+        // 转成bean
+        $data = [];
+        $modelName = Tools::getModelNameByClass(get_called_class());
+        foreach ($rows as $key => $row) {
+            $tmpBean = new $modelName();
+            $data[] = $tmpBean->arrayToBean($row);
+            unset($tmpBean);
+        }
+
+        return $data;
+    }
+
+    /**
+     * 搜索全部数据.
+     */
+    final public function searchAll(array $params = [], array $searchLinkType = [], array $page = [], array $orderBys = [], array $groupBys = []): array
+    {
+        // 看变量是否是该属性
+        $params = BaseDao::clearIllegalParams($params);
+
+        $searchTypeConf = $searchLinkType['search_type'] ?? [];
+        $linkTypeConf = $searchLinkType['link_type'] ?? [];
+
+        $searchBinding = [];
+        foreach ($params as $field => $value) {
+            if (Tools::superEmpty($value)) {
+                $code = 1011;
+                throw new MysqlException($code, $field.'的值不能为空');
+            }
+
+            // 默认是 等号 链接起来
+            $searchType = $searchLinkType[$field]['search_type'] ?? 'IN';
+            $linkType = $searchLinkType[$field]['link_type'] ?? 'IN';
+
+            if ($linkType == 'OR') {
+                $whereKey = [];
+                $whereValue = [];
+
+                switch (strtoupper($searchType)) {
+
+                    case 'LIKE':
+                        $whereKey[] = "  {$field} LIKE ? ";
+                        $whereValue[] = '%'."{$value}".'%';
+                        break;
+
+                    case 'LLIKE':
+                        $whereKey[] = "  {$field} LIKE ? ";
+                        $whereValue[] = '%'."{$value}";
+                        break;
+
+                    case 'RLIKE':
+                        $whereKey[] = "  {$field} LIKE ? ";
+                        $whereValue[] = "{$value}".'%';
+                        break;
+
+                    case '>':
+                    case '<':
+                    case '>=':
+                    case '<=':
+                        $whereKey[] = "  {$field} {$searchType} ?  ";
+                        $whereValue[] = $value;
+                        break;
+
+                    case 'NOT IN':
+                        $value = !is_array($value) ? [$value] : $value;
+                        $whereKey[] = "  {$field} {$searchType} ?  ";
+                        $whereValue[] = $value;
+
+                        // no break
+                    case 'IS NOT':
+                        $whereKey[] = "  {$field} IS NOT NULL  ";
+                        break;
+
+                    case 'IS':
+                        $whereKey[] = "  {$field} IS NULL  ";
+                        break;
+
+                    case 'BETWEEN':
+                        $value = !is_array($value) ? [$value] : $value;
+                        if (!empty($value[0]) && !empty($value[1])) {
+                            $whereKey[] = "  {$field} BETWEEN ? AND ? ";
+                            $whereValue[] = $value[0];
+                            $whereValue[] = $value[1];
+                        }
+                }
+
+                $whereOrSql = implode('OR', $whereKey);
+                if (!empty($whereOrSql)) {
+                    $this->getDb()->where("({$whereOrSql})", $whereValue);
+                }
+            }
+
+            if ($linkType == 'AND') {
+                switch (strtoupper($searchType)) {
+
+                    case 'IN':
+                    case 'NOT IN':
+                    case 'BETWEEN':
+                        $value = !is_array($value) ? [$value] : $value;
+                        $this->getDb()->where($field, $value, $searchType);
+                        break;
+
+                    case 'LIKE':
+                        $this->getDb()->where($field, "%{$value}%", $searchType);
+                        break;
+
+                    case 'LLIKE':
+                        $this->getDb()->where($field, "%{$value}", $searchType);
+                        break;
+
+                    case 'RLIKE':
+                        $this->getDb()->where($field, "{$value}%", $searchType);
+                        break;
+
+                    case '>':
+                    case '<':
+                    case '>=':
+                    case '<=':
+                        $this->getDb()->where($field, [$searchType => $value]);
+                        break;
+
+                    case 'IS NOT':
+                    case 'IS':
+                        $this->getDb()->where($field, null, $searchType);
+                        break;
+                }
+            }
+        }
+
+        // 分组规则
+        foreach ($groupBys as $fields) {
+            $this->getDb()->groupBy($fields);
+        }
+
+        // 排序规则
+        foreach ($orderBys as $fields => $orderType) {
+            $this->getDb()->orderBy($fields, $orderType);
+        }
+
+        // 逻辑删除
+        $logicDeleteField = $this->getLogicDeleteField();
+        if ($logicDeleteField) {
+            $this->getDb()->where($logicDeleteField, 0);
+        }
+        
+        $rows = $this->getDb()->get($this->getBeanObj()->getTableName(), $page, $this->getBeanObj()->getFields()) ?? [];
+
+        // 转成bean
+        $data = [];
+        $modelName = Tools::getModelNameByClass(get_called_class());
+        foreach ($rows as $key => $row) {
+            $tmpBean = new $modelName();
+            $data[] = $tmpBean->arrayToBean($row);
+            unset($tmpBean);
+        }
+
+        return $data;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAutoCache(): bool
+    {
+        return $this->autoCache;
+    }
+
+    /**
+     * @param bool $autoCache
+     */
+    public function setAutoCache(bool $autoCache): void
+    {
+        $this->autoCache = $autoCache;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getBeanObj()
+    {
+        return $this->beanObj;
+    }
+
+    /**
+     * @return Bean
+     */
+    public function setBeanObj($beanObj)
+    {
+        $this->beanObj = $beanObj;
+    }
+
+    /**
+     * @return null|string
+     */
+    final public function getDb($dbType = AsaEsConst::DI_MYSQL_DEFAULT)
+    {
+        if (isset($this->db[$dbType])  && $this->db[$dbType] instanceof EsMysqliDb) {
+            return $this->db[$dbType];
+        }
+
+        $this->db[$dbType] = new EsMysqliDb($dbType);
+        return $this->db[$dbType];
+    }
+
+    /**
+     * 自动写入时间
+     * @param string $a
+     * @param array $params
+     */
+    final protected function autoWriteTime(array $autoType, array $params)
+    {
+        foreach ($autoType as $field) {
+            if (property_exists($this->getBeanObj(), $field)) {
+                // 外部传入就不走默认值
+                $params[$field] = $params[$field] ?? Time::getNowDataTime();
+            }
+        }
+        return $params;
+    }
+
+    /**
+     * 用户
+     * @param string $a
+     * @param array $params
+     */
+    final protected function autoWriteUid(array $autoType, array $params)
+    {
+        // TODO TOKEN 获取uid
+        $uid = 0;
+        foreach ($autoType as $field) {
+            if (property_exists($this->getBeanObj(), $field)) {
+                // 外部传入就不走默认值
+                $params[$field] = $params[$field] ??  $uid;
+            }
+        }
+        return $params;
+    }
+
+    /**
+     * 清空非法变量
+     */
+    final protected function clearIllegalParams(array $params):array
+    {
+        foreach ($params as $field => $value) {
+            if (!property_exists($this->getBeanObj(), $field)) {
+                unset($params[$field]);
+            }
+        }
+        return $params;
+    }
+
+    /**
+     * 基础数据是否已经被删除
+     */
+    public function basicIsDeleted(int $id) :bool
+    {
+        $redisObj = new EsRedis();
+        return (bool)$redisObj->sIsMember(EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_DELETED), $id);
+    }
+
+    /**
+     * 获取基础数据操作redis key
+     */
+    private function getBasicRedisHashKey($id) :string
+    {
+        return EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_TYPE) . "_{$id}";
+    }
+
+    /**
+     * 获取逻辑删除列的名称
+     * @return string
+     */
+    private function getLogicDeleteField() :string
+    {
+        $logicDeleteField = '';
+        foreach (AsaEsConst::MYSQL_AUTO_LOGICDELETE as $field) {
+            if (property_exists($this->getBeanObj(), $field)) {
+                $logicDeleteField = $field;
+            }
+        }
+
+        return $logicDeleteField;
+    }
+}

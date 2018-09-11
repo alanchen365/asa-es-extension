@@ -48,6 +48,17 @@ class EasySwooleEvent
         // 获取配置
         $corsDomain = Config::getInstance()->getConf('auth.CROSS_DOMAIN', true);
         $whitelistsRoute = Config::getInstance()->getConf('auth.NO_AUTH_ROUTE', true);
+        
+        // 如果是option请求 则放过
+        if ('OPTIONS' == $request->getMethod()) {
+            $response->withHeader('Access-Control-Allow-Origin', '*');
+            $response->withHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
+            $response->withHeader('Access-Control-Allow-Credentials', 'true');
+            $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+
+            $response->withStatus(Status::CODE_OK);
+            $response->end();
+        }
 
         // 判断跨域
         $origin = current($request->getHeader('origin') ?? null) ?? '';

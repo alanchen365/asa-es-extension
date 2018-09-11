@@ -206,7 +206,7 @@ class BaseDao
         foreach ($ids as $key => $id) {
 
             // 如果该数据已经被删除 就不需要再查数据库了
-            if ($this->basicIsDeleted()) {
+            if ($this->basicIsDeleted($id)) {
                 unset($ids[$key]);
                 continue;
             }
@@ -431,6 +431,10 @@ class BaseDao
         $linkTypeConf = $searchLinkType['link_type'] ?? [];
 
         $searchBinding = [];
+        $whereKey = [];
+        $whereValue = [];
+        $whereOrSql = '';
+
         foreach ($params as $field => $value) {
             if (Tools::superEmpty($value)) {
                 $code = 1011;
@@ -439,11 +443,9 @@ class BaseDao
 
             // 默认是 等号 链接起来
             $searchType = $searchLinkType[$field]['search_type'] ?? 'IN';
-            $linkType = $searchLinkType[$field]['link_type'] ?? 'IN';
+            $linkType = $searchLinkType[$field]['link_type'] ?? 'AND';
 
             if ($linkType == 'OR') {
-                $whereKey = [];
-                $whereValue = [];
 
                 switch (strtoupper($searchType)) {
 
@@ -492,11 +494,6 @@ class BaseDao
                             $whereValue[] = $value[1];
                         }
                 }
-
-                $whereOrSql = implode('OR', $whereKey);
-                if (!empty($whereOrSql)) {
-                    $this->getDb()->where("({$whereOrSql})", $whereValue);
-                }
             }
 
             if ($linkType == 'AND') {
@@ -534,6 +531,11 @@ class BaseDao
                         break;
                 }
             }
+        }
+
+        $whereOrSql = implode('OR', $whereKey) ?? null;
+        if (!empty($whereOrSql)) {
+            $this->getDb()->where("({$whereOrSql})", $whereValue);
         }
 
         // 分组规则

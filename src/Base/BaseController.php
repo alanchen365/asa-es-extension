@@ -30,6 +30,11 @@ class BaseController extends Controller
     protected $serviceObj;
 
     /**
+     * @var validate
+     */
+    protected $validate;
+
+    /**
      * 获取单条数据
      */
     public function getById()
@@ -85,10 +90,9 @@ class BaseController extends Controller
         $params = $this->getRequestJsonParam();
         $moduleObjName = $this->getModuleResultsName(get_called_class(), AsaEsConst::RESULTS_RETURN_TYPE_OBJ);
 
-        // TODO
-        if (empty($params)) {
-            // 抛出参数错误异常
-        }
+        // 默认的规则校验
+        $vData = $this->getValidate()->getBindingField($params);
+        $this->getValidate()->verify(__FUNCTION__, $vData);
 
         $id = $this->getServiceObj()->insert($params);
         $results->set($moduleObjName, $this->getServiceObj()->getById($id));
@@ -114,19 +118,12 @@ class BaseController extends Controller
         $results = new Results();
         $params = $this->request()->getRequestParam();
 
-        $searchLinkType = [
-            'name' => [
-                'link_type' => 'AND',
-                'search_type' => 'LIKE',
-            ],
-        ];
-
+        $searchLinkType = $this->getValidate()->getSearchParam();
         $moduleObjName = $this->getModuleResultsName(get_called_class(), AsaEsConst::RESULTS_RETURN_TYPE_LIST);
-        $list = $this->getServiceObj()->searchAll($params, $searchLinkType, $this->getPageParam(), MysqlOrderBys::LOGISTICS_LOGISTICS, MysqlGroupBys::LOGISTICS_LOGISTICS);
-//        $list = $this->getServiceObj()->getAll($params, $searchLinkType, $this->getPageParam(), MysqlOrderBys::LOGISTICS_LOGISTICS, MysqlGroupBys::LOGISTICS_LOGISTICS);
+
+        $list = $this->getServiceObj()->searchAll($params, $searchLinkType, $this->getPageParam(), [], []);
 
         $results->set($moduleObjName, $list);
-        $results->set(AsaEsConst::RESULTS_RETURN_OPTION_LIST, get_called_class());
         Web::setBody($this->response(), $results);
     }
 
@@ -167,6 +164,36 @@ class BaseController extends Controller
         return strtolower($resultsName.'_'.$type);
     }
 
+    public function onRequest($action): ?bool
+    {
+        try {
+            // 解token
+            $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
+            $tokenStr = $esRequest->getHeaderToken();
+            $tokenObj = Token::decode($tokenStr);
+
+            return true;
+        } catch (\Exception $e) {
+            throw new SignException(3002);
+            return false;
+        }
+    }
+
+    /**
+     * @return validate
+     */
+    public function getValidate()
+    {
+        return $this->validate;
+    }
+
+    /**
+     * @param validate $validate
+     */
+    public function setValidate($validate): void
+    {
+        $this->validate = $validate;
+    }
 
     /**
      * @return mixed
@@ -182,21 +209,5 @@ class BaseController extends Controller
     public function setServiceObj($serviceObj): void
     {
         $this->serviceObj = $serviceObj;
-    }
-
-    public function onRequest($action): ?bool
-    {
-        try {
-            // 解token
-            $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
-            $tokenStr = $esRequest->getHeaderToken();
-            $tokenObj = Token::decode($tokenStr);
-
-            var_dump($tokenObj);
-            return true;
-        } catch (\Exception $e) {
-            throw new SignException(3002);
-            return false;
-        }
     }
 }

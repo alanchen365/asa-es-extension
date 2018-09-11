@@ -47,7 +47,7 @@ class Inotify extends AbstractProcess
                 $events = inotify_read($notify);
                 if (!empty($events)) {
                     //注意更新多个文件的间隔时间处理,防止一次更新了10个文件，重启了10次，懒得做了，反正原理在这里
-//                    FileLogger::getInstance()->console('service is going to reload');
+                    FileLogger::getInstance()->console('service is going to reload');
                     ServerManager::getInstance()->getServer()->reload();
                 }
             });

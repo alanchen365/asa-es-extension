@@ -34,13 +34,15 @@ class BaseValidate extends Validate
      */
     public function getBindingField(array $userInputData): array
     {
+
         $data = [];
-        foreach ($this->bindingField as $verifyKey => $input) {
-            if (isset($userInputData[$input])) {
-                $data[$verifyKey] = $userInputData[$input];
+        $bindingField = array_keys($this->rule) ?? [];
+        foreach ($bindingField as $verifyKey) {
+            if (isset($userInputData[$verifyKey])) {
+                $data[$verifyKey] = $userInputData[$verifyKey];
             }
         }
-
+        
         return $data;
     }
 

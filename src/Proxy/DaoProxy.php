@@ -50,10 +50,6 @@ class DaoProxy
                 if ($actionName == 'getById') {
                     // 如果开启了缓存
                     if ($this->class->isAutoCache()) {
-                        // 先看看缓存是否已经删除
-                        if (call_user_func_array([$this->class,'basicIsDeleted'], $arguments)) {
-                            return (object)[];
-                        }
 
                         // 缓存是否命中
                         $cacheObj = call_user_func_array([$this->class,'getByIdCache'], $arguments);
@@ -61,6 +57,11 @@ class DaoProxy
 
                         if (isset($cacheId)) {
                             return $cacheObj;
+                        }
+
+                        // 先看看缓存是否已经删除
+                        if (call_user_func_array([$this->class,'basicIsDeleted'], $arguments)) {
+                            return (object)[];
                         }
                     }
 

@@ -54,7 +54,7 @@ class BaseValidate extends Validate
     public function verify(string $scene, array $vData, int $code = 1000): void
     {
         // 验证规则为空的话 默认不验证
-        if (!$this->getScene($scene)) {
+        if ($this->getScene($scene)) {
             if (!$this->scene($scene)->check($vData)) {
                 throw new AppException($code, $this->getError());
             }

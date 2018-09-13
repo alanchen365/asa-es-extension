@@ -39,6 +39,8 @@ class EasySwooleEvent
     {
         // 服务热重启
         ProcessManager::getInstance()->addProcess(AsaEsConst::PROCESS_AUTO_RELOAD, Inotify::class);
+        // 进程批量注入
+        \App\Process\Router::run();
     }
 
     public static function onRequest(Request $request, Response $response): void

@@ -40,7 +40,7 @@ class SystemException implements ExceptionHandlerInterface
             'msg' => $msg,
             'file' => $exception->getFile(),
             'line' => $exception->getLine(),
-            'trace' => $exception->getTrace(),
+//            'trace' => $exception->getTrace(),
         ];
 
         FileLogger::getInstance()->log(json_encode($data), 'RUNNING_ERROR');

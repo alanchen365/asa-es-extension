@@ -406,6 +406,11 @@ class BaseDao
             $this->getDb()->where($logicDeleteField, 0);
         }
 
+        // 如果分页没有传递 给一个默认分页
+        if (empty($page)) {
+            $page = [0,AppInfo::APP_PAGE_MAX];
+        }
+
         $rows = $this->getDb()->get($this->getBeanObj()->getTableName(), $page, $this->getBeanObj()->getFields()) ?? [];
 
         // 转成bean
@@ -447,7 +452,6 @@ class BaseDao
             $linkType = $searchLinkType[$field]['link_type'] ?? 'AND';
 
             if ($linkType == 'OR') {
-
                 switch (strtoupper($searchType)) {
 
                     case 'LIKE':
@@ -554,7 +558,12 @@ class BaseDao
         if ($logicDeleteField) {
             $this->getDb()->where($logicDeleteField, 0);
         }
-        
+
+        // 如果分页没有传递 给一个默认分页
+        if (empty($page)) {
+            $page = [0,AppInfo::APP_PAGE_DEFAULT_NUM];
+        }
+
         $rows = $this->getDb()->get($this->getBeanObj()->getTableName(), $page, $this->getBeanObj()->getFields()) ?? [];
 
         // 转成bean

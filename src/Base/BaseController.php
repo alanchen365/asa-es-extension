@@ -8,6 +8,7 @@
 
 namespace AsaEs\Base;
 
+use App\AppConst\AppInfo;
 use App\AppConst\MysqlGroupBys;
 use App\AppConst\MysqlOrderBys;
 use App\Module\Logistics\Bean\LogisticsBean;
@@ -150,7 +151,7 @@ class BaseController extends Controller
     public function getPageParam():array
     {
         $pageNo = $this->request()->getQueryParam(AsaEsConst::PAGE_KEY) ?? 0;
-        $pageNum = $this->request()->getQueryParam(AsaEsConst::PAGE_NUM_KEY) ?? 0;
+        $pageNum = $this->request()->getQueryParam(AsaEsConst::PAGE_NUM_KEY) ?? AppInfo::APP_PAGE_DEFAULT_NUM;
         return View::pageParam(intval($pageNo), intval($pageNum));
     }
 

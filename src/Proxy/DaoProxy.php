@@ -67,7 +67,7 @@ class DaoProxy
 
                     // 走数据库
                     $dbObj = call_user_func_array([$this->class,'getById'], $arguments);
-                    $DbId = $dbObj->getId() ?? null;
+                    $DbId = method_exists($dbObj,'getId') ? $dbObj->getId() : null;
 
                     if ($this->class->isAutoCache()) {
                         // 保存缓存

@@ -53,7 +53,7 @@ class BaseValidate extends Validate
      */
     public function verify(string $scene, array $vData, int $code = 1000): void
     {
-        if(!empty($this->scene['$scene'])){
+        if(!empty($this->scene['scene'])){
             if (!$this->scene($scene)->check($vData)) {
                 throw new AppException($code, $this->getError());
             }

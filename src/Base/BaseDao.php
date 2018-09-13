@@ -224,7 +224,8 @@ class BaseDao
 
         $this->getDb()->where('id', $ids, 'IN');
 
-        if ($this->getLogicDeleteField()) {
+        $field = $this->getLogicDeleteField();
+        if ($field) {
             // 走更新方法 自动加一些属性
             $params = [$field=>1];
             $params = BaseDao::autoWriteTime(AsaEsConst::MYSQL_AUTO_UPDATETIME, $params);
@@ -666,6 +667,7 @@ class BaseDao
     public function basicIsDeleted(int $id) :bool
     {
         $redisObj = new EsRedis();
+        return false;
         return (bool)$redisObj->sIsMember(EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_DELETED), $id);
     }
 

@@ -19,7 +19,7 @@ class EsMysqliDb
      * 需要保存日志的配置 可在外部覆写
      * @var array
      */
-    protected $saveLog = ['get','getOne','update','delete'];
+    protected $saveLog = ['get','getOne','update','delete','insert'];
 
     /**
      * 链接到哪个数据库

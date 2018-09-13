@@ -14,6 +14,7 @@ use App\AppConst\MysqlOrderBys;
 use App\Module\Logistics\Bean\LogisticsBean;
 use AsaEs\AsaEsConst;
 use AsaEs\Exception\BaseException;
+use AsaEs\Exception\MsgException;
 use AsaEs\Exception\Service\SignException;
 use AsaEs\Output\Results;
 use AsaEs\Output\Web;
@@ -59,9 +60,16 @@ class BaseController extends Controller
         $id = $this->request()->getRequestParam('id');
         $params = $this->getRequestJsonParam();
 
-        // TODO
-        if (empty($params)) {
-            // 抛出参数错误异常
+        $vData = $this->getValidate()->getBindingField($params);
+        $this->getValidate()->verify(__FUNCTION__, $vData);
+
+        // 先查一下
+        $obj = $this->getServiceObj()->getById($id);
+        $id = $obj->getId() ?? null;
+
+        // 数据是否存在
+        if(!isset($id)){
+            throw new MsgException(1009);
         }
 
         $moduleObjName = $this->getModuleResultsName(get_called_class(), AsaEsConst::RESULTS_RETURN_TYPE_OBJ);
@@ -78,6 +86,15 @@ class BaseController extends Controller
     {
         $results = new Results();
         $id = $this->request()->getRequestParam('id');
+
+        // 先查一下
+        $obj = $this->getServiceObj()->getById($id);
+        $id = $obj->getId() ?? null;
+
+        // 数据是否存在
+        if(!isset($id)){
+            throw new MsgException(1009);
+        }
 
         $this->getServiceObj()->deleteByIds([$id]);
         Web::setBody($this->response(), $results);
@@ -102,17 +119,6 @@ class BaseController extends Controller
     }
 
     /**
-     * 根据某列删除数据 （内部）
-     */
-    public function deleteByField()
-    {
-        $results = new Results();
-
-        $this->getServiceObj()->deleteByField('name', ['zhangsan']);
-        Web::setBody($this->response(), $results);
-    }
-
-    /**
      * 列表查询
      */
     public function index()
@@ -132,6 +138,7 @@ class BaseController extends Controller
     final protected function onException(\Throwable $throwable, $actionName): void
     {
         if ($throwable->getPrevious() instanceof BaseException) {
+
             Web::failBody($this->response(), new Results(), $throwable->getCode(), $throwable->getMessage());
         } else {
             throw $throwable;

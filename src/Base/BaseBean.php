@@ -150,6 +150,10 @@ class BaseBean
         return $data;
     }
 
+    public function __call($actionName, $arguments){
+        return null;
+    }
+
     /**
      * 对private变量可写
      * @param string $name

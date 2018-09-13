@@ -40,17 +40,17 @@ class BaseDao
     /**
      * getById查询缓存
      */
-    public function getByIdCache($id)
+    public function getByIdCache(?int $id)
     {
+        if (isset($id)) {
+            return $this->getBeanObj();
+        }
+
         $redisObj = new EsRedis();
         $redisKey = $this->getBasicRedisHashKey($id);
 
         $row = $redisObj->hGetAll($redisKey);
         $this->getBeanObj()->arrayToBean($row);
-
-        if ($this->getBeanObj()->getId() > 0) {
-            return $this->getBeanObj();
-        }
 
         return $this->getBeanObj();
     }
@@ -58,8 +58,12 @@ class BaseDao
     /**
      * getById保存缓存
      */
-    public function setByIdCache($id, $row)
+    public function setByIdCache(?int $id, $row):void
     {
+        if (!isset($id) || empty($row)) {
+            return;
+        }
+
         $redisObj = new EsRedis();
         $redisKey = $this->getBasicRedisHashKey($id);
 
@@ -76,10 +80,10 @@ class BaseDao
      * @param int $id
      * @return object
      */
-    final public function getById(int $id): object
+    final public function getById(?int $id): object
     {
-        if ($id < 1) {
-            return (object) [];
+        if (!isset($id)) {
+            return $this->getBeanObj();
         }
 
         // 查询条件拼接 检测是否存在逻辑删除 存在则拼接上逻辑删除的条件
@@ -94,8 +98,9 @@ class BaseDao
         $row = $this->getDb()->getOne($this->getBeanObj()->getTableName(), $this->getBeanObj()->getFields()) ?? [];
         $this->getBeanObj()->arrayToBean($row);
 
-        if ($this->getBeanObj()->getId() < 1) {
-            return (object) [];
+        $id = $row['id'] ?? null;
+        if (!isset($id)) {
+            return $this->getBeanObj();
         }
 
         return $this->getBeanObj();
@@ -673,7 +678,7 @@ class BaseDao
     /**
      * 基础数据是否已经被删除
      */
-    public function basicIsDeleted(int $id) :bool
+    public function basicIsDeleted(?int $id) :bool
     {
         $redisObj = new EsRedis();
         return false;

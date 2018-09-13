@@ -59,7 +59,6 @@ class DaoProxy
                             return $cacheObj;
                         }
 
-                        // 先看看缓存是否已经删除
                         if (call_user_func_array([$this->class,'basicIsDeleted'], $arguments)) {
                             return (object)[];
                         }

@@ -190,7 +190,7 @@ class BaseDao
             }
             $params[$field] = $value;
         }
-        
+
         $this->getDb()->where('id', $ids, 'IN')->update($tableName, $params);
         if (0 !== $this->getDb()->getLastErrno()) {
             $code = 4010;
@@ -331,15 +331,18 @@ class BaseDao
      * @param $value
      * @return array
      */
-    final public function deleteByField(string $field, array $values): void
+    final public function deleteByField(array $fieldValues): void
     {
-        if (empty($field) || empty($values)) {
+        if (empty($fieldValues)) {
             $code = 4009;
             throw new MysqlException($code);
         }
 
         // 先找到需要更新哪些条数据
-        $this->getDb()->where($field, $values, 'IN');
+        foreach ($fieldValues as $field => $value){
+            $values = !is_array($values) ? [$values] : $values;
+            $this->getDb()->where($field, $values, 'IN');
+        }
         $rows = $this->getDb()->get($this->getBeanObj()->getTableName(), null, 'id');
 
         // 先查出id
@@ -499,7 +502,7 @@ class BaseDao
                         $whereKey[] = "  {$field} {$searchType} ?  ";
                         $whereValue[] = $value;
 
-                        // no break
+                    // no break
                     case 'IS NOT':
                         $whereKey[] = "  {$field} IS NOT NULL  ";
                         break;

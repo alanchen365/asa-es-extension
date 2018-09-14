@@ -155,16 +155,21 @@ class BaseDao
      *
      * @throws MysqlException
      */
-    final public function updateByField(string $field, array $fieldValues, string $updateField, $updateValue): void
+    final public function updateByField(array $originalFieldValues, array $updateFieldValues): void
     {
-        if (Tools::superEmpty($field) || Tools::superEmpty($fieldValues)) {
+        // 看变量是否是该属性
+        $updateFieldValues = BaseDao::clearIllegalParams($updateFieldValues);
+        if (Tools::superEmpty($originalFieldValues) || Tools::superEmpty($updateFieldValues)) {
             $code = 4020;
             throw new MysqlException($code);
         }
 
         // 先找到需要更新哪些条数据
         $tableName = $this->getBeanObj()->getTableName();
-        $this->getDb()->where($field, $fieldValues, 'IN');
+        foreach ($originalFieldValues as $field => $value) {
+            $value = !is_array($value) ? [$value] : $value;
+            $this->getDb()->where($field, $value, 'IN');
+        }
         $rows = $this->getDb()->get($tableName, null, 'id');
 
         // 先查出id
@@ -177,8 +182,15 @@ class BaseDao
         $params = [];
         $params = BaseDao::autoWriteTime(AsaEsConst::MYSQL_AUTO_UPDATETIME, $params);
         $params = BaseDao::autoWriteUid(AsaEsConst::MYSQL_AUTO_UPDATEUSER, $params);
-        $params[$updateField] = $updateValue;
 
+        foreach ($updateFieldValues as $field => $value) {
+            if(is_array($value)){
+                unset($params[$field]);
+                continue;
+            }
+            $params[$field] = $value;
+        }
+        
         $this->getDb()->where('id', $ids, 'IN')->update($tableName, $params);
         if (0 !== $this->getDb()->getLastErrno()) {
             $code = 4010;

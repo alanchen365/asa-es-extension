@@ -41,7 +41,7 @@ class EsRedis
      */
     public static function getKeyPre(string $key):string
     {
-        return strtoupper(AppInfo::APP_EN_NAME ."s_".AppInfo::APP_VERSION . "_" . $key);
+        return strtoupper(AppInfo::APP_EN_NAME ."_".AppInfo::APP_VERSION . "_" . $key);
     }
 
     public function __call($actionName, $arguments)

@@ -184,14 +184,16 @@ class BaseDao
         $params = BaseDao::autoWriteUid(AsaEsConst::MYSQL_AUTO_UPDATEUSER, $params);
 
         foreach ($updateFieldValues as $field => $value) {
-            if(is_array($value)){
+            if (is_array($value)) {
                 unset($params[$field]);
                 continue;
             }
             $params[$field] = $value;
         }
 
-        $this->getDb()->where('id', $ids, 'IN')->update($tableName, $params);
+        $this->getDb()->where('id', $ids, 'IN');
+        $this->getDb()->update($tableName, $params);
+
         if (0 !== $this->getDb()->getLastErrno()) {
             $code = 4010;
             throw new MysqlException($code, $this->getDb()->getLastError());
@@ -339,9 +341,9 @@ class BaseDao
         }
 
         // 先找到需要更新哪些条数据
-        foreach ($fieldValues as $field => $value){
-            $values = !is_array($values) ? [$values] : $values;
-            $this->getDb()->where($field, $values, 'IN');
+        foreach ($fieldValues as $field => $value) {
+            $value = !is_array($value) ? [$value] : $value;
+            $this->getDb()->where($field, $value, 'IN');
         }
         $rows = $this->getDb()->get($this->getBeanObj()->getTableName(), null, 'id');
 
@@ -374,7 +376,6 @@ class BaseDao
             switch (strtoupper($searchType)) {
 
                 // ARRAY 绝对等于 绝对不等 BETWEEN
-                case 'IN':
                 case 'NOT IN':
                     $value = !is_array($value) ? [$value] : $value;
                     $this->getDb()->where($field, $value, $searchType);
@@ -405,8 +406,7 @@ class BaseDao
                     break;
                 default:
                     // 默认为in 防止抛错的
-                    $value = !is_array($value) ? [$value] : $value;
-                    $this->getDb()->where($field, $value, 'IN');
+                    is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->db->where($field, $value);
             }
         }
 
@@ -502,7 +502,7 @@ class BaseDao
                         $whereKey[] = "  {$field} {$searchType} ?  ";
                         $whereValue[] = $value;
 
-                    // no break
+                        // no break
                     case 'IS NOT':
                         $whereKey[] = "  {$field} IS NOT NULL  ";
                         break;
@@ -518,13 +518,14 @@ class BaseDao
                             $whereValue[] = $value[0];
                             $whereValue[] = $value[1];
                         }
+                    default:
+                        is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->db->where($field, $value);
                 }
             }
 
             if ($linkType == 'AND') {
                 switch (strtoupper($searchType)) {
 
-                    case 'IN':
                     case 'NOT IN':
                     case 'BETWEEN':
                         $value = !is_array($value) ? [$value] : $value;
@@ -554,6 +555,8 @@ class BaseDao
                     case 'IS':
                         $this->getDb()->where($field, null, $searchType);
                         break;
+                    default:
+                        is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->db->where($field, $value);
                 }
             }
         }

@@ -35,12 +35,17 @@ class EsRedis
     {
         return strtoupper(AppInfo::APP_EN_NAME ."_".AppInfo::APP_VERSION . "_" . $key."_".$type);
     }
-    
+
     /**
-     * 获取model的rediskey
+     * 获取基础的redis Key
      */
-    public static function getKeyPre(string $key):string
+    public static function getKeyPre($key)
     {
+        if (is_array($key)) {
+            return array_map(function ($val) {
+                return self::getKeyPre($val);
+            }, $key);
+        }
         return strtoupper(AppInfo::APP_EN_NAME ."_".AppInfo::APP_VERSION . "_" . $key);
     }
 

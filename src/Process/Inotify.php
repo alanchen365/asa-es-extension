@@ -42,6 +42,7 @@ class Inotify extends AbstractProcess
             foreach ($list as $item) {
                 inotify_add_watch($notify, $item, IN_CREATE | IN_DELETE | IN_MODIFY);
             }
+            // 加入EventLoop
             swoole_event_add($notify, function () use ($notify) {
                 $events = inotify_read($notify);
                 if (!empty($events)) {

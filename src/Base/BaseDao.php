@@ -42,17 +42,20 @@ class BaseDao
      */
     public function getByIdCache(?int $id)
     {
+        $beanClass = Tools::getModelNameByClass(get_called_class());
+        $modelBean = new $beanClass();
+
         if (isset($id)) {
-            return $this->getBeanObj();
+            return $modelBean;
         }
 
         $redisObj = new EsRedis();
         $redisKey = $this->getBasicRedisHashKey($id);
 
         $row = $redisObj->hGetAll($redisKey);
-        $this->getBeanObj()->arrayToBean($row);
+        $modelBean->arrayToBean($row);
 
-        return $this->getBeanObj();
+        return $modelBean;
     }
 
     /**
@@ -82,8 +85,11 @@ class BaseDao
      */
     final public function getById(?int $id): object
     {
+        $beanClass = Tools::getModelNameByClass(get_called_class());
+        $modelBean = new $beanClass();
+
         if (!isset($id)) {
-            return $this->getBeanObj();
+            return $modelBean;
         }
 
         // 查询条件拼接 检测是否存在逻辑删除 存在则拼接上逻辑删除的条件
@@ -96,14 +102,14 @@ class BaseDao
 
         // 数据填充
         $row = $this->getDb()->getOne($this->getBeanObj()->getTableName(), $this->getBeanObj()->getFields()) ?? [];
-        $this->getBeanObj()->arrayToBean($row);
+        $modelBean->arrayToBean($row);
 
         $id = $row['id'] ?? null;
         if (!isset($id)) {
-            return $this->getBeanObj();
+            return $modelBean;
         }
 
-        return $this->getBeanObj();
+        return $modelBean;
     }
 
     /**
@@ -502,7 +508,7 @@ class BaseDao
                         $whereKey[] = "  {$field} {$searchType} ?  ";
                         $whereValue[] = $value;
 
-                        // no break
+                    // no break
                     case 'IS NOT':
                         $whereKey[] = "  {$field} IS NOT NULL  ";
                         break;

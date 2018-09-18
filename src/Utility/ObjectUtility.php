@@ -2,6 +2,8 @@
 
 namespace AsaEs\Utility;
 
+use think\validate\ValidateRule;
+
 class ObjectUtility
 {
     /**
@@ -44,5 +46,16 @@ class ObjectUtility
         }
 
         return $ret;
+    }
+
+    /**
+     * 判断一个对象是否为空
+     * 为空返回空对象 不为空返回入参
+     * @param object $obj
+     * @return object
+     */
+    public static function objectEmpty(object $obj) :object
+    {
+        return isset($obj->id) ? $obj :  (object)[];
     }
 }

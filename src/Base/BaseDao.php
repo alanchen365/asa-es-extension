@@ -45,13 +45,13 @@ class BaseDao
         $beanClass = Tools::getModelNameByClass(get_called_class());
         $modelBean = new $beanClass();
 
-        if (isset($id)) {
+        if (!isset($id)) {
             return $modelBean;
         }
 
         $redisObj = new EsRedis();
         $redisKey = $this->getBasicRedisHashKey($id);
-
+        
         $row = $redisObj->hGetAll($redisKey);
         $modelBean->arrayToBean($row);
 
@@ -412,7 +412,7 @@ class BaseDao
                     break;
                 default:
                     // 默认为in 防止抛错的
-                    is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->db->where($field, $value);
+                    is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->getDb()->where($field, $value);
             }
         }
 
@@ -525,7 +525,7 @@ class BaseDao
                             $whereValue[] = $value[1];
                         }
                     default:
-                        is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->db->where($field, $value);
+                        is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->getDb()->where($field, $value);
                 }
             }
 
@@ -562,7 +562,7 @@ class BaseDao
                         $this->getDb()->where($field, null, $searchType);
                         break;
                     default:
-                        is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->db->where($field, $value);
+                        is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->getDb()->where($field, $value);
                 }
             }
         }

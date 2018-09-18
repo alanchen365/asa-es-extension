@@ -47,7 +47,11 @@ class DaoProxy
             $ref = new \ReflectionClass($this->class);
             if ($ref->hasMethod($actionName) &&  $ref->getMethod($actionName)->isPublic() && !$ref->getMethod($actionName)->isStatic()) {
 
+                /**
+                 * get by id
+                 */
                 if ($actionName == 'getById') {
+
                     // 如果开启了缓存
                     if ($this->class->isAutoCache()) {
 
@@ -59,24 +63,49 @@ class DaoProxy
                             return $cacheObj;
                         }
 
+                        // 如果数据已被删除
                         if (call_user_func_array([$this->class,'basicIsDeleted'], $arguments)) {
                             return (object)[];
                         }
                     }
-
+                    
                     // 走数据库
                     $dbObj = call_user_func_array([$this->class,'getById'], $arguments);
-                    $DbId = method_exists($dbObj,'getId') ? $dbObj->getId() : null;
+                    $dbId = method_exists($dbObj,'getId') ? $dbObj->getId() : null;
 
                     if ($this->class->isAutoCache()) {
                         // 保存缓存
-                        if (isset($DbId)) {
-                            call_user_func_array([$this->class,'setByIdCache'], [$DbId,$dbObj->toArray()]);
+                        if (isset($dbId)) {
+                            call_user_func_array([$this->class,'setByIdCache'], [$dbId,$dbObj->toArray()]);
                         }
                     }
 
                     return $dbObj;
                 }
+
+                /**
+                 * get all
+                 */
+                if ($actionName == 'getAll'){
+
+                    if ($this->class->isAutoCache()) {
+
+                    }
+
+                    // 走数据库
+
+                    if ($this->class->isAutoCache()){
+
+                    }
+                }
+
+                /**
+                 * search all
+                 */
+                if ($actionName == 'getById'){
+
+                }
+
 
                 return call_user_func_array([$this->class,$actionName], $arguments);
             }

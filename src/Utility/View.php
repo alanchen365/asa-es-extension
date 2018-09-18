@@ -3,18 +3,21 @@
 namespace AsaEs\Utility;
 
 use App\AppConst\AppInfo;
+use AsaEs\Config;
 use EasySwoole\Core\Component\Di;
 use ReflectionClass;
+use think\validate\ValidateRule;
 
-class View
+trait View
 {
+
     /**
      * 分页处理方法.
      *
      * @param null $page_no
      * @param int  $page_size
      */
-    public static function pageParam(int $no = 1, int $pageNum): array
+    public function pageParam(int $no = 1, int $pageNum): array
     {
         // 前端不传递分页 给个默认
         $pageNum = 0 === $pageNum ? AppInfo::APP_PAGE_DEFAULT_NUM : $pageNum;
@@ -28,6 +31,18 @@ class View
 
         return [intval($offset), intval($pageNum)];
     }
+
+    /**
+     * 去掉命名空间获取类名对象(全小写).
+     */
+    public function getModuleResultsName(string $className, string $type = AsaEsConst::RESULTS_RETURN_TYPE_OBJ): string
+    {
+        $className = explode('\\', $className);
+        $resultsName = (string) end($className);
+
+        return strtolower($resultsName.'_'.$type);
+    }
+
 
 //    /**
 //     * 获取列表操作项判断 TODO 获取roid.

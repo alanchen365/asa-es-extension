@@ -79,6 +79,60 @@ class BaseDao
     }
 
     /**
+     * 获取列表缓存
+     * @param string $functionName
+     * @param $arguments
+     * @return array|mixed
+     */
+    public function getListCache(string $functionName, $arguments)
+    {
+        $hashKey = md5(json_encode($arguments));
+        $redisKey =  EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), $functionName);
+
+        $redisObj = new EsRedis();
+        $rows = $redisObj->hGet($redisKey, $hashKey);
+        $rows = unserialize($rows) ?? [];
+
+        if(empty($rows)){
+            // key 是否存在
+            if ($redisObj->hExists($redisKey, $hashKey)) {
+                return [];
+            }
+        }
+
+        return $rows;
+    }
+
+    /**
+     * 给列表写入缓存
+     * @param string $functionName
+     * @param $arguments
+     * @param array|null $rows
+     */
+    public function setListCache(string $functionName, $arguments, ?array $rows = [])
+    {
+        $redisKey =  EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), $functionName);
+        $hashKey = md5(json_encode($arguments));
+
+        $redisObj = new EsRedis();
+        $redisObj->hSet($redisKey, $hashKey, serialize($rows));
+    }
+
+    /**
+     * 清理列表缓存
+     */
+    public function delListCache(){
+
+        $redisObj = new EsRedis();
+
+        $redisKeyGetAll =  EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_GET_ALL);
+        $redisKeySearchAll =  EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_SEARCH_ALL);
+        
+        $redisObj->del($redisKeyGetAll);
+        $redisObj->del($redisKeySearchAll);
+    }
+
+    /**
      * 获取单条数据
      * @param int $id
      * @return object
@@ -219,56 +273,6 @@ class BaseDao
     }
 
     /**
-     * 删除单条数据
-     * @param int $id
-     */
-    final public function deleteByIds(array $ids):void
-    {
-        $redisObj = new EsRedis();
-        $pipe = $redisObj->multi(\Redis::PIPELINE);
-
-        // 先删缓存 标注该条数据已删除 写入集合中 减少直接查库的可能 可能存在并发问题 后期可写入lua脚本
-        foreach ($ids as $key => $id) {
-
-            // 如果该数据已经被删除 就不需要再查数据库了
-            if ($this->basicIsDeleted($id)) {
-                unset($ids[$key]);
-                continue;
-            }
-
-            $redisKey = $this->getBasicRedisHashKey($id);
-            $pipe->hDel($redisKey, $id);
-            $pipe->sAdd(EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_DELETED), $id);
-        }
-        $pipe->exec();
-
-        // 都是空的话 就没有必要再走数据库
-        if (empty($ids)) {
-            return;
-        }
-
-        $this->getDb()->where('id', $ids, 'IN');
-
-        $field = $this->getLogicDeleteField();
-        if ($field) {
-            // 走更新方法 自动加一些属性
-            $params = [$field=>1];
-            $params = BaseDao::autoWriteTime(AsaEsConst::MYSQL_AUTO_UPDATETIME, $params);
-            $params = BaseDao::autoWriteUid(AsaEsConst::MYSQL_AUTO_UPDATEUSER, $params);
-
-            // 开始更新
-            $flg = $this->getDb()->update($this->getBeanObj()->getTableName(), $params) ?? [];
-        } else {
-            $flg = $this->getDb()->delete($this->getBeanObj()->getTableName());
-        }
-
-        if (!$flg || 0 !== $this->getDb()->getLastErrno()) {
-            $code = 4013;
-            throw new MysqlException($code);
-        }
-    }
-
-    /**
      * 插入单条数据
      * @param array $params
      */
@@ -360,6 +364,59 @@ class BaseDao
         }
 
         $this->deleteByIds($ids);
+    }
+
+    /**
+     * 删除单条数据
+     * @param int $id
+     */
+    final public function deleteByIds(array $ids):void
+    {
+        $redisObj = new EsRedis();
+        $pipe = $redisObj->multi(\Redis::PIPELINE);
+
+        // 清理列表缓存
+
+
+        // 先删缓存 标注该条数据已删除 写入集合中 减少直接查库的可能 可能存在并发问题 后期可写入lua脚本
+        foreach ($ids as $key => $id) {
+
+            // 如果该数据已经被删除 就不需要再查数据库了
+            if ($this->basicIsDeleted($id)) {
+                unset($ids[$key]);
+                continue;
+            }
+
+            $redisKey = $this->getBasicRedisHashKey($id);
+            $pipe->hDel($redisKey, $id);
+            $pipe->sAdd(EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_DELETED), $id);
+        }
+        $pipe->exec();
+
+        // 都是空的话 就没有必要再走数据库
+        if (empty($ids)) {
+            return;
+        }
+
+        $this->getDb()->where('id', $ids, 'IN');
+
+        $field = $this->getLogicDeleteField();
+        if ($field) {
+            // 走更新方法 自动加一些属性
+            $params = [$field=>1];
+            $params = BaseDao::autoWriteTime(AsaEsConst::MYSQL_AUTO_UPDATETIME, $params);
+            $params = BaseDao::autoWriteUid(AsaEsConst::MYSQL_AUTO_UPDATEUSER, $params);
+
+            // 开始更新
+            $flg = $this->getDb()->update($this->getBeanObj()->getTableName(), $params) ?? [];
+        } else {
+            $flg = $this->getDb()->delete($this->getBeanObj()->getTableName());
+        }
+
+        if (!$flg || 0 !== $this->getDb()->getLastErrno()) {
+            $code = 4013;
+            throw new MysqlException($code);
+        }
     }
 
     /**
@@ -524,6 +581,7 @@ class BaseDao
                             $whereValue[] = $value[0];
                             $whereValue[] = $value[1];
                         }
+                        // no break
                     default:
                         is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->getDb()->where($field, $value);
                 }
@@ -700,12 +758,37 @@ class BaseDao
     }
 
     /**
+     * 查询sql.
+     *
+     * @param string $sql    执行的sql语句
+     * @param array  $param  相关参数
+     * @param bool   $isMore
+     *
+     * @return mixed
+     *
+     * @throws MysqlException
+     */
+    protected function querySql(string $sql, array $param = null, bool $isOne = false)
+    {
+        if (!$isOne) {
+            $result = $this->getDb()->rawQuery($sql, $param);
+        } else {
+            $result = $this->getDb()->rawQueryOne($sql, $param);
+        }
+
+        if (0 !== $this->getDb()->getLastErrno()) {
+            throw new MysqlException(4017, $this->getDb()->getLastError());
+        }
+
+        return $result;
+    }
+
+    /**
      * 基础数据是否已经被删除
      */
     public function basicIsDeleted(?int $id) :bool
     {
         $redisObj = new EsRedis();
-        return false;
         return (bool)$redisObj->sIsMember(EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_DELETED), $id);
     }
 
@@ -732,4 +815,6 @@ class BaseDao
 
         return $logicDeleteField;
     }
+
+
 }

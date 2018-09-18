@@ -40,6 +40,12 @@ class AsaEsConst
     // redis 基础数据已删除的key
     const REDIS_BASIC_DELETED = 'BASIC_DELETED';
 
+    // redis 基础数据源 search all 的列表
+    const REDIS_BASIC_SEARCH_ALL = 'SEARCH_ALL';
+
+    // redis 技术数据 get all 的列表
+    const REDIS_BASIC_GET_ALL = 'GET_ALL';
+
     // 控制器中列表返回类型
     const RESULTS_RETURN_TYPE_LIST = 'list';
     const RESULTS_RETURN_TYPE_OBJ = 'obj';

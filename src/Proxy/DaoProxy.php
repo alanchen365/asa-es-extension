@@ -7,8 +7,10 @@
  */
 namespace AsaEs\Proxy;
 
+use AsaEs\AsaEsConst;
 use AsaEs\Base\BaseDao;
 use AsaEs\Logger\FileLogger;
+use AsaEs\Utility\ArrayUtility;
 use EasySwoole\Core\Component\Logger;
 use EasySwoole\Core\Swoole\Process\AbstractProcess;
 use EasySwoole\Core\Swoole\ServerManager;
@@ -64,14 +66,15 @@ class DaoProxy
                         }
 
                         // 如果数据已被删除
-                        if (call_user_func_array([$this->class,'basicIsDeleted'], $arguments)) {
-                            return (object)[];
+                        $isDelete = call_user_func_array([$this->class,'basicIsDeleted'], $arguments);
+                        if ($isDelete) {
+                            return $cacheObj;
                         }
                     }
                     
                     // 走数据库
                     $dbObj = call_user_func_array([$this->class,'getById'], $arguments);
-                    $dbId = method_exists($dbObj,'getId') ? $dbObj->getId() : null;
+                    $dbId = method_exists($dbObj, 'getId') ? $dbObj->getId() : null;
 
                     if ($this->class->isAutoCache()) {
                         // 保存缓存
@@ -86,26 +89,45 @@ class DaoProxy
                 /**
                  * get all
                  */
-                if ($actionName == 'getAll'){
+                if ($actionName == 'searchAll' || $actionName == 'getAll') {
+                    $functionName;
+                    if ($actionName == 'searchAll') {
+                        $functionName = AsaEsConst::REDIS_BASIC_SEARCH_ALL;
+                    } else {
+                        $functionName = AsaEsConst::REDIS_BASIC_GET_ALL;
+                    }
 
+                    // 先在缓存中查
                     if ($this->class->isAutoCache()) {
+                        $cacheList = call_user_func_array([$this->class,'getListCache'], [$functionName,$arguments]);
 
+                        if (!empty($cacheList)) {
+                            return $cacheList;
+                        }
                     }
 
                     // 走数据库
+                    $dbList = call_user_func_array([$this->class,$actionName], $arguments);
 
-                    if ($this->class->isAutoCache()){
-
+                    // 保存到数据库
+                    if ($this->class->isAutoCache()) {
+                        call_user_func_array([$this->class,'setListCache'], [$functionName,$arguments,$dbList]);
                     }
+
+                    return $dbList;
                 }
+
 
                 /**
-                 * search all
+                 * 如果走了如下方法 将缓存清空
                  */
-                if ($actionName == 'getById'){
-
+                $cacheFunction = [
+                    'updateByIds','updateByField','insert','insertAll','deleteByField','deleteByIds'
+                ];
+                if (ArrayUtility::arrayFlip($cacheFunction, $actionName)) {
+                    // 清空缓存
+                    call_user_func_array([$this->class,'delListCache'],[$actionName]);
                 }
-
 
                 return call_user_func_array([$this->class,$actionName], $arguments);
             }

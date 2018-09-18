@@ -50,7 +50,7 @@ class ObjectUtility
 
     /**
      * 判断一个对象是否为空
-     * 为空返回空对象 不为空返回入参
+     * 如果为空 返回一个空对象
      * @param object $obj
      * @return object
      */

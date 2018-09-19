@@ -532,9 +532,6 @@ eof;
         // 看变量是否是该属性
         $params = BaseDao::clearIllegalParams($params);
 
-        $searchTypeConf = $searchLinkType['search_type'] ?? [];
-        $linkTypeConf = $searchLinkType['link_type'] ?? [];
-
         $searchBinding = [];
         $whereKey = [];
         $whereValue = [];
@@ -577,9 +574,12 @@ eof;
                         break;
 
                     case 'NOT IN':
-                        $value = !is_array($value) ? [$value] : $value;
-                        $whereKey[] = "  {$field} {$searchType} ?  ";
-                        $whereValue[] = $value;
+                        $whereKey[] = "  {$field} NOT IN (?)  ";
+                        if (is_array($value) && !empty($value)) {
+                            $whereValue[] = implode("','", $value);
+                        } else {
+                            $whereValue[] = $value;
+                        }
 
                     // no break
                     case 'IS NOT':
@@ -599,7 +599,12 @@ eof;
                         }
                         // no break
                     default:
-                        is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->getDb()->where($field, $value);
+                        $whereKey[] = "  {$field} IN (?)  ";
+                        if (is_array($value) && !empty($value)) {
+                            $whereValue[] = implode("','", $value);
+                        } else {
+                            $whereValue[] = $value;
+                        }
                 }
             }
 
@@ -642,6 +647,7 @@ eof;
         }
 
         $whereOrSql = implode('OR', $whereKey) ?? null;
+
         if (!empty($whereOrSql)) {
             $this->getDb()->where("({$whereOrSql})", $whereValue);
         }

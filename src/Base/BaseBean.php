@@ -30,7 +30,6 @@ class BaseBean
         return $this->_fields;
     }
 
-
     /**
      * 获取所有列
      * @param mixed $fields
@@ -39,7 +38,6 @@ class BaseBean
     {
         $this->_fields = $fields;
     }
-
 
     public function __construct(array $data = null, $autoCreateProperty = true)
     {
@@ -164,8 +162,8 @@ class BaseBean
         $this->$name = $value;
     }
 
-//    public function &__get(string $name)
-//    {
-//        return $this->$name;
-//    }
+    public function &__get(string $name)
+    {
+        return $this->$name;
+    }
 }

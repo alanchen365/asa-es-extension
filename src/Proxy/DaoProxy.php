@@ -117,15 +117,14 @@ class DaoProxy
                     return $dbList;
                 }
 
-
                 /**
-                 * 如果走了如下方法 将缓存清空
+                 * 如果走了如下方法 将缓存清空（基础数据列表缓存）
                  */
                 $cacheFunction = [
                     'updateByIds','updateByField','insert','insertAll','deleteByField','deleteByIds'
                 ];
                 if (ArrayUtility::arrayFlip($cacheFunction, $actionName)) {
-                    // 清空缓存
+                    // 清空缓存 基础数据列表缓存
                     call_user_func_array([$this->class,'delListCache'],[$actionName]);
                 }
 

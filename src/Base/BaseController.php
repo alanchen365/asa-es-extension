@@ -18,6 +18,7 @@ use AsaEs\Exception\MsgException;
 use AsaEs\Exception\Service\SignException;
 use AsaEs\Output\Results;
 use AsaEs\Output\Web;
+use AsaEs\Utility\ObjectUtility;
 use AsaEs\Utility\Token;
 use AsaEs\Utility\Tools;
 use AsaEs\Utility\View;
@@ -27,7 +28,6 @@ use ReflectionClass;
 
 class BaseController extends Controller
 {
-
     use View;
 
     /**
@@ -49,7 +49,8 @@ class BaseController extends Controller
         $id = $this->request()->getQueryParam('id');
 
         $moduleObjName = $this->getModuleResultsName(get_called_class(), AsaEsConst::RESULTS_RETURN_TYPE_OBJ);
-        $results->set($moduleObjName, $this->getServiceObj()->getById($id));
+        $obj = ObjectUtility::objectEmpty($this->getServiceObj()->getById($id));
+        $results->set($moduleObjName, $obj);
 
         Web::setBody($this->response(), $results);
     }
@@ -71,7 +72,7 @@ class BaseController extends Controller
         $id = $obj->getId() ?? null;
 
         // 数据是否存在
-        if(!isset($id)){
+        if (!isset($id)) {
             throw new MsgException(1009);
         }
 
@@ -95,7 +96,7 @@ class BaseController extends Controller
         $id = $obj->getId() ?? null;
 
         // 数据是否存在
-        if(!isset($id)){
+        if (!isset($id)) {
             throw new MsgException(1009);
         }
 
@@ -141,7 +142,6 @@ class BaseController extends Controller
     final protected function onException(\Throwable $throwable, $actionName): void
     {
         if ($throwable->getPrevious() instanceof BaseException) {
-
             Web::failBody($this->response(), new Results(), $throwable->getCode(), $throwable->getMessage());
         } else {
             throw $throwable;

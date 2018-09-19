@@ -93,7 +93,7 @@ class BaseDao
         $rows = $redisObj->hGet($redisKey, $hashKey);
         $rows = unserialize($rows) ?? [];
 
-        if(empty($rows)){
+        if (empty($rows)) {
             // key 是否存在
             if ($redisObj->hExists($redisKey, $hashKey)) {
                 return [];
@@ -121,13 +121,13 @@ class BaseDao
     /**
      * 清理列表缓存
      */
-    public function delListCache(){
-
+    public function delListCache()
+    {
         $redisObj = new EsRedis();
 
         $redisKeyGetAll =  EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_GET_ALL);
         $redisKeySearchAll =  EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_SEARCH_ALL);
-        
+
         $redisObj->del($redisKeyGetAll);
         $redisObj->del($redisKeySearchAll);
     }
@@ -194,14 +194,42 @@ class BaseDao
             throw new MysqlException($code, $this->getDb()->getLastError());
         }
 
-        // 批量更新
-        $redisObj = new EsRedis();
-        $pipe = $redisObj->multi(\Redis::PIPELINE);
+        // 批量更新缓存
+        $this->updateRedisByLua($ids, $params);
+    }
 
+    /**
+     * 一次性更新redis缓存 （如果key不存在则不更新）
+     */
+    final private function updateRedisByLua(array $ids, array $params)
+    {
+        $ids = [1,-1];
+        $idsKeys = [];
+        $redisObj = new EsRedis();
         foreach ($ids as $id) {
-            $redisKey = $this->getBasicRedisHashKey($id);
+            $idsKeys[] = $this->getBasicRedisHashKey($id);
+        }
+
+        $lua = <<<eof
+local idsKeys = cjson.decode(KEYS[1]) or ''
+local data = {};
+for i, key in ipairs(idsKeys) do
+    local flg = redis.call( 'EXISTS', key);
+    if flg == 1 then
+        data[i] = key;
+    end
+end
+
+return cjson.encode(data)     
+eof;
+
+        $idsKeys = $redisObj->eval($lua, [json_encode($idsKeys),json_encode($params)], 1);
+        $idsKeys = json_decode($idsKeys, true) ?? [];
+
+        $pipe = $redisObj->multi(\Redis::PIPELINE);
+        foreach ($idsKeys as $key) {
             foreach ($params as $column => $value) {
-                $pipe->hSet($redisKey, $column, $value);
+                $pipe->hSet($key, $column, $value);
             }
         }
         $pipe->exec();
@@ -259,17 +287,8 @@ class BaseDao
             throw new MysqlException($code, $this->getDb()->getLastError());
         }
 
-        // 批量更新
-        $redisObj = new EsRedis();
-        $pipe = $redisObj->multi(\Redis::PIPELINE);
-
-        foreach ($ids as $id) {
-            $redisKey = $this->getBasicRedisHashKey($id);
-            foreach ($params as $column => $value) {
-                $pipe->hSet($redisKey, $column, $value);
-            }
-        }
-        $pipe->exec();
+        // 批量更新缓存
+        $this->updateRedisByLua($ids, $params);
     }
 
     /**
@@ -374,9 +393,6 @@ class BaseDao
     {
         $redisObj = new EsRedis();
         $pipe = $redisObj->multi(\Redis::PIPELINE);
-
-        // 清理列表缓存
-
 
         // 先删缓存 标注该条数据已删除 写入集合中 减少直接查库的可能 可能存在并发问题 后期可写入lua脚本
         foreach ($ids as $key => $id) {
@@ -815,6 +831,4 @@ class BaseDao
 
         return $logicDeleteField;
     }
-
-
 }

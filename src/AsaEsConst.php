@@ -31,8 +31,8 @@ class AsaEsConst
     // request id
     const REQUEST_ID = 'request_id';
 
-    // redis 默认过期时间  (秒)
-    const REDIS_DEFAULT_EXPIRE = (60 * 60 * 24) * 30;
+    // redis 默认过期时间  (一天)
+    const REDIS_DEFAULT_EXPIRE_ONE_DAY = 60 * 60 * 24;
 
     // redis 基础数据分类
     const REDIS_BASIC_TYPE = 'BASIC';

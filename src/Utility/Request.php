@@ -6,6 +6,9 @@ use App\AppConst\AppInfo;
 use AsaEs\AsaEsConst;
 use AsaEs\Cache\EsRedis;
 use AsaEs\Config;
+use AsaEs\Exception\BaseException;
+use AsaEs\Exception\Service\SignException;
+use Firebase\JWT\JWT;
 
 class Request
 {
@@ -18,6 +21,11 @@ class Request
      * token
      */
     protected $headerToken;
+
+    /**
+     * token 对象
+     */
+    protected $tokenObj;
 
     /**
      *swoole_request
@@ -33,11 +41,30 @@ class Request
             $this->setSwooleRequest($request->getSwooleRequest());
             // 记录当时的token
             $tokenHeader = current($request->getHeader(AppInfo::APP_HEADER_TOKEN)) ?? '';
+            // 写token
             $this->setHeaderToken($tokenHeader);
         }
     }
 
+
     /**
+     * @param mixed $tokenObj
+     */
+    public function setTokenObj($tokenObj): void
+    {
+        $this->tokenObj = $tokenObj;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTokenObj()
+    {
+        return $this->tokenObj;
+    }
+
+    /**
+     * 鉴权
      * @param mixed $headerToken
      */
     public function setHeaderToken($headerToken): void

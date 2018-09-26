@@ -54,7 +54,7 @@ class ObjectUtility
      * @param object $obj
      * @return object
      */
-    public static function objectEmpty(object $obj) :object
+    public static function objectEmpty($obj) :object
     {
         return isset($obj->id) ? $obj :  (object)[];
     }

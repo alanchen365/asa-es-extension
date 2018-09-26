@@ -53,7 +53,7 @@ class EasySwooleEvent
         // 获取配置
         $corsDomain = Config::getInstance()->getConf('auth.CROSS_DOMAIN', true);
         $whitelistsRoute = Config::getInstance()->getConf('auth.NO_AUTH_ROUTE', true);
-        
+
         // 如果是option请求 则放过
         if ('OPTIONS' == $request->getMethod()) {
             $response->withHeader('Access-Control-Allow-Origin', '*');

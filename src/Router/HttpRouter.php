@@ -28,6 +28,7 @@ class HttpRouter
     {
         $this->loadConfig('web');
         $this->loadConfig('api');
+        $this->loadConfig('public');
     }
 
     /**
@@ -47,6 +48,7 @@ class HttpRouter
          * Web 路由
          */
         $routeCollector->addGroup('/web', function (RouteCollector $route) {
+
             $routeArray = $this->router["web"];
             foreach ($routeArray as $routerArray) {
                 foreach ($routerArray as $perfix =>  $routerFunction) {
@@ -59,12 +61,26 @@ class HttpRouter
          * APP 路由
          */
         $routeCollector->addGroup('/api', function (RouteCollector $route) {
+
+            $routeArray = $this->router["api"];
+            foreach ($routeArray as $routerArray) {
+                foreach ($routerArray as $perfix =>  $routerFunction) {
+                    $route->addGroup($perfix, $routerFunction);
+                }
+            }
         });
 
         /**
          * 公开路由 该路径下的路由无需鉴权
          */
         $routeCollector->addGroup('/public', function (RouteCollector $route) {
+
+            $routeArray = $this->router["public"];
+            foreach ($routeArray as $routerArray) {
+                foreach ($routerArray as $perfix =>  $routerFunction) {
+                    $route->addGroup($perfix, $routerFunction);
+                }
+            }
         });
     }
 

@@ -11,6 +11,7 @@ use AsaEs\AsaEsConst;
 use AsaEs\Base\BaseDao;
 use AsaEs\Logger\FileLogger;
 use AsaEs\Utility\ArrayUtility;
+use AsaEs\Utility\Tools;
 use EasySwoole\Core\Component\Logger;
 use EasySwoole\Core\Swoole\Process\AbstractProcess;
 use EasySwoole\Core\Swoole\ServerManager;
@@ -45,6 +46,14 @@ class DaoProxy
     {
         if ($this->class instanceof BaseDao) {
 
+            /**
+             * 获取单条转发
+             */
+            if ($actionName == 'getOneByField') {
+                $rows = call_user_func_array([$this->class,'getALl'], $arguments);
+                return $rows[0] ?? null;
+            }
+
             // 方法是否存在
             $ref = new \ReflectionClass($this->class);
             if ($ref->hasMethod($actionName) &&  $ref->getMethod($actionName)->isPublic() && !$ref->getMethod($actionName)->isStatic()) {
@@ -53,37 +62,34 @@ class DaoProxy
                  * get by id
                  */
                 if ($actionName == 'getById') {
-
                     // 如果开启了缓存
                     if ($this->class->isAutoCache()) {
 
                         // 缓存是否命中
-                        $cacheObj = call_user_func_array([$this->class,'getByIdCache'], $arguments);
-                        $cacheId = $cacheObj->getId() ?? null;
-
-                        if (isset($cacheId)) {
-                            return $cacheObj;
+                        $cacheRow = call_user_func_array([$this->class,'getByIdCache'], $arguments);
+                        if (!empty($cacheRow)) {
+                            return $this->getClass()->getBeanObj()->arrayToBean($cacheRow);
                         }
 
                         // 如果数据已被删除
                         $isDelete = call_user_func_array([$this->class,'basicIsDeleted'], $arguments);
-                        if ($isDelete) {
-                            return $cacheObj;
+                        if($isDelete){
+                            return $this->getClass()->getBeanObj()->arrayToBean([]);
                         }
                     }
-                    
+
                     // 走数据库
-                    $dbObj = call_user_func_array([$this->class,'getById'], $arguments);
-                    $dbId = method_exists($dbObj, 'getId') ? $dbObj->getId() : null;
+                    $dbRow = call_user_func_array([$this->class,'getById'], $arguments);
+                    $newBeanObj =  $this->class->getBeanObj()->arrayToBean($dbRow);
 
                     if ($this->class->isAutoCache()) {
                         // 保存缓存
-                        if (isset($dbId)) {
-                            call_user_func_array([$this->class,'setByIdCache'], [$dbId,$dbObj->toArray()]);
+                        if (!empty($dbRow)) {
+                            call_user_func_array([$this->class,'setByIdCache'], [$newBeanObj->getId(),$newBeanObj->toArray()]);
                         }
                     }
 
-                    return $dbObj;
+                    return $newBeanObj;
                 }
 
                 /**
@@ -125,7 +131,7 @@ class DaoProxy
                 ];
                 if (ArrayUtility::arrayFlip($cacheFunction, $actionName)) {
                     // 清空缓存 基础数据列表缓存
-                    call_user_func_array([$this->class,'delListCache'],[$actionName]);
+                    call_user_func_array([$this->class,'delListCache'], [$actionName]);
                 }
 
                 return call_user_func_array([$this->class,$actionName], $arguments);

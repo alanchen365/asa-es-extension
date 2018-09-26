@@ -1,6 +1,8 @@
 <?php
 namespace AsaEs\Base;
 
+use AsaEs\Utility\Tools;
+
 class BaseBean
 {
     const FILTER_NOT_NULL  = 1;
@@ -57,9 +59,17 @@ class BaseBean
      */
     final public function arrayToBean(array $data, $autoCreateProperty = true): BaseBean
     {
-        // 如果初始化数据为空，什么都不用做了
+        // 防止数据错乱 每一次赋值 都获取一个新的对象
+        $modelName = Tools::getModelNameByClass(get_called_class());
+        $newBeanInstance = new $modelName();
+
+        // 如果初始化为空 就返回一个空的bean
         if (empty($data)) {
-            return $this;
+            foreach ($this->_fields as $field) {
+                unset($newBeanInstance->$field);
+            }
+
+            return $newBeanInstance;
         }
 
         if ($autoCreateProperty == false) {
@@ -71,13 +81,13 @@ class BaseBean
          */
         foreach ($this->_fields as $field) {
             if (isset($data[$field])) {
-                $this->addProperty($field, $data[$field]);
+                $newBeanInstance->addProperty($field, $data[$field]);
             }
         }
 
         // 数据填充完毕后之后做一些操作
-        $this->beforeInitialize();
-        return $this;
+        $newBeanInstance->beforeInitialize();
+        return $newBeanInstance;
     }
 
     /**

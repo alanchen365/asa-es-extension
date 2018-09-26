@@ -13,18 +13,21 @@ use App\AppConst\MysqlGroupBys;
 use App\AppConst\MysqlOrderBys;
 use App\Module\Logistics\Bean\LogisticsBean;
 use AsaEs\AsaEsConst;
+use AsaEs\Config;
 use AsaEs\Exception\BaseException;
 use AsaEs\Exception\MsgException;
 use AsaEs\Exception\Service\SignException;
 use AsaEs\Output\Results;
 use AsaEs\Output\Web;
 use AsaEs\Utility\ObjectUtility;
+use AsaEs\Utility\Request;
 use AsaEs\Utility\Token;
 use AsaEs\Utility\Tools;
 use AsaEs\Utility\View;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Http\AbstractInterface\Controller;
 use ReflectionClass;
+use think\validate\ValidateRule;
 
 class BaseController extends Controller
 {
@@ -168,17 +171,31 @@ class BaseController extends Controller
 
     public function onRequest($action): ?bool
     {
-        try {
-            // 解token
-            $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
-            $tokenStr = $esRequest->getHeaderToken();
-            $tokenObj = Token::decode($tokenStr);
+        // 路由鉴权
+        $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
 
-            return true;
-        } catch (\Exception $e) {
-            throw new SignException(3002);
-            return false;
+        // 路由白名单
+        $tokenStr = $esRequest->getHeaderToken() ?? '';
+        $server = $esRequest->getSwooleRequest();
+        $requestUri = $server['server']['request_uri'];
+
+        // 不鉴权域名
+        $whitelistsRoute = Config::getInstance()->getConf("auth.ROUTE_WHITE_LIST", true);
+
+        $flg = true;
+        foreach ($whitelistsRoute as $url) {
+            $tmpUrl = substr($requestUri, 0, strlen($url));
+            if ($tmpUrl === $url && !empty($url)) {
+                $flg = false;
+            }
         }
+
+        if ($flg) {
+            $tokenObj =  Token::decode($tokenStr);
+            $esRequest->setTokenObj($tokenObj);
+        }
+
+        return true;
     }
 
     /**

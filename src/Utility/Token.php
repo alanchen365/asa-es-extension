@@ -3,6 +3,7 @@
 namespace AsaEs\Utility;
 
 use AsaEs\Config;
+use AsaEs\Exception\BaseException;
 use AsaEs\Exception\Service\SignException;
 use Firebase\JWT\JWT;
 
@@ -28,11 +29,14 @@ class Token
     {
         try {
             $jwtConf = Config::getInstance()->getConf('JWT');
-            $tokenObj = JWT::decode($token, $jwtConf['KEY'], [$jwtConf['ALG']]) ?? (object)[];
+            $tokenObj = (object) JWT::decode($token, $jwtConf['KEY'], [$jwtConf['ALG']]);
 
-            return (object)$tokenObj;
-        } catch (\Exception $e) {
-            throw new SignException($e->getCode(), $e->getMessage());
+            return  $tokenObj;
+        } catch (\Exception $exception) {
+            if ($exception instanceof BaseException) {
+                throw $exception;
+            }
+            throw new SignException(3002);
         }
     }
 }

@@ -8,6 +8,8 @@ use AsaEs\Config;
 use AsaEs\Logger\FileLogger;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Di;
+use EasySwoole\Core\Swoole\Process\ProcessManager;
+use EasySwoole\Core\Swoole\ServerManager;
 use EasySwoole\Core\Swoole\Task\TaskManager;
 use think\validate\ValidateRule;
 
@@ -19,7 +21,7 @@ class EsMysqliDb
      * 需要保存日志的配置 可在外部覆写
      * @var array
      */
-    protected $saveLog = ['get','getOne','update','delete','insert'];
+    protected $saveLog = ['get','getOne','update','delete','insert','rawQuery','rawQueryOne'];
 
     /**
      * 链接到哪个数据库
@@ -77,7 +79,13 @@ class EsMysqliDb
     {
         // 唯一请求id
         $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
-        $requestId = $requestObj->getRequestId();
+
+        //  环境判断
+        if (ServerManager::getInstance()->getServer()->worker_id == -1) {
+            $requestId = "cli_running";
+        } else {
+            $requestId = $requestObj->getRequestId();
+        }
 
         $saveData = [
             'request_id' => $requestId,
@@ -86,9 +94,9 @@ class EsMysqliDb
 
         // 保存sql执行
         if (Config::getInstance()->getConf('DEBUG')) {
-            echo "\n==================== {} ====================\n";
+            echo "\n==================== {$actionName} ====================\n";
             var_dump(self::$dbInstance->getLastQuery());
-            echo "==================== {} ====================\n";
+            echo "==================== {$actionName} ====================\n";
             return;
         }
 

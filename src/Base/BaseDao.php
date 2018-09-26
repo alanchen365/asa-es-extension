@@ -15,6 +15,7 @@ use AsaEs\Utility\ArrayUtility;
 use AsaEs\Utility\Time;
 use AsaEs\Utility\Tools;
 use EasySwoole\Core\Component\Di;
+use EasySwoole\Core\Swoole\ServerManager;
 use think\Validate;
 use think\validate\ValidateRule;
 
@@ -40,22 +41,17 @@ class BaseDao
     /**
      * getById查询缓存
      */
-    public function getByIdCache(?int $id)
+    public function getByIdCache(?int $id) :array
     {
-        $beanClass = Tools::getModelNameByClass(get_called_class());
-        $modelBean = new $beanClass();
-
         if (!isset($id)) {
-            return $modelBean;
+            return [];
         }
 
         $redisObj = new EsRedis();
         $redisKey = $this->getBasicRedisHashKey($id);
         
         $row = $redisObj->hGetAll($redisKey);
-        $modelBean->arrayToBean($row);
-
-        return $modelBean;
+        return $row;
     }
 
     /**
@@ -137,13 +133,10 @@ class BaseDao
      * @param int $id
      * @return object
      */
-    final public function getById(?int $id): object
+    final public function getById(?int $id): array
     {
-        $beanClass = Tools::getModelNameByClass(get_called_class());
-        $modelBean = new $beanClass();
-
         if (!isset($id)) {
-            return $modelBean;
+            return [];
         }
 
         // 查询条件拼接 检测是否存在逻辑删除 存在则拼接上逻辑删除的条件
@@ -156,14 +149,7 @@ class BaseDao
 
         // 数据填充
         $row = $this->getDb()->getOne($this->getBeanObj()->getTableName(), $this->getBeanObj()->getFields()) ?? [];
-        $modelBean->arrayToBean($row);
-
-        $id = $row['id'] ?? null;
-        if (!isset($id)) {
-            return $modelBean;
-        }
-
-        return $modelBean;
+        return $row ?? [];
     }
 
     /**
@@ -203,7 +189,6 @@ class BaseDao
      */
     final private function updateRedisByLua(array $ids, array $params)
     {
-        $ids = [1,-1];
         $idsKeys = [];
         $redisObj = new EsRedis();
         foreach ($ids as $id) {
@@ -514,11 +499,8 @@ eof;
 
         // 转成bean
         $data = [];
-        $modelName = Tools::getModelNameByClass(get_called_class());
         foreach ($rows as $key => $row) {
-            $tmpBean = new $modelName();
-            $data[] = $tmpBean->arrayToBean($row);
-            unset($tmpBean);
+            $data[] = $this->getBeanObj()->arrayToBean($row);
         }
 
         return $data;
@@ -618,15 +600,15 @@ eof;
                         break;
 
                     case 'LIKE':
-                        $this->getDb()->where($field, "%{$value}%", $searchType);
+                        $this->getDb()->where($field, "%{$value}%", "LIKE");
                         break;
 
                     case 'LLIKE':
-                        $this->getDb()->where($field, "%{$value}", $searchType);
+                        $this->getDb()->where($field, "%{$value}", "LIKE");
                         break;
 
                     case 'RLIKE':
-                        $this->getDb()->where($field, "{$value}%", $searchType);
+                        $this->getDb()->where($field, "{$value}%", "LIKE");
                         break;
 
                     case '>':
@@ -677,11 +659,8 @@ eof;
 
         // 转成bean
         $data = [];
-        $modelName = Tools::getModelNameByClass(get_called_class());
         foreach ($rows as $key => $row) {
-            $tmpBean = new $modelName();
-            $data[] = $tmpBean->arrayToBean($row);
-            unset($tmpBean);
+            $data[] = $this->getBeanObj()->arrayToBean($row);
         }
 
         return $data;
@@ -755,12 +734,19 @@ eof;
      */
     final protected function autoWriteUid(array $autoType, array $params)
     {
-        // TODO TOKEN 获取uid
-        $uid = 0;
+        //  环境判断
+        if (ServerManager::getInstance()->getServer()->worker_id == -1) {
+            return $params;
+        }
+
+        // 获取当前用户uid
+        $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
+        $tokenObj = $esRequest->getTokenObj();
+
         foreach ($autoType as $field) {
             if (property_exists($this->getBeanObj(), $field)) {
                 // 外部传入就不走默认值
-                $params[$field] = $params[$field] ??  $uid;
+                $params[$field] = $params[$field] ??  $tokenObj->uid;
             }
         }
         return $params;
@@ -811,6 +797,7 @@ eof;
     public function basicIsDeleted(?int $id) :bool
     {
         $redisObj = new EsRedis();
+        return false;
         return (bool)$redisObj->sIsMember(EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_DELETED), $id);
     }
 

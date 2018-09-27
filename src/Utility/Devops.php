@@ -27,7 +27,6 @@ class Devops
         return $keys;
     }
 
-
     /**
     * 清除某个表所有的redis缓存
     */
@@ -59,5 +58,26 @@ class Devops
 
         $pipe->exec();
         return  Devops::getModuleAllRedisKeys($tableName);
+    }
+
+    /**
+     * 自定义缓存查看
+     */
+    public static function getRedisCacheByKey($redisObj, array $searchKeys)
+    {
+        $nKeys = [];
+        foreach ($searchKeys as $key) {
+            $nKeys[$key] = $redisObj->keys($key."*");
+        }
+
+        return $nKeys;
+    }
+
+    /**
+     * 自定义缓存删除
+     */
+    public static function clearRedisCacheByKey($redisObj, array $keys)
+    {
+        $redisObj->delAll($keys);
     }
 }

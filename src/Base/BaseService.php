@@ -29,7 +29,7 @@ class BaseService
     /**
      * @return mixed
      */
-    public function getDaoObj()
+    final public function getDaoObj()
     {
         return $this->daoObj;
     }
@@ -37,14 +37,33 @@ class BaseService
     /**
      * @param mixed $daoObj
      */
-    public function setDaoObj($daoObj): void
+    final public function setDaoObj($daoObj): void
     {
         // 这里先走代理
         $this->daoObj = new DaoProxy($daoObj);
     }
 
     /**
-     * 纯属为了ide提示
+     * 按列删除
+     * @param array $fieldValues
+     */
+    final public function deleteByField(array $fieldValues) :void
+    {
+        $this->getDaoObj()->deleteByField($fieldValues);
+    }
+
+    /**
+     * 获取单条
+     * @param int|null $id
+     * @return mixed
+     */
+    final public function getById(?int $id)
+    {
+        return $this->getDaoObj()->getById($id);
+    }
+
+    /**
+     * 根据某列获取单条
      * @param array $params
      * @param array $searchLinkType
      * @param array $page
@@ -55,5 +74,85 @@ class BaseService
     final public function getOneByField(array $params = [], array $searchLinkType = [], array $page = [], array $orderBys = [], array $groupBys = [])
     {
         return  $this->getDaoObj()->getOneByField($params, $searchLinkType, $page, $orderBys, $groupBys);
+    }
+
+    /**
+     * 查列表
+     * @param array $params
+     * @param array $searchLinkType
+     * @param array $page
+     * @param array $orderBys
+     * @param array $groupBys
+     * @return array
+     */
+    final public function getAll(array $params = [], array $searchLinkType = [], array $page = [], array $orderBys = [], array $groupBys = []): array
+    {
+        return  $this->getDaoObj()->getAll($params, $searchLinkType, $page, $orderBys, $groupBys);
+    }
+
+    /**
+     * 搜索
+     * @param array $params
+     * @param array $searchLinkType
+     * @param array $page
+     * @param array $orderBys
+     * @param array $groupBys
+     * @return array
+     */
+    final public function searchAll(array $params = [], array $searchLinkType = [], array $page = [], array $orderBys = [], array $groupBys = []): array
+    {
+        return  $this->getDaoObj()->searchAll($params, $searchLinkType, $page, $orderBys, $groupBys);
+    }
+
+    /**
+     * 根据id删除
+     * @param array $ids
+     */
+    final public function deleteByIds(array $ids):void
+    {
+        $this->getDaoObj()->deleteByIds($ids);
+    }
+
+    /**
+     * 批量插入
+     * @param array $params
+     * @return array
+     */
+    final public function insertAll(array $params): array
+    {
+        return $this->getDaoObj()->insertAll($params);
+    }
+
+    /**
+     * 插入单条数据
+     * @param array $params
+     */
+    final public function insert(array $params) :int
+    {
+        return $this->getDaoObj()->insert($params);
+    }
+
+    /**
+     * 更新全表中某列等于某个值的所有数据.
+     *
+     * @param string $field
+     * @param string $value
+     *
+     * @throws MysqlException
+     */
+    final public function updateByField(array $originalFieldValues, array $updateFieldValues): void
+    {
+        $this->getDaoObj()->updateByField($originalFieldValues, $updateFieldValues);
+    }
+
+    /**
+     * 根据id更新
+     * @param array $ids
+     * @param array $params
+     * @return mixed
+     */
+    final public function updateByIds(array $ids, array $params)
+    {
+        return $this->getDaoObj()->updateByIds($ids, $params);
     }
 }

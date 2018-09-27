@@ -49,20 +49,20 @@ class EsRedis
         return strtoupper(AppInfo::APP_EN_NAME ."_".AppInfo::APP_VERSION . "_" . $key);
     }
 
-    public function __call($actionName, $arguments)
+    /*
+     * 根据keys 批量删除
+     */
+    public function delAll(?array $keys)
     {
-        self::$dbInstance = self::$dbInstance ?? $this->connect();
-        if (self::$dbInstance instanceof \Redis) {
-            $ref = new \ReflectionClass(\Redis::class);
-            if ($ref->hasMethod($actionName) &&  $ref->getMethod($actionName)->isPublic()) {
-                $this->__hook($actionName, $arguments);
-                return call_user_func_array([self::$dbInstance,$actionName], $arguments);
-            }
+        if (empty($keys)) {
+            return ;
         }
-    }
 
-    private function __hook($actionName, $arguments)
-    {
+        $pipe = $this->multi(\Redis::PIPELINE);
+        foreach ($keys as $key) {
+            $pipe->del($key);
+        }
+        $pipe->exec();
     }
 
     /**
@@ -93,5 +93,21 @@ class EsRedis
         } catch (\RedisException $e) {
             throw new RedisException($e->getCode(), $e->getMessage());
         }
+    }
+
+    public function __call($actionName, $arguments)
+    {
+        self::$dbInstance = self::$dbInstance ?? $this->connect();
+        if (self::$dbInstance instanceof \Redis) {
+            $ref = new \ReflectionClass(\Redis::class);
+            if ($ref->hasMethod($actionName) &&  $ref->getMethod($actionName)->isPublic()) {
+                $this->__hook($actionName, $arguments);
+                return call_user_func_array([self::$dbInstance,$actionName], $arguments);
+            }
+        }
+    }
+
+    private function __hook($actionName, $arguments)
+    {
     }
 }

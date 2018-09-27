@@ -168,7 +168,6 @@ class BaseController extends Controller
         return $this->pageParam(intval($pageNo), intval($pageNum));
     }
 
-
     public function onRequest($action): ?bool
     {
         // 路由鉴权

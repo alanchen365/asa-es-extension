@@ -29,7 +29,7 @@ class BaseService
     /**
      * @return mixed
      */
-    final public function getDaoObj()
+    public function getDaoObj()
     {
         return $this->daoObj;
     }
@@ -37,7 +37,7 @@ class BaseService
     /**
      * @param mixed $daoObj
      */
-    final public function setDaoObj($daoObj): void
+    public function setDaoObj($daoObj): void
     {
         // 这里先走代理
         $this->daoObj = new DaoProxy($daoObj);
@@ -47,7 +47,7 @@ class BaseService
      * 按列删除
      * @param array $fieldValues
      */
-    final public function deleteByField(array $fieldValues) :void
+    public function deleteByField(array $fieldValues) :void
     {
         $this->getDaoObj()->deleteByField($fieldValues);
     }
@@ -57,7 +57,7 @@ class BaseService
      * @param int|null $id
      * @return mixed
      */
-    final public function getById(?int $id)
+    public function getById(?int $id)
     {
         return $this->getDaoObj()->getById($id);
     }
@@ -71,7 +71,7 @@ class BaseService
      * @param array $groupBys
      * @return mixed
      */
-    final public function getOneByField(array $params = [], array $searchLinkType = [], array $page = [], array $orderBys = [], array $groupBys = [])
+    public function getOneByField(array $params = [], array $searchLinkType = [], array $page = [], array $orderBys = [], array $groupBys = [])
     {
         return  $this->getDaoObj()->getOneByField($params, $searchLinkType, $page, $orderBys, $groupBys);
     }
@@ -85,7 +85,7 @@ class BaseService
      * @param array $groupBys
      * @return array
      */
-    final public function getAll(array $params = [], array $searchLinkType = [], array $page = [], array $orderBys = [], array $groupBys = []): array
+    public function getAll(array $params = [], array $searchLinkType = [], array $page = [], array $orderBys = [], array $groupBys = []): array
     {
         return  $this->getDaoObj()->getAll($params, $searchLinkType, $page, $orderBys, $groupBys);
     }
@@ -99,7 +99,7 @@ class BaseService
      * @param array $groupBys
      * @return array
      */
-    final public function searchAll(array $params = [], array $searchLinkType = [], array $page = [], array $orderBys = [], array $groupBys = []): array
+    public function searchAll(array $params = [], array $searchLinkType = [], array $page = [], array $orderBys = [], array $groupBys = []): array
     {
         return  $this->getDaoObj()->searchAll($params, $searchLinkType, $page, $orderBys, $groupBys);
     }
@@ -108,7 +108,7 @@ class BaseService
      * 根据id删除
      * @param array $ids
      */
-    final public function deleteByIds(array $ids):void
+    public function deleteByIds(array $ids):void
     {
         $this->getDaoObj()->deleteByIds($ids);
     }
@@ -118,7 +118,7 @@ class BaseService
      * @param array $params
      * @return array
      */
-    final public function insertAll(array $params): array
+    public function insertAll(array $params): array
     {
         return $this->getDaoObj()->insertAll($params);
     }
@@ -127,7 +127,7 @@ class BaseService
      * 插入单条数据
      * @param array $params
      */
-    final public function insert(array $params) :int
+    public function insert(array $params) :int
     {
         return $this->getDaoObj()->insert($params);
     }
@@ -140,7 +140,7 @@ class BaseService
      *
      * @throws MysqlException
      */
-    final public function updateByField(array $originalFieldValues, array $updateFieldValues): void
+    public function updateByField(array $originalFieldValues, array $updateFieldValues): void
     {
         $this->getDaoObj()->updateByField($originalFieldValues, $updateFieldValues);
     }
@@ -151,7 +151,7 @@ class BaseService
      * @param array $params
      * @return mixed
      */
-    final public function updateByIds(array $ids, array $params)
+    public function updateByIds(array $ids, array $params)
     {
         return $this->getDaoObj()->updateByIds($ids, $params);
     }

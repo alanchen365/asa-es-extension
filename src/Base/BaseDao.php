@@ -162,6 +162,7 @@ class BaseDao
     {
         // 看变量是否是该属性
         $params = BaseDao::clearIllegalParams($params);
+        unset($params['id']);
         if (empty($params) || empty($ids)) {
             $code = 4005;
             throw new MysqlException($code);
@@ -322,6 +323,8 @@ eof;
 
         $logicDeleteField = $this->getLogicDeleteField();
         foreach ($params as $key => $param) {
+
+            $params[$key] = BaseDao::clearIllegalParams($param);
             $params[$key] = BaseDao::autoWriteTime(AsaEsConst::MYSQL_AUTO_INSERTTIME, $params[$key]);
             $params[$key] = BaseDao::autoWriteUid(AsaEsConst::MYSQL_AUTO_INSERTUSER, $params[$key]);
 

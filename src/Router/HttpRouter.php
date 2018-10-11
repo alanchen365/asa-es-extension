@@ -27,7 +27,8 @@ class HttpRouter
     public function registered():void
     {
         $this->loadConfig('web');
-        $this->loadConfig('api');
+        $this->loadConfig('app');
+        $this->loadConfig('view');
         $this->loadConfig('public');
     }
 
@@ -60,9 +61,22 @@ class HttpRouter
         /**
          * APP 路由
          */
-        $routeCollector->addGroup('/api', function (RouteCollector $route) {
+        $routeCollector->addGroup('/app', function (RouteCollector $route) {
 
-            $routeArray = $this->router["api"];
+            $routeArray = $this->router["app"];
+            foreach ($routeArray as $routerArray) {
+                foreach ($routerArray as $perfix =>  $routerFunction) {
+                    $route->addGroup($perfix, $routerFunction);
+                }
+            }
+        });
+
+        /**
+         * view 路由
+         */
+        $routeCollector->addGroup('/view', function (RouteCollector $route) {
+
+            $routeArray = $this->router["view"];
             foreach ($routeArray as $routerArray) {
                 foreach ($routerArray as $perfix =>  $routerFunction) {
                     $route->addGroup($perfix, $routerFunction);

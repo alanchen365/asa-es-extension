@@ -196,7 +196,7 @@ class BaseController extends Controller
                 $response->withStatus(Status::CODE_UNAUTHORIZED);
                 $response->end();
             }
-            
+
             $tokenObj =  Token::decode($tokenStr);
             $esRequest->setTokenObj($tokenObj);
         }

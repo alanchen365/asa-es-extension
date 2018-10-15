@@ -26,6 +26,7 @@ use AsaEs\Utility\Tools;
 use AsaEs\Utility\View;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Http\AbstractInterface\Controller;
+use EasySwoole\Core\Http\Message\Status;
 use ReflectionClass;
 use think\validate\ValidateRule;
 
@@ -193,8 +194,8 @@ class BaseController extends Controller
         if ($flg) {
 
             if (!$tokenStr) {
-                $response->withStatus(Status::CODE_UNAUTHORIZED);
-                $response->end();
+                $this->response()->withStatus(Status::CODE_UNAUTHORIZED);
+                $this->response()->end();
             }
 
             $tokenObj =  Token::decode($tokenStr);

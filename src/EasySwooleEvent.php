@@ -51,8 +51,11 @@ class EasySwooleEvent
         $requestHost = current($request->getHeader('host') ?? null) ?? '';
         
         // 获取配置
+        $env = Config::getInstance()->getConf('ENV');
         $corsDomain = Config::getInstance()->getConf('auth.CROSS_DOMAIN', true);
         $whitelistsRoute = Config::getInstance()->getConf('auth.NO_AUTH_ROUTE', true);
+        $tokenStr = Config::getInstance()->getConf('auth.TOKEN', true);
+        $swaggerDomain = Config::getInstance()->getConf('auth.SWAGGER_DOMAIN',true);
 
         // 如果是option请求 则放过
         if ('OPTIONS' == $request->getMethod()) {
@@ -75,13 +78,18 @@ class EasySwooleEvent
             $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
         }
 
-        // 如果是本机 及 开发环境 模拟一个用户出来
+        // 如果是本机 及 开发环境 及swagger 模拟一个用户出来
         if (AppInfo::APP_TOKEN_AUTH_SWITCH) {
             $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
-            $tokenStr = $esRequest->getHeaderToken();
+            $esTokenStr = $esRequest->getHeaderToken();
 
-            if (ArrayUtility::arrayFlip(['LOCAL','DEVELOP'], Config::getInstance()->getConf('ENV')) && !$tokenStr) {
-                $tokenStr = AppInfo::APP_SIMULATION_USER_TOKEN_STRING;
+            // 本机和开发环境的模拟
+            if (ArrayUtility::arrayFlip(['LOCAL','DEVELOP'], $env && !$esTokenStr)) {
+                $esRequest->setHeaderToken($tokenStr);
+            }
+            
+            // test swagger 模拟用户
+            if ($env == "TESTING" && $swaggerDomain == $origin) {
                 $esRequest->setHeaderToken($tokenStr);
             }
         }

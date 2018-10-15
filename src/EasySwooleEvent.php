@@ -84,10 +84,10 @@ class EasySwooleEvent
             $esTokenStr = $esRequest->getHeaderToken();
 
             // 本机和开发环境的模拟
-            if (ArrayUtility::arrayFlip(['LOCAL','DEVELOP'], $env && !$esTokenStr)) {
+            if (ArrayUtility::arrayFlip(['LOCAL','DEVELOP'], $env ) && !$esTokenStr) {
                 $esRequest->setHeaderToken($tokenStr);
             }
-            
+
             // test swagger 模拟用户
             if ($env == "TESTING" && $swaggerDomain == $origin) {
                 $esRequest->setHeaderToken($tokenStr);

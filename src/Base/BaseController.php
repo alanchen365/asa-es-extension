@@ -189,7 +189,14 @@ class BaseController extends Controller
             }
         }
 
+        // 需要鉴权
         if ($flg) {
+
+            if (!$tokenStr) {
+                $response->withStatus(Status::CODE_UNAUTHORIZED);
+                $response->end();
+            }
+            
             $tokenObj =  Token::decode($tokenStr);
             $esRequest->setTokenObj($tokenObj);
         }

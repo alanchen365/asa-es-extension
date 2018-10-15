@@ -84,11 +84,6 @@ class EasySwooleEvent
                 $tokenStr = AppInfo::APP_SIMULATION_USER_TOKEN_STRING;
                 $esRequest->setHeaderToken($tokenStr);
             }
-            
-            if (!$tokenStr) {
-                $response->withStatus(Status::CODE_UNAUTHORIZED);
-                $response->end();
-            }
         }
     }
 

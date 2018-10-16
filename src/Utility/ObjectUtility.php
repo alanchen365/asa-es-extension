@@ -56,6 +56,10 @@ class ObjectUtility
      */
     public static function objectEmpty($obj)
     {
-        return isset($obj->id) ? $obj :  null;
+        if(Tools::superEmpty($obj)){
+            return null;
+        }
+
+        return $obj;
     }
 }

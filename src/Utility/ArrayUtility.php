@@ -316,7 +316,7 @@ class ArrayUtility
     {
         $refs = array();
         foreach ($arr as $offset => $row) {
-            $arr[$offset][$key_childrens] = array();
+            $arr[$offset][$key_childrens] = null;
             $refs[$row[$key_node_id]] = &$arr[$offset];
         }
 

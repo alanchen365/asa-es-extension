@@ -30,6 +30,7 @@ class Curl
                         }
                     }
                     break;
+
                 case 'POST':
                     if ($params && isset($params['form_params'])) {
                         foreach ($params['form_params'] as $key => $value) {
@@ -41,6 +42,9 @@ class Curl
                         }
                         $request->setUserOpt([CURLOPT_POSTFIELDS => $params['body']]);
                     }
+                    break;
+                case 'DELETE':
+                    $request->setUserOpt([CURLOPT_CUSTOMREQUEST => $method]);
                     break;
                 default:
                     throw new \InvalidArgumentException('method eroor');
@@ -55,10 +59,9 @@ class Curl
 
                 $request->setUserOpt([CURLOPT_HTTPHEADER => $header]);
             }
-
             return $request->exec();
         } catch (\Exception $e) {
-            throw  new CurlException($e->getCode(), $e->getMessage());
+            throw new \AsaEs\Exception\Service\CurlException($e->getCode(), $e->getMessage());
         }
     }
 }

@@ -31,6 +31,9 @@ class AsaEsConst
     // request id
     const REQUEST_ID = 'request_id';
 
+    // 框架级定时器
+    const PROCESS_TIMER = "PROCESS_TIMER";
+
     // redis 默认过期时间  (一天)
     const REDIS_DEFAULT_EXPIRE_ONE_DAY = 60 * 60 * 24;
 

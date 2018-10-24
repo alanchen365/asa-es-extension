@@ -9,8 +9,10 @@ use AsaEs\Exception\SystemException;
 use AsaEs\Logger\AccessLogger;
 use AsaEs\Logger\FileLogger;
 use AsaEs\Process\Inotify;
+use AsaEs\Process\Timer;
 use AsaEs\Router\HttpRouter;
 use AsaEs\Utility\ArrayUtility;
+use EasySwoole\Core\Component\Crontab\CronTab;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Component\Logger;
 use EasySwoole\Core\Component\SysConst;
@@ -37,6 +39,11 @@ class EasySwooleEvent
     
     public static function mainServerCreate(ServerManager $server, EventRegister $register): void
     {
+        // 定时器
+        CronTab::getInstance()->addRule('test3', '00 02 * * *', function () {
+            FileLogger::getInstance()->log("写log", "SENDLOG");
+        });
+
         // 服务热重启
         ProcessManager::getInstance()->addProcess(AsaEsConst::PROCESS_AUTO_RELOAD, Inotify::class);
         // 进程批量注入
@@ -55,7 +62,7 @@ class EasySwooleEvent
         $corsDomain = Config::getInstance()->getConf('auth.CROSS_DOMAIN', true);
         $whitelistsRoute = Config::getInstance()->getConf('auth.NO_AUTH_ROUTE', true);
         $tokenStr = Config::getInstance()->getConf('auth.TOKEN', true);
-        $swaggerDomain = Config::getInstance()->getConf('auth.SWAGGER_DOMAIN',true);
+        $swaggerDomain = Config::getInstance()->getConf('auth.SWAGGER_DOMAIN', true);
 
         // 如果是option请求 则放过
         if ('OPTIONS' == $request->getMethod()) {
@@ -84,7 +91,7 @@ class EasySwooleEvent
             $esTokenStr = $esRequest->getHeaderToken();
 
             // 本机和开发环境的模拟
-            if (ArrayUtility::arrayFlip(['LOCAL','DEVELOP'], $env ) && !$esTokenStr) {
+            if (ArrayUtility::arrayFlip(['LOCAL','DEVELOP'], $env) && !$esTokenStr) {
                 $esRequest->setHeaderToken($tokenStr);
             }
 
@@ -100,18 +107,19 @@ class EasySwooleEvent
         //从请求里获取之前增加的时间戳
         $reqTime = $request->getAttribute('requestTime');
         //计算一下运行时间
-        $runTime = round(microtime(true) - $reqTime, 3);
+        $runTime = round(microtime(true) - $reqTime, 5);
         //获取用户IP地址
         $ip = ServerManager::getInstance()->getServer()->connection_info($request->getSwooleRequest()->fd);
 
+        $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
+
         //拼接一个简单的日志
-        $logStr = ' | '.$ip['remote_ip'] .' | '. $runTime . '|' . $request->getUri() .' | '.
-            $request->getHeader('user-agent')[0];
+        $logStr = $ip['remote_ip'] .' | '. ($runTime * 1000) . ' ms |' . $request->getUri() .' | '. $requestObj->getRequestId() . ' | ' .  $request->getHeader('user-agent')[0];
         //判断一下当执行时间大于1秒记录到 slowlog 文件中，否则记录到 access 文件
-        if ($runTime > 1) {
-            Logger::getInstance()->log($logStr, 'slowlog');
+        if ($runTime > 200) {
+            FileLogger::getInstance()->log($logStr, 'SLOWLOG');
         } else {
-            logger::getInstance()->log($logStr, 'access');
+            FileLogger::getInstance()->log($logStr, 'ACCESS');
         }
     }
 }

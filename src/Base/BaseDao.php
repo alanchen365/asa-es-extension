@@ -51,6 +51,10 @@ class BaseDao
         $redisKey = $this->getBasicRedisHashKey($id);
         
         $row = $redisObj->hGetAll($redisKey);
+        // int转换
+        foreach ($row as $item => $value){
+            $row[$item] = is_numeric($value) ? intval($value) : $value;
+        }
         return $row;
     }
 

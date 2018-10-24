@@ -2,11 +2,13 @@
 
 namespace AsaEs\Exception;
 
+use AsaEs\AsaEsConst;
 use AsaEs\Logger\FileLogger;
 use AsaEs\Output\Msg;
 use AsaEs\Output\Results;
 use AsaEs\Output\Web;
 use EasySwoole\Config;
+use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Http\AbstractInterface\ExceptionHandlerInterface;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
@@ -25,6 +27,9 @@ class SystemException implements ExceptionHandlerInterface
         $results = new Results();
         $msg = $exception->getMessage();
 
+        // request id
+        $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
+
         // 如果错误为空，拿着错误码去msg查一下
         if (empty($msg)) {
             $msg = Msg::get($exception->getCode());
@@ -40,6 +45,7 @@ class SystemException implements ExceptionHandlerInterface
             'msg' => $msg,
             'file' => $exception->getFile(),
             'line' => $exception->getLine(),
+            AsaEsConst::REQUEST_ID=>$requestObj->getRequestId(),
             'trace' => $exception->getTrace(),
         ];
 

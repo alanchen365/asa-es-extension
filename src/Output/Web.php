@@ -31,7 +31,7 @@ class Web
 
         $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
         $saveData = [
-                AsaEsConst::REQUEST_ID => (array)$requestObj->getRequestId(),
+                AsaEsConst::REQUEST_ID => $requestObj->getRequestId(),
                 'swoole_http_request' => (array)$requestObj->getSwooleRequest(),
                 'response_body' => $data
             ];

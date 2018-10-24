@@ -8,6 +8,17 @@ use EasySwoole\Core\Component\Logger;
 class Tools
 {
     /**
+     * 获取命名空间最后一位
+     * @param string $nameSpace
+     * @return string
+     */
+    public static function getLastNameSpaceName(string $nameSpace) :?string
+    {
+        $nameSpaceArr = explode('\\',$nameSpace);
+        return end($nameSpaceArr) ?? null;
+    }
+
+    /**
      * 去掉命名空间获取类名对象
      */
     public static function getModelNameByClass(string $className): string

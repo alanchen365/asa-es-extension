@@ -67,6 +67,7 @@ class DaoProxy
 
                         // 缓存是否命中
                         $cacheRow = call_user_func_array([$this->class,'getByIdCache'], $arguments);
+
                         if (!empty($cacheRow)) {
                             return $this->getClass()->getBeanObj()->arrayToBean($cacheRow);
                         }
@@ -108,7 +109,13 @@ class DaoProxy
                         $cacheList = call_user_func_array([$this->class,'getListCache'], [$functionName,$arguments]);
 
                         if (!empty($cacheList)) {
-                            return $cacheList;
+                            $nCacheList = [];
+                            // 动态转bean下 这里是为了防止bean中的数据不更新
+                            foreach ($cacheList as $key => $cacheObj){
+                                $newBeanObj =  $this->class->getBeanObj()->arrayToBean($cacheObj->toArray());
+                                $nCacheList[] = $newBeanObj;
+                            }
+                            return $nCacheList;
                         }
                     }
 

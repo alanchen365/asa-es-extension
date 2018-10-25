@@ -52,8 +52,14 @@ class BaseDao
         
         $row = $redisObj->hGetAll($redisKey);
         // int转换
-        foreach ($row as $item => $value){
-            $row[$item] = is_numeric($value) ? intval($value) : $value;
+        foreach ($row as $item => $value) {
+            // 是否是int string
+            if (is_numeric($value)) {
+                $intVal = intval($value);
+                if (mb_strlen($intVal) === mb_strlen($value)) {
+                    $row[$item] = $intVal;
+                }
+            }
         }
         return $row;
     }
@@ -327,7 +333,6 @@ eof;
 
         $logicDeleteField = $this->getLogicDeleteField();
         foreach ($params as $key => $param) {
-
             $params[$key] = BaseDao::clearIllegalParams($param);
             $params[$key] = BaseDao::autoWriteTime(AsaEsConst::MYSQL_AUTO_INSERTTIME, $params[$key]);
             $params[$key] = BaseDao::autoWriteUid(AsaEsConst::MYSQL_AUTO_INSERTUSER, $params[$key]);

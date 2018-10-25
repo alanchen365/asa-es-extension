@@ -41,6 +41,7 @@ class EasySwooleEvent
     {
         // 定时器
         CronTab::getInstance()->addRule('test3', '00 02 * * *', function () {
+            
             FileLogger::getInstance()->log("写log", "SENDLOG");
         });
 

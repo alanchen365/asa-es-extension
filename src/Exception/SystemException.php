@@ -40,7 +40,7 @@ class SystemException implements ExceptionHandlerInterface
                 $msg = '服务器竟然出现了错误,请稍后再试';
             }
         }
-        
+
         // 记录log
         $exceptionData = ExceptionUtility::getExceptionData($exception, $code, $message);
         FileLogger::getInstance()->log(json_encode($exceptionData), strtoupper("RUNNING_ERROR"));

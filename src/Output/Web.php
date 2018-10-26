@@ -29,7 +29,7 @@ class Web
             $data = $results->getData();
         }
 
-//        $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
+        $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
 //        $saveData = [
 //                AsaEsConst::REQUEST_ID => $requestObj->getRequestId(),
 //                'swoole_http_request' => (array)$requestObj->getSwooleRequest(),

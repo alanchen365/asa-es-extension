@@ -40,7 +40,7 @@ class FileLogger extends BaseLogger
             $filePath = $this->defaultDir . "/{$category}/";
 //            $fileName = $filePath. "/{$d}_{$h}.log";
             $fileName = $filePath. "/{$ym}{$d}.log";
-            
+
             clearstatcache();
             if(!is_dir($filePath)){
                 $this->createDirectory($filePath);

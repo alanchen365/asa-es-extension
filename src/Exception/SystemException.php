@@ -7,11 +7,13 @@ use AsaEs\Logger\FileLogger;
 use AsaEs\Output\Msg;
 use AsaEs\Output\Results;
 use AsaEs\Output\Web;
+use AsaEs\Utility\ExceptionUtility;
 use EasySwoole\Config;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Http\AbstractInterface\ExceptionHandlerInterface;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
+use EasySwoole\Core\Swoole\Task\TaskManager;
 
 class SystemException implements ExceptionHandlerInterface
 {
@@ -38,21 +40,13 @@ class SystemException implements ExceptionHandlerInterface
                 $msg = '服务器竟然出现了错误,请稍后再试';
             }
         }
-
-        // 要记录的异常信息
-        $data = [
-            'code' => $exception->getCode(),
-            'msg' => $msg,
-            'file' => $exception->getFile(),
-            'line' => $exception->getLine(),
-            AsaEsConst::REQUEST_ID => $requestObj->getRequestId(),
-            'trace' => $exception->getTrace(),
-        ];
-
-        FileLogger::getInstance()->log(json_encode($data), 'RUNNING_ERROR');
+        
+        // 记录log
+        $exceptionData = ExceptionUtility::getExceptionData($exception, $code, $message);
+        FileLogger::getInstance()->log(json_encode($exceptionData), strtoupper("RUNNING_ERROR"));
 
         if (\AsaEs\Config::getInstance()->getConf('DEBUG')) {
-            $response->write(json_encode($data));
+            $response->write(json_encode(ExceptionUtility::getExceptionData($exception) ?? []));
             $response->withHeader('Content-type', 'application/json;charset=utf-8');
             $response->end();
             return;

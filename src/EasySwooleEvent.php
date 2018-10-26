@@ -39,10 +39,9 @@ class EasySwooleEvent
     
     public static function mainServerCreate(ServerManager $server, EventRegister $register): void
     {
-        // 定时器
-        CronTab::getInstance()->addRule('test3', '00 02 * * *', function () {
-            
-            FileLogger::getInstance()->log("写log", "SENDLOG");
+        // 定时发送log到内网
+        CronTab::getInstance()->addRule('ASAES-SEND-LOG', '00 02 * * *', function () {
+            FileLogger::getInstance()->log("写log", "ASAES-SEND-LOG");
         });
 
         // 服务热重启

@@ -27,6 +27,30 @@ class Request
      */
     protected $tokenObj;
 
+
+    /**
+     * raw
+     * @var
+     */
+    protected $rawContent;
+
+    /**
+     * @return mixed
+     */
+    public function getRawContent(bool $decode = true)
+    {
+        return json_decode($this->rawContent,true) ?? [];
+    }
+
+    /**
+     * @param mixed $rawContent
+     */
+    public function setRawContent($rawContent): void
+    {
+        $this->rawContent = $rawContent;
+    }
+
+
     /**
      *swoole_request
      */
@@ -43,6 +67,9 @@ class Request
             $tokenHeader = current($request->getHeader(AppInfo::APP_HEADER_TOKEN)) ?? '';
             // 写token
             $this->setHeaderToken($tokenHeader);
+            // 获取raw
+            $rawStr = $request->getSwooleRequest()->rawContent();
+            $this->setRawContent($rawStr);
         }
     }
 

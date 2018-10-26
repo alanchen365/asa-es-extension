@@ -19,6 +19,7 @@ use AsaEs\Exception\MsgException;
 use AsaEs\Exception\Service\SignException;
 use AsaEs\Output\Results;
 use AsaEs\Output\Web;
+use AsaEs\Utility\ExceptionUtility;
 use AsaEs\Utility\ObjectUtility;
 use AsaEs\Utility\Request;
 use AsaEs\Utility\Token;
@@ -192,7 +193,6 @@ class BaseController extends Controller
 
         // 需要鉴权
         if ($flg) {
-
             if (!$tokenStr) {
                 $this->response()->withStatus(Status::CODE_UNAUTHORIZED);
                 $this->response()->end();

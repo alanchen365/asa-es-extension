@@ -8,10 +8,13 @@
 
 namespace AsaEs\Exception;
 
+use AsaEs\Utility\ExceptionUtility;
 use AsaEs\Utility\Tools;
+use think\validate\ValidateRule;
 
 class MsgException extends BaseException
 {
+
     /**
      * SignException constructor.
      *

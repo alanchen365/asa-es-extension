@@ -46,7 +46,7 @@ class BaseDao
         if (!isset($id)) {
             return [];
         }
-            
+
         $redisObj = new EsRedis();
         $redisKey = $this->getBasicRedisHashKey();
 
@@ -68,6 +68,7 @@ class BaseDao
         $redisKey = $this->getBasicRedisHashKey();
 
         // 改造缓存方式
+        $row = $this->clearIllegalParams($row);
         $redisObj->hSet($redisKey, $id, json_encode($row));
 
 //        // 利用管道机制 一次执行 减少网络请求

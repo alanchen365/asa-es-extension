@@ -26,6 +26,8 @@ class FileLogger extends BaseLogger
 
     public function log(string $str, $category = 'default'):FileLogger
     {
+        // 动态转大写
+        $category = strtoupper($category);
         if ($this->loggerWriter instanceof LoggerWriterInterface) {
             $this->loggerWriter->writeLog($str, $category, time());
         } else {
@@ -33,11 +35,12 @@ class FileLogger extends BaseLogger
 
             $ym = date('ym');
             $d = date('d', time());
-            $h = date('A', time());
+//            $h = date('A', time());
 
-            $filePath = $this->defaultDir . "/{$category}/{$ym}";
-            $fileName = $filePath. "/{$d}_{$h}.log";
-
+            $filePath = $this->defaultDir . "/{$category}/";
+//            $fileName = $filePath. "/{$d}_{$h}.log";
+            $fileName = $filePath. "/{$ym}{$d}.log";
+            
             clearstatcache();
             if(!is_dir($filePath)){
                 $this->createDirectory($filePath);

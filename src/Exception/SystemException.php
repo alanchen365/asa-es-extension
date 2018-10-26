@@ -35,7 +35,7 @@ class SystemException implements ExceptionHandlerInterface
             $msg = Msg::get($exception->getCode());
             // 还为空的话 ， 就给个默认了
             if (empty($msg)) {
-                $msg = '服务器竟然出现了错误,请联系管理员';
+                $msg = '服务器竟然出现了错误,请稍后再试';
             }
         }
 
@@ -45,7 +45,7 @@ class SystemException implements ExceptionHandlerInterface
             'msg' => $msg,
             'file' => $exception->getFile(),
             'line' => $exception->getLine(),
-            AsaEsConst::REQUEST_ID=>$requestObj->getRequestId(),
+            AsaEsConst::REQUEST_ID => $requestObj->getRequestId(),
             'trace' => $exception->getTrace(),
         ];
 
@@ -58,6 +58,6 @@ class SystemException implements ExceptionHandlerInterface
             return;
         }
 
-        Web::failBody($response, $results, $exception->getCode(), "服务器竟然出现了错误,请联系管理员");
+        Web::failBody($response, $results, $exception->getCode(), "服务器竟然出现了错误,请稍后再试");
     }
 }

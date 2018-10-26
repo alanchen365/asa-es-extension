@@ -115,9 +115,9 @@ class EasySwooleEvent
         $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
 
         //拼接一个简单的日志
-        $logStr = $ip['remote_ip'] .' | '. ($runTime * 1000) . ' ms |' . $request->getUri() .' | '. $requestObj->getRequestId() . ' | ' .  $request->getHeader('user-agent')[0];
+        $logStr = $ip['remote_ip'] .' | '. ($runTime * 1000) . ' ms | ' . $request->getUri() .' | '. $requestObj->getRequestId() . ' | ' .  $request->getHeader('user-agent')[0];
         //判断一下当执行时间大于1秒记录到 slowlog 文件中，否则记录到 access 文件
-        if ($runTime > 200) {
+        if (($runTime * 1000) > 300) {
             FileLogger::getInstance()->log($logStr, 'SLOWLOG');
         } else {
             FileLogger::getInstance()->log($logStr, 'ACCESS');

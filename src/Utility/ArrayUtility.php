@@ -6,20 +6,19 @@ class ArrayUtility
 {
 
     /**
-     * 判断一个一位数组中的id是否小于1 如果小于1则注销变量 最终判断注销后的数组是否为空
+     * 判断一个一位数组中的id是是否是null（不过滤9） 如果等于null 最终判断注销后的数组是否为空
      */
-    public static function emptyIds(array $ids){
-
-        if(empty($ids)){
-            return true;
-        }
-
-        foreach ($ids as $key => $id){
-            if($id < 1){
-                return true;
+    public static function emptyIds(array $ids)
+    {
+        foreach ((array)$ids as $key => $id) {
+            if (!isset($id)) {
+                unset($ids[$key]);
             }
         }
 
+        if (empty($ids)) {
+            return true;
+        }
         return false;
     }
 

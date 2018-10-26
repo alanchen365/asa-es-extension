@@ -46,21 +46,12 @@ class BaseDao
         if (!isset($id)) {
             return [];
         }
-
+            
         $redisObj = new EsRedis();
-        $redisKey = $this->getBasicRedisHashKey($id);
-        
-        $row = $redisObj->hGetAll($redisKey);
-        // int转换
-        foreach ($row as $item => $value) {
-            // 是否是int string
-            if (is_numeric($value)) {
-                $intVal = intval($value);
-                if (mb_strlen($intVal) === mb_strlen($value)) {
-                    $row[$item] = $intVal;
-                }
-            }
-        }
+        $redisKey = $this->getBasicRedisHashKey();
+
+        $rowJson = $redisObj->hGet($redisKey, $id);
+        $row = json_decode($rowJson, true) ?? [];
         return $row;
     }
 
@@ -74,14 +65,17 @@ class BaseDao
         }
 
         $redisObj = new EsRedis();
-        $redisKey = $this->getBasicRedisHashKey($id);
+        $redisKey = $this->getBasicRedisHashKey();
 
-        // 利用管道机制 一次执行 减少网络请求
-        $pipe = $redisObj->multi(\Redis::PIPELINE);
-        foreach ($row as $column => $value) {
-            $pipe->hSet($redisKey, $column, $value);
-        }
-        $pipe->exec();
+        // 改造缓存方式
+        $redisObj->hSet($redisKey, $id, json_encode($row));
+
+//        // 利用管道机制 一次执行 减少网络请求
+//        $pipe = $redisObj->multi(\Redis::PIPELINE);
+//        foreach ($row as $column => $value) {
+//            $pipe->hSet($redisKey, $column, $value);
+//        }
+//        $pipe->exec();
     }
 
     /**
@@ -173,7 +167,7 @@ class BaseDao
         // 看变量是否是该属性
         $params = BaseDao::clearIllegalParams($params);
         unset($params['id']);
-        if (empty($params) || empty($ids)) {
+        if (empty($params) || empty($ids) || ArrayUtility::emptyIds($ids)) {
             $code = 4005;
             throw new MysqlException($code);
         }
@@ -202,31 +196,31 @@ class BaseDao
     {
         $idsKeys = [];
         $redisObj = new EsRedis();
-        foreach ($ids as $id) {
-            $idsKeys[] = $this->getBasicRedisHashKey($id);
-        }
+        $redisKey =  $this->getBasicRedisHashKey();
 
-        $lua = <<<eof
-local idsKeys = cjson.decode(KEYS[1]) or ''
-local data = {};
-for i, key in ipairs(idsKeys) do
-    local flg = redis.call( 'EXISTS', key);
-    if flg == 1 then
-        data[i] = key;
-    end
-end
+//        foreach ($ids as $id) {
+//            $idsKeys[] = $this->getBasicRedisHashKey($id);
+//        }
 
-return cjson.encode(data)     
-eof;
+//        $lua = <<<eof
+//local idsKeys = cjson.decode(KEYS[1]) or ''
+//local data = {};
+//for i, key in ipairs(idsKeys) do
+//    local flg = redis.call( 'EXISTS', key);
+//    if flg == 1 then
+//        data[i] = key;
+//    end
+//end
+//
+//return cjson.encode(data)
+//eof;
 
-        $idsKeys = $redisObj->eval($lua, [json_encode($idsKeys),json_encode($params)], 1);
-        $idsKeys = json_decode($idsKeys, true) ?? [];
+//        $idsKeys = $redisObj->eval($lua, [json_encode($idsKeys),json_encode($params)], 1);
+//        $idsKeys = json_decode($idsKeys, true) ?? [];
 
         $pipe = $redisObj->multi(\Redis::PIPELINE);
-        foreach ($idsKeys as $key) {
-            foreach ($params as $column => $value) {
-                $pipe->hSet($key, $column, $value);
-            }
+        foreach ($ids as $id) {
+            $pipe->hDel($redisKey, $id);
         }
         $pipe->exec();
     }
@@ -400,7 +394,7 @@ eof;
                 continue;
             }
 
-            $redisKey = $this->getBasicRedisHashKey($id);
+            $redisKey = $this->getBasicRedisHashKey();
             $pipe->hDel($redisKey, $id);
             $pipe->sAdd(EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_DELETED), $id);
         }
@@ -816,9 +810,9 @@ eof;
     /**
      * 获取基础数据操作redis key
      */
-    private function getBasicRedisHashKey($id) :string
+    private function getBasicRedisHashKey() :string
     {
-        return EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_TYPE) . "_{$id}";
+        return EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_TYPE);
     }
 
     /**

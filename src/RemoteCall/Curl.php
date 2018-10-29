@@ -2,7 +2,7 @@
 
 namespace AsaEs\RemoteCall;
 
-use App\Utility\Exception\CurlException;
+use AsaEs\Exception\Service\CurlException;
 use EasySwoole\Core\Utility\Curl\Response;
 use EasySwoole\Core\Utility\Curl\Request;
 use EasySwoole\Core\Utility\Curl\Field;
@@ -18,7 +18,8 @@ class Curl
      * @param string $url
      * @param array  $params
      */
-    public function request(string $method, string $url, array $params = null): Response {
+    public function request(string $method, string $url, array $params = null): Response
+    {
         try {
             $request = new Request($url);
 
@@ -67,13 +68,13 @@ class Curl
             $errNo = $responseObj->getErrorNo();
             $errMsg = $responseObj->getError();
 
-            if (isset($errNo) && $errNo > 0){
-                throw new \AsaEs\Exception\Service\CurlException(2008, $errMsg);
+            if (isset($errNo) && $errNo > 0) {
+                throw new CurlException(2008, $errMsg);
             }
 
             return $responseObj;
         } catch (\Exception $e) {
-            throw new \AsaEs\Exception\Service\CurlException($e->getCode(), $e->getMessage());
+            throw new CurlException($e->getCode(), $e->getMessage());
         }
     }
 }

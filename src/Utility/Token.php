@@ -28,7 +28,7 @@ class Token
     public static function decode(string $token): object
     {
         try {
-            $jwtConf = Config::getInstance()->getConf('JWT');
+            $jwtConf = Config::getInstance()->getConf('auth',true);
             $tokenObj = (object) JWT::decode($token, $jwtConf['KEY'], [$jwtConf['ALG']]);
 
             return  $tokenObj;

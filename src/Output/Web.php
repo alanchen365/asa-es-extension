@@ -30,18 +30,16 @@ class Web
         }
 
         $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
-        $saveData = [
-            AsaEsConst::REQUEST_ID => $requestObj->getRequestId(),
-            'swoole_http_request' => (array)$requestObj->getSwooleRequest(),
-            'response_code' => $code,
-            'response_msg' => $msg,
+//        $saveData = [
+//                AsaEsConst::REQUEST_ID => $requestObj->getRequestId(),
+//                'swoole_http_request' => (array)$requestObj->getSwooleRequest(),
 //                'response_body' => $data
-        ];
-
-        // 异步写文件
-        TaskManager::async(function () use ($saveData) {
-            FileLogger::getInstance()->log(json_encode($saveData), AsaEsConst::LOG_REQUEST_RESPONSE);
-        });
+//            ];
+//
+//        // 异步写文件
+//        TaskManager::async(function () use ($saveData) {
+//            FileLogger::getInstance()->log(json_encode($saveData), AsaEsConst::LOG_REQUEST_RESPONSE);
+//        });
 
         $response->withAddedHeader('request_id',$requestObj->getRequestId());
         $response->write(json_encode($data));

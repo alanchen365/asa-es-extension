@@ -20,6 +20,7 @@ class AppException extends BaseException
      */
     public function __construct(int $code, string $msg = '', \Throwable $previous = null)
     {
+        // 写log
         parent::__construct($code, $msg, $this);
     }
 }

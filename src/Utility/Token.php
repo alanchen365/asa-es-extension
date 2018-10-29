@@ -12,7 +12,7 @@ class Token
     public static function encode(int $uid):string
     {
         try {
-            $jwtConf = Config::getInstance()->getConf('JWT') ?? null;
+            $jwtConf = Config::getInstance()->getConf('jwt',true) ?? null;
             if (!$jwtConf) {
                 $code = 1012;
                 throw new SignException($code);

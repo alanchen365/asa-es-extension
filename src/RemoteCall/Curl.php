@@ -59,7 +59,19 @@ class Curl
 
                 $request->setUserOpt([CURLOPT_HTTPHEADER => $header]);
             }
-            return $request->exec();
+
+
+            $responseObj = $request->exec();
+
+            // 错误判断
+            $errNo = $responseObj->getErrorNo();
+            $errMsg = $responseObj->getError();
+
+            if (isset($errNo) && $errNo > 0){
+                throw new \AsaEs\Exception\Service\CurlException(2008, $errMsg);
+            }
+
+            return $responseObj;
         } catch (\Exception $e) {
             throw new \AsaEs\Exception\Service\CurlException($e->getCode(), $e->getMessage());
         }

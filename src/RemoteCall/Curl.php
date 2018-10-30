@@ -15,7 +15,7 @@ class Curl
     // 是否合并配置
     protected $isMerge = true;
 
-    public function __construct(?array $config, ?bool $isMerge = true)
+    public function __construct(?array $config = [], ?bool $isMerge = true)
     {
         $this->config = $config;
         $this->isMerge = $isMerge;

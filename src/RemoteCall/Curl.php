@@ -3,14 +3,22 @@
 namespace AsaEs\RemoteCall;
 
 use AsaEs\Exception\Service\CurlException;
+use AsaEs\Utility\Tools;
 use EasySwoole\Core\Utility\Curl\Response;
 use EasySwoole\Core\Utility\Curl\Request;
 use EasySwoole\Core\Utility\Curl\Field;
 
 class Curl
 {
-    public function __construct()
+    // 用户配置
+    protected $config = [];
+    // 是否合并配置
+    protected $isMerge = true;
+
+    public function __construct(?array $config, ?bool $isMerge = true)
     {
+        $this->config = $config;
+        $this->isMerge = $isMerge;
     }
 
     /**
@@ -22,6 +30,11 @@ class Curl
     {
         try {
             $request = new Request($url);
+
+            // 动态修改配置
+            if (!Tools::superEmpty($this->getConfig())) {
+                $request->setUserOpt($this->config, $this->isMerge);
+            }
 
             switch ($method) {
                 case 'GET':
@@ -44,6 +57,7 @@ class Curl
                         $request->setUserOpt([CURLOPT_POSTFIELDS => $params['body']]);
                     }
                     break;
+
                 case 'DELETE':
                     $request->setUserOpt([CURLOPT_CUSTOMREQUEST => $method]);
                     break;
@@ -61,10 +75,8 @@ class Curl
                 $request->setUserOpt([CURLOPT_HTTPHEADER => $header]);
             }
 
-
-            $responseObj = $request->exec();
-
             // 错误判断
+            $responseObj = $request->exec();
             $errNo = $responseObj->getErrorNo();
             $errMsg = $responseObj->getError();
 
@@ -76,5 +88,29 @@ class Curl
         } catch (\Exception $e) {
             throw new CurlException($e->getCode(), $e->getMessage());
         }
+    }
+
+    /**
+     * 获取配置
+     */
+    public function getConfig() :array
+    {
+        return $this->config;
+    }
+
+    /**
+     * @param array $config
+     */
+    public function setConfig(array $config): void
+    {
+        $this->config = $config;
+    }
+
+    /**
+     * @param bool $isMerge
+     */
+    public function setIsMerge(bool $isMerge): void
+    {
+        $this->isMerge = $isMerge;
     }
 }

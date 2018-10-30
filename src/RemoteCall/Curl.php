@@ -14,8 +14,10 @@ class Curl
     protected $config = [];
     // 是否合并配置
     protected $isMerge = true;
+    // 是否忽略错误
+    protected $isIgnoreErr = false;
 
-    public function __construct(?array $config = [], ?bool $isMerge = true)
+    public function __construct(?array $config = [], ?bool $isMerge = true,?bool $isIgnoreErr = false)
     {
         $this->config = $config;
         $this->isMerge = $isMerge;
@@ -80,7 +82,7 @@ class Curl
             $errNo = $responseObj->getErrorNo();
             $errMsg = $responseObj->getError();
 
-            if (isset($errNo) && $errNo > 0) {
+            if (isset($errNo) && $errNo > 0 && !$this->isIgnoreErr) {
                 throw new CurlException(2008, $errMsg);
             }
 
@@ -112,5 +114,22 @@ class Curl
     public function setIsMerge(bool $isMerge): void
     {
         $this->isMerge = $isMerge;
+    }
+
+
+    /**
+     * @return bool
+     */
+    public function isIgnoreErr(): bool
+    {
+        return $this->isIgnoreErr;
+    }
+
+    /**
+     * @param bool $isIgnoreErr
+     */
+    public function setIsIgnoreErr(bool $isIgnoreErr): void
+    {
+        $this->isIgnoreErr = $isIgnoreErr;
     }
 }

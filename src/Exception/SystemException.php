@@ -28,13 +28,14 @@ class SystemException implements ExceptionHandlerInterface
     {
         $results = new Results();
         $msg = $exception->getMessage();
-
+        $code = $exception->getCode();
+        
         // request id
         $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
 
         // 如果错误为空，拿着错误码去msg查一下
         if (empty($msg)) {
-            $msg = Msg::get($exception->getCode());
+            $msg = Msg::get($code);
             // 还为空的话 ， 就给个默认了
             if (empty($msg)) {
                 $msg = '服务器竟然出现了错误,请稍后再试';
@@ -42,7 +43,7 @@ class SystemException implements ExceptionHandlerInterface
         }
 
         // 记录log
-        $exceptionData = ExceptionUtility::getExceptionData($exception, $code, $message);
+        $exceptionData = ExceptionUtility::getExceptionData($exception, $code, $msg);
         FileLogger::getInstance()->log(json_encode($exceptionData), strtoupper("RUNNING_ERROR"));
 
         if (\AsaEs\Config::getInstance()->getConf('DEBUG')) {

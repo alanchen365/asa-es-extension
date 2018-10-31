@@ -46,7 +46,7 @@ class Curl
                         }
                     }
                     break;
-
+                case 'PUT':
                 case 'POST':
                     if ($params && isset($params['form_params'])) {
                         foreach ($params['form_params'] as $key => $value) {

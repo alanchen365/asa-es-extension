@@ -39,6 +39,17 @@ class BaseDao
     private $db = [];
 
     /**
+     * 获取表最后的一条插入记录
+     */
+    public function getByLast(string $field = 'id')
+    {
+        // 数据填充
+        $this->getDb()->orderBy($field, 'DESC');
+        $row = $this->getDb()->getOne($this->getBeanObj()->getTableName(), $this->getBeanObj()->getFields()) ?? [];
+        return $row ?? [];
+    }
+
+    /**
      * getById查询缓存
      */
     public function getByIdCache(?int $id) :array
@@ -204,17 +215,17 @@ class BaseDao
 //        }
 
 //        $lua = <<<eof
-//local idsKeys = cjson.decode(KEYS[1]) or ''
-//local data = {};
-//for i, key in ipairs(idsKeys) do
+        //local idsKeys = cjson.decode(KEYS[1]) or ''
+        //local data = {};
+        //for i, key in ipairs(idsKeys) do
 //    local flg = redis.call( 'EXISTS', key);
 //    if flg == 1 then
 //        data[i] = key;
 //    end
-//end
+        //end
 //
-//return cjson.encode(data)
-//eof;
+        //return cjson.encode(data)
+        //eof;
 
 //        $idsKeys = $redisObj->eval($lua, [json_encode($idsKeys),json_encode($params)], 1);
 //        $idsKeys = json_decode($idsKeys, true) ?? [];
@@ -742,7 +753,7 @@ class BaseDao
     final protected function autoWriteUid(array $autoType, array $params)
     {
         //  环境判断
-        if (ServerManager::getInstance()->getServer()->worker_id == -1) {
+        if (ServerManager::getInstance()->getServer()->worker_id < 0 || empty(Tools::superEmpty($requestObj))) {
             return $params;
         }
 

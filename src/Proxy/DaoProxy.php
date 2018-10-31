@@ -59,6 +59,15 @@ class DaoProxy
             if ($ref->hasMethod($actionName) &&  $ref->getMethod($actionName)->isPublic() && !$ref->getMethod($actionName)->isStatic()) {
 
                 /**
+                 * getByLast
+                 */
+                if($actionName == 'getByLast'){
+                    $dbRow = call_user_func_array([$this->class,'getByLast'], $arguments);
+                    $newBeanObj =  $this->class->getBeanObj()->arrayToBean($dbRow);
+                    return $newBeanObj;
+                }
+
+                /**
                  * get by id
                  */
                 if ($actionName == 'getById') {

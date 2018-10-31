@@ -6,6 +6,7 @@ use App\AppConst\AppInfo;
 use AsaEs\AsaEsConst;
 use AsaEs\Config;
 use AsaEs\Logger\FileLogger;
+use AsaEs\Utility\Tools;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Swoole\Process\ProcessManager;
@@ -81,7 +82,7 @@ class EsMysqliDb
         $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
 
         //  环境判断
-        if (ServerManager::getInstance()->getServer()->worker_id == -1) {
+        if (ServerManager::getInstance()->getServer()->worker_id < 0 || empty(Tools::superEmpty($requestObj))) {
             $requestId = "cli_running";
         } else {
             $requestId = $requestObj->getRequestId();

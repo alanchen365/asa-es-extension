@@ -80,7 +80,6 @@ class EsMysqliDb
     {
         // 唯一请求id
         $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
-
         //  环境判断
         if (ServerManager::getInstance()->getServer()->worker_id < 0 || Tools::superEmpty($requestObj)) {
             $requestId = "cli_running";

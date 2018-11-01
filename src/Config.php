@@ -10,7 +10,6 @@ use EasySwoole\Core\Utility\File;
 
 class Config
 {
-
     use Singleton;
 
     /**
@@ -42,7 +41,20 @@ class Config
      * 开发环境 本机(LOCAL) 开发服务器(DEVELOP) 测试服务器(TESTING) 生产服务器(PRODUCTION)
      * @return string
      */
-    public function getEnv():string {
+    public function getEnv():string
+    {
         return strtoupper(\EasySwoole\Config::getInstance()->getConf('ENV'));
+    }
+
+    /**
+     * 获取配置文件中数据库名称
+     */
+    public function getDbName(string $diName = AsaEsConst::DI_MYSQL_DEFAULT, string $configFile = 'mysql', bool $env = true)
+    {
+        // 获取当前开发环境
+        if ($env) {
+            $keyPath = $configFile . "." . Config::getEnv() . "." . $diName . "." . "db";
+        }
+        return strtolower(\EasySwoole\Config::getInstance()->getConf($keyPath));
     }
 }

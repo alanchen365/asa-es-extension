@@ -43,7 +43,7 @@ class ExceptionUtility
             $data['swoole_request']= $requestObj->getSwooleRequest();
             $data[AsaEsConst::REQUEST_ID]= $requestObj->getRequestId();
         }
-        
+
         return $data ?? [];
     }
 }

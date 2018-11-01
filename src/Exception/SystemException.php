@@ -30,9 +30,6 @@ class SystemException implements ExceptionHandlerInterface
         $msg = $exception->getMessage();
         $code = $exception->getCode();
         
-        // request id
-        $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
-
         // 如果错误为空，拿着错误码去msg查一下
         if (empty($msg)) {
             $msg = Msg::get($code);

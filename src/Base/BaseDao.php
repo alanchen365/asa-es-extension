@@ -753,14 +753,13 @@ class BaseDao
     final protected function autoWriteUid(array $autoType, array $params)
     {
         //  环境判断
-        if (ServerManager::getInstance()->getServer()->worker_id < 0 || empty(Tools::superEmpty($requestObj))) {
+        // 获取当前用户uid
+        $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
+        if (ServerManager::getInstance()->getServer()->worker_id < 0 || Tools::superEmpty($esRequest)) {
             return $params;
         }
 
-        // 获取当前用户uid
-        $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
         $tokenObj = $esRequest->getTokenObj();
-
         foreach ($autoType as $field) {
             if (property_exists($this->getBeanObj(), $field)) {
                 // 外部传入就不走默认值

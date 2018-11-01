@@ -48,6 +48,7 @@ class Curl
                     break;
                 case 'PUT':
                 case 'POST':
+                    $request->setUserOpt([CURLOPT_CUSTOMREQUEST => $method]);
                     if ($params && isset($params['form_params'])) {
                         foreach ($params['form_params'] as $key => $value) {
                             $request->addPost(new Field($key, $value));

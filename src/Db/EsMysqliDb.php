@@ -82,7 +82,7 @@ class EsMysqliDb
         $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
 
         //  环境判断
-        if (ServerManager::getInstance()->getServer()->worker_id < 0 || empty(Tools::superEmpty($requestObj))) {
+        if (ServerManager::getInstance()->getServer()->worker_id < 0 || Tools::superEmpty($requestObj)) {
             $requestId = "cli_running";
         } else {
             $requestId = $requestObj->getRequestId();

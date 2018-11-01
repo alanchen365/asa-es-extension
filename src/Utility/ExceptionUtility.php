@@ -26,9 +26,7 @@ class ExceptionUtility
      */
     public static function getExceptionData(\Throwable $throwable, ?int $code = 0, ?string $msg = '')
     {
-        // request id
         $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
-
         $msg = empty($msg)  ? $throwable->getMessage() : $msg;
         $code = empty($code) ?  $throwable->getCode() : $code;
 
@@ -38,11 +36,14 @@ class ExceptionUtility
             'file' => $throwable->getFile(),
             'line' => $throwable->getLine(),
             'trace' => ExceptionUtility::simplifyTrace($throwable->getTrace()),
-            'swoole_request' => $requestObj->getSwooleRequest(),
-            'raw_content' =>$requestObj->getRawContent(),
-            AsaEsConst::REQUEST_ID=>$requestObj->getRequestId(),
         ];
 
+        if (!Tools::superEmpty($requestObj)) {
+            $data['raw_content']= $requestObj->getRawContent();
+            $data['swoole_request']= $requestObj->getSwooleRequest();
+            $data[AsaEsConst::REQUEST_ID]= $requestObj->getRequestId();
+        }
+        
         return $data ?? [];
     }
 }

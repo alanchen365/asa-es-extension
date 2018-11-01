@@ -38,7 +38,7 @@ class ExceptionUtility
             'trace' => ExceptionUtility::simplifyTrace($throwable->getTrace()),
         ];
 
-        if (!Tools::superEmpty($requestObj)) {
+        if (is_object($requestObj)) {
             $data['raw_content']= $requestObj->getRawContent();
             $data['swoole_request']= $requestObj->getSwooleRequest();
             $data[AsaEsConst::REQUEST_ID]= $requestObj->getRequestId();

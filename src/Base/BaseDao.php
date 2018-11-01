@@ -597,7 +597,7 @@ class BaseDao
                             $whereValue[] = $value[0];
                             $whereValue[] = $value[1];
                         }
-                        // no break
+                    // no break
                     default:
                         $whereKey[] = "  {$field} IN (?)  ";
                         if (is_array($value) && !empty($value)) {
@@ -755,7 +755,7 @@ class BaseDao
         //  环境判断
         // 获取当前用户uid
         $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
-        if (ServerManager::getInstance()->getServer()->worker_id < 0 || Tools::superEmpty($esRequest)) {
+        if (ServerManager::getInstance()->getServer()->worker_id < 0 || !is_object($esRequest)) {
             return $params;
         }
 

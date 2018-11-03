@@ -9,21 +9,21 @@ use Firebase\JWT\JWT;
 
 class Token
 {
-    public static function encode(int $uid):string
-    {
-        try {
-            $jwtConf = Config::getInstance()->getConf('jwt',true) ?? null;
-            if (!$jwtConf) {
-                $code = 1012;
-                throw new SignException($code);
-            }
-
-            $token = JWT::encode(['uid'=>$uid], $jwtConf['KEY'], $jwtConf['ALG']) ?? '';
-            return $token;
-        } catch (\Exception $e) {
-            throw new SignException($e->getCode(), $e->getMessage());
-        }
-    }
+//    public static function encode(int $uid):string
+//    {
+//        try {
+//            $jwtConf = Config::getInstance()->getConf('jwt',true) ?? null;
+//            if (!$jwtConf) {
+//                $code = 1012;
+//                throw new SignException($code);
+//            }
+//
+//            $token = JWT::encode(['uid'=>$uid], $jwtConf['KEY'], $jwtConf['ALG']) ?? '';
+//            return $token;
+//        } catch (\Exception $e) {
+//            throw new SignException($e->getCode(), $e->getMessage());
+//        }
+//    }
 
     public static function decode(string $token): object
     {

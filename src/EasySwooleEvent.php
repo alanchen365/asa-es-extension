@@ -37,7 +37,7 @@ class EasySwooleEvent
         // 注册异常
         Di::getInstance()->set(SysConst::HTTP_EXCEPTION_HANDLER, SystemException::class);
     }
-
+    
     public static function mainServerCreate(ServerManager $server, EventRegister $register): void
     {
         // 定时发送log到内网
@@ -59,7 +59,7 @@ class EasySwooleEvent
         $request->withAttribute('requestTime', microtime(true));
         Di::getInstance()->set(AsaEsConst::DI_REQUEST_OBJ, new \AsaEs\Utility\Request($request));
         $requestHost = current($request->getHeader('host') ?? null) ?? '';
-
+        
         // 获取配置
         $env = Config::getInstance()->getConf('ENV');
         $corsDomain = Config::getInstance()->getConf('auth.CROSS_DOMAIN', true);

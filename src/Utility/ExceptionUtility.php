@@ -37,13 +37,13 @@ class ExceptionUtility
             'line' => $throwable->getLine(),
             'trace' => ExceptionUtility::simplifyTrace($throwable->getTrace()),
         ];
-
-        if (is_object($requestObj)) {
+            
+        // 是否是http方式运行
+        if (Env::isHttp()) {
             $data['raw_content']= $requestObj->getRawContent();
             $data['swoole_request']= $requestObj->getSwooleRequest();
             $data[AsaEsConst::REQUEST_ID]= $requestObj->getRequestId();
         }
-
         return $data ?? [];
     }
 }

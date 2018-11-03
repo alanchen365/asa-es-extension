@@ -1,56 +1,56 @@
 <?php
 
-namespace AsaEs\Exception;
+namespace AsaEs\Output;
 
 use AsaEs\AsaEsConst;
 use AsaEs\Logger\FileLogger;
-use AsaEs\Output\Msg;
-use AsaEs\Output\Results;
-use AsaEs\Output\Web;
-use AsaEs\Utility\ExceptionUtility;
-use AsaEs\Utility\Tools;
 use EasySwoole\Config;
 use EasySwoole\Core\Component\Di;
-use EasySwoole\Core\Http\AbstractInterface\ExceptionHandlerInterface;
-use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
-use EasySwoole\Core\Swoole\ServerManager;
 use EasySwoole\Core\Swoole\Task\TaskManager;
 
-class SystemException implements ExceptionHandlerInterface
+class Web
 {
-    /**
-     * 所有异常都走这里.
-     *
-     * @param \Throwable $exception
-     * @param Request    $request
-     * @param Response   $response
-     */
-    public function handle(\Throwable $exception, Request $request, Response $response)
+    public static function setBody(Response $response, Results $results, int $code = 100000, string $msg = '', bool $successFlg = true): void
     {
-        $results = new Results();
-        $msg = $exception->getMessage();
-        $code = $exception->getCode();
+        $response->withHeader('Content-type', 'application/json;charset=utf-8');
 
-        // 如果错误为空，拿着错误码去msg查一下
-        if (empty($msg)) {
-            $msg = Msg::get($code);
-            // 还为空的话 ， 就给个默认了
-            if (empty($msg)) {
-                $msg = '服务器竟然出现了错误,请稍后再试';
-            }
+        // 返回值封装
+        $msg = empty($msg) ? Msg::get($code) : $msg;
+        $results->setMsg((string) $msg);
+
+        // 成功逻辑
+        if ($successFlg) {
+            $results->setCode(empty($code) ? 100000 : $code);
+            $data = $results->getData();
+        } else {
+            $results->setCode(empty($code) ? 0 : $code);
+
+            $data = $results->getData();
         }
 
-        // 记录log
-        $exceptionData = ExceptionUtility::getExceptionData($exception, $code, $msg);
-        if (\AsaEs\Config::getInstance()->getConf('DEBUG')) {
-            $response->write(json_encode(ExceptionUtility::getExceptionData($exception) ?? []));
-            $response->withHeader('Content-type', 'application/json;charset=utf-8');
-            $response->end();
-            return;
-        }
+        $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
+        $saveData = [
+                AsaEsConst::REQUEST_ID => $requestObj->getRequestId(),
+                'swoole_http_request' => (array)$requestObj->getSwooleRequest(),
+                'response_code' =>$code,
+                'response_msg' => $msg,
+//                'response_body' => $data
+            ];
 
-        FileLogger::getInstance()->log(json_encode($exceptionData), strtoupper("HTTP_RUNNING_ERROR"));
-        Web::failBody($response, $results, $exception->getCode(), "服务器竟然出现了错误,请稍后再试");
+        // 异步写文件
+//        TaskManager::async(function () use ($saveData) {
+            FileLogger::getInstance()->log(json_encode($saveData), AsaEsConst::LOG_REQUEST_RESPONSE);
+//        });
+
+        $response->withAddedHeader('request_id',$requestObj->getRequestId());
+        $response->write(json_encode($data));
+        $response->end();
+        return;
+    }
+
+    public static function failBody(Response $response, Results $results, int $code = 0, string $msg = ''): void
+    {
+        self::setBody($response, $results, $code, $msg, false);
     }
 }

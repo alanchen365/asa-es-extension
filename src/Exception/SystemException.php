@@ -31,7 +31,7 @@ class SystemException implements ExceptionHandlerInterface
         $results = new Results();
         $msg = $exception->getMessage();
         $code = $exception->getCode();
-
+        
         // 如果错误为空，拿着错误码去msg查一下
         if (empty($msg)) {
             $msg = Msg::get($code);
@@ -42,20 +42,15 @@ class SystemException implements ExceptionHandlerInterface
         }
 
         // 记录log
-        $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
         $exceptionData = ExceptionUtility::getExceptionData($exception, $code, $msg);
-        if (ServerManager::getInstance()->getServer()->worker_id < 0 || Tools::superEmpty($requestObj)) {
-            FileLogger::getInstance()->log(json_encode($exceptionData), strtoupper("PROCESS_RUNNING_ERROR"));
-        } else {
-            if (\AsaEs\Config::getInstance()->getConf('DEBUG')) {
-                $response->write(json_encode(ExceptionUtility::getExceptionData($exception) ?? []));
-                $response->withHeader('Content-type', 'application/json;charset=utf-8');
-                $response->end();
-                return;
-            }
-
-            FileLogger::getInstance()->log(json_encode($exceptionData), strtoupper("HTTP_RUNNING_ERROR"));
-            Web::failBody($response, $results, $exception->getCode(), "服务器竟然出现了错误,请稍后再试");
+        if (\AsaEs\Config::getInstance()->getConf('DEBUG')) {
+            $response->write(json_encode(ExceptionUtility::getExceptionData($exception) ?? []));
+            $response->withHeader('Content-type', 'application/json;charset=utf-8');
+            $response->end();
+            return;
         }
+
+        FileLogger::getInstance()->log(json_encode($exceptionData), strtoupper("HTTP_RUNNING_ERROR"));
+        Web::failBody($response, $results, $exception->getCode(), "服务器竟然出现了错误,请稍后再试");
     }
 }

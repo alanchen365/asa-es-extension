@@ -12,6 +12,7 @@ use AsaEs\Exception\Service\MysqlException;
 use AsaEs\Logger\FileLogger;
 use AsaEs\Proxy\DaoProxy;
 use AsaEs\Utility\ArrayUtility;
+use AsaEs\Utility\Env;
 use AsaEs\Utility\Time;
 use AsaEs\Utility\Tools;
 use EasySwoole\Core\Component\Di;
@@ -752,14 +753,15 @@ class BaseDao
      */
     final protected function autoWriteUid(array $autoType, array $params)
     {
-        //  环境判断
-        // 获取当前用户uid
-        $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
-        if (ServerManager::getInstance()->getServer()->worker_id < 0 || !is_object($esRequest)) {
+        // 是否是http方式运行
+        if(!Env::isHttp()){
             return $params;
         }
 
+        // 获取当前用户uid
+        $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
         $tokenObj = $esRequest->getTokenObj();
+
         foreach ($autoType as $field) {
             if (property_exists($this->getBeanObj(), $field)) {
                 // 外部传入就不走默认值

@@ -6,6 +6,9 @@ use App\AppConst\AppInfo;
 use AsaEs\AsaEsConst;
 use AsaEs\Config;
 use AsaEs\Logger\FileLogger;
+use AsaEs\Utility\ArrayUtility;
+use AsaEs\Utility\Env;
+use AsaEs\Utility\Time;
 use AsaEs\Utility\Tools;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Component\Di;
@@ -80,35 +83,33 @@ class EsMysqliDb
     {
         // 唯一请求id
         $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
-        //  环境判断
-        if (ServerManager::getInstance()->getServer()->worker_id < 0 || Tools::superEmpty($requestObj)) {
-            $requestId = "cli_running";
-        } else {
-            $requestId = $requestObj->getRequestId();
-        }
+        $requestId =  Env::isHttp() ? $requestObj->getRequestId() : "cli_running";
 
         $saveData = [
             'request_id' => $requestId,
             'database_query' => self::$dbInstance->getLastQuery(),
         ];
 
-        // 保存sql执行
+        // 本机和开发环境 打印SQL
         if (Config::getInstance()->getConf('DEBUG')) {
             $env = Config::getInstance()->getEnv();
+            $nowDate = Time::getNowDataTime();
             if ($env == "LOCAL" || $env == "DEVELOP") {
-                echo "\n==================== {$actionName} ====================\n";
+                echo "\n==================== {$actionName} {$nowDate} ====================\n";
                 var_dump(self::$dbInstance->getLastQuery());
-                echo "==================== {$actionName} ====================\n";
+                echo "==================== {$actionName} {$nowDate} ====================\n";
             }
         }
 
-//        if (ServerManager::getInstance()->getServer()->worker_id < 0 || Tools::superEmpty($requestObj)) {
-//            FileLogger::getInstance()->log(json_encode($saveData), AsaEsConst::LOG_MYSQL_QUERY);
-//        } else {
-//            // 异步写文件
-//            TaskManager::async(function () use ($saveData) {
-//                FileLogger::getInstance()->log(json_encode($saveData), AsaEsConst::LOG_MYSQL_QUERY);
-//            });
-//        }
+        // 如果是http 就走异步记录
+        if (Env::isHttp()) {
+            // 异步写文件
+            TaskManager::async(function () use ($saveData) {
+                FileLogger::getInstance()->log(json_encode($saveData), AsaEsConst::LOG_MYSQL_QUERY);
+            });
+            return;
+        }
+
+        FileLogger::getInstance()->log(json_encode($saveData), AsaEsConst::LOG_MYSQL_QUERY);
     }
 }

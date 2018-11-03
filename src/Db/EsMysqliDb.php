@@ -93,21 +93,22 @@ class EsMysqliDb
         ];
 
         // 保存sql执行
-        $env = Config::getInstance()->getEnv();
-        if (Config::getInstance()->getConf('DEBUG') && ($env == "LOCAL" || $env == "DEVELOP")) {
-            echo "\n==================== {$actionName} ====================\n";
-            var_dump(self::$dbInstance->getLastQuery());
-            echo "==================== {$actionName} ====================\n";
-            return;
+        if (Config::getInstance()->getConf('DEBUG')) {
+            $env = Config::getInstance()->getEnv();
+            if ($env == "LOCAL" || $env == "DEVELOP") {
+                echo "\n==================== {$actionName} ====================\n";
+                var_dump(self::$dbInstance->getLastQuery());
+                echo "==================== {$actionName} ====================\n";
+            }
         }
 
-        // 异步写文件
-        if (ServerManager::getInstance()->getServer()->worker_id < 0 || Tools::superEmpty($requestObj)) {
-            FileLogger::getInstance()->log(json_encode($saveData), AsaEsConst::LOG_MYSQL_QUERY);
-        } else {
-            TaskManager::async(function () use ($saveData) {
-                FileLogger::getInstance()->log(json_encode($saveData), AsaEsConst::LOG_MYSQL_QUERY);
-            });
-        }
+//        if (ServerManager::getInstance()->getServer()->worker_id < 0 || Tools::superEmpty($requestObj)) {
+//            FileLogger::getInstance()->log(json_encode($saveData), AsaEsConst::LOG_MYSQL_QUERY);
+//        } else {
+//            // 异步写文件
+//            TaskManager::async(function () use ($saveData) {
+//                FileLogger::getInstance()->log(json_encode($saveData), AsaEsConst::LOG_MYSQL_QUERY);
+//            });
+//        }
     }
 }

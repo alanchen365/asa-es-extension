@@ -37,7 +37,7 @@ class ExceptionUtility
             'line' => $throwable->getLine(),
             'trace' => ExceptionUtility::simplifyTrace($throwable->getTrace()),
         ];
-            
+
         // 是否是http方式运行
         if (Env::isHttp()) {
             $data['raw_content']= $requestObj->getRawContent();

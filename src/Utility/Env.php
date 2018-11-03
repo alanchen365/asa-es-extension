@@ -4,6 +4,7 @@ namespace AsaEs\Utility;
 
 use AsaEs\AsaEsConst;
 use EasySwoole\Core\Component\Di;
+use EasySwoole\Core\Swoole\ServerManager;
 
 class Env
 {

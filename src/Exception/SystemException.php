@@ -32,7 +32,7 @@ class SystemException implements ExceptionHandlerInterface
         $results = new Results();
         $msg = $exception->getMessage();
         $code = $exception->getCode();
-
+        
         // 如果错误为空，拿着错误码去msg查一下
         if (empty($msg)) {
             $msg = Msg::get($code);

@@ -124,5 +124,8 @@ class EasySwooleEvent
         } else {
             FileLogger::getInstance()->log($logStr, 'ACCESS');
         }
+
+        // 如果事物没有关闭 手动关闭
+
     }
 }

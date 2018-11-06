@@ -19,31 +19,67 @@ use think\validate\ValidateRule;
 
 class EsMysqliDb extends \MysqliDb
 {
-    public function __construct($host = null, $username = null, $password = null, $db = null, $port = null, $charset = 'utf8', $socket = null)
+    private static $dbInstance;
+
+    /**
+     * 需要保存日志的配置 可在外部覆写
+     * @var array
+     */
+    protected $saveLog = ['get','getOne','update','delete','insert','rawQuery','rawQueryOne'];
+
+    /**
+     * 链接到哪个数据库
+     * @var string
+     */
+    protected $dbType;
+
+    public function __construct($dbType)
     {
-        parent::__construct($host, $username, $password, $db, $port, $charset, $socket);
+        $this->dbType = $dbType;
     }
 
     /**
-     * @return bool
+     * @return array
      */
-    public function isTransactionInProgress(): bool
+    public function getSaveLog(): array
     {
-        return $this->_transaction_in_progress;
+        return $this->saveLog;
     }
 
     /**
-     * @param bool $transaction_in_progress
+     * @param array $saveLog
      */
-    public function setTransactionInProgress(bool $transaction_in_progress): void
+    public function setSaveLog(array $saveLog): void
     {
-        $this->_transaction_in_progress = $transaction_in_progress;
+        $this->saveLog = $saveLog;
     }
 
     /**
-     * 记录log
+     * @param string $dbType
      */
-    public function saveLog(?string $actionName):void
+    public function setDbType(string $dbType): void
+    {
+        $this->dbType = $dbType;
+    }
+
+    public function __call($actionName, $arguments)
+    {
+        self::$dbInstance =  self::$dbInstance ?? Di::getInstance()->get($this->dbType);
+        if (self::$dbInstance instanceof MysqliDbTools) {
+            $ref = new \ReflectionClass(MysqliDbTools::class);
+            if ($ref->hasMethod($actionName) &&  $ref->getMethod($actionName)->isPublic()) {
+                $return = call_user_func_array([self::$dbInstance,$actionName], $arguments);
+                // 需要记log的方法 TODO 换成O1
+
+                if (in_array($actionName, $this->saveLog)) {
+                    $this->__hook($actionName, $arguments);
+                }
+                return $return;
+            }
+        }
+    }
+
+    protected function __hook(?string $actionName, $argumentsr):void
     {
         // 唯一请求id
         $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
@@ -51,7 +87,7 @@ class EsMysqliDb extends \MysqliDb
 
         $saveData = [
             'request_id' => $requestId,
-            'database_query' =>  self::$_instance->getLastQuery(),
+            'database_query' => self::$dbInstance->getLastQuery(),
         ];
 
         // 本机和开发环境 打印SQL
@@ -60,7 +96,7 @@ class EsMysqliDb extends \MysqliDb
             $nowDate = Time::getNowDataTime();
             if ($env == "LOCAL" || $env == "DEVELOP") {
                 echo "\n==================== {$actionName} {$nowDate} ====================\n";
-                echo self::$_instance->getLastQuery()."\n";
+                var_dump(self::$dbInstance->getLastQuery());
                 echo "==================== {$actionName} {$nowDate} ====================\n";
             }
         }

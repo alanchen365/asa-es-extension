@@ -47,6 +47,7 @@ class BaseDao
         // 数据填充
         $this->getDb()->orderBy($field, 'DESC');
         $row = $this->getDb()->getOne($this->getBeanObj()->getTableName(), $this->getBeanObj()->getFields()) ?? [];
+        $this->getDb()->saveLog(__FUNCTION__);
         return $row ?? [];
     }
 
@@ -76,19 +77,15 @@ class BaseDao
             return;
         }
 
-        $redisObj = new EsRedis();
-        $redisKey = $this->getBasicRedisHashKey();
+        $isTransaction = $this->getDb()->isTransactionInProgress();
+        if(!$isTransaction){
+            $redisObj = new EsRedis();
+            $redisKey = $this->getBasicRedisHashKey();
 
-        // 改造缓存方式
-        $row = $this->clearIllegalParams($row);
-        $redisObj->hSet($redisKey, $id, json_encode($row));
-
-//        // 利用管道机制 一次执行 减少网络请求
-//        $pipe = $redisObj->multi(\Redis::PIPELINE);
-//        foreach ($row as $column => $value) {
-//            $pipe->hSet($redisKey, $column, $value);
-//        }
-//        $pipe->exec();
+            // 改造缓存方式
+            $row = $this->clearIllegalParams($row);
+            $redisObj->hSet($redisKey, $id, json_encode($row));
+        }
     }
 
     /**
@@ -166,6 +163,8 @@ class BaseDao
 
         // 数据填充
         $row = $this->getDb()->getOne($this->getBeanObj()->getTableName(), $this->getBeanObj()->getFields()) ?? [];
+        // 记录log
+        $this->getDb()->saveLog(__FUNCTION__);
         return $row ?? [];
     }
 
@@ -200,6 +199,7 @@ class BaseDao
 
         // 批量更新缓存
         $this->updateRedisByLua($ids, $params);
+        $this->getDb()->saveLog(__FUNCTION__);
     }
 
     /**
@@ -290,6 +290,9 @@ class BaseDao
             throw new MysqlException($code, $this->getDb()->getLastError());
         }
 
+        // 记录log
+        $this->getDb()->saveLog(__FUNCTION__);
+
         // 批量更新缓存
         $this->updateRedisByLua($ids, $params);
     }
@@ -321,6 +324,9 @@ class BaseDao
             $code = 4002;
             throw new MysqlException($code, $this->getDb()->getLastError());
         }
+
+        // 记录log
+        $this->getDb()->saveLog(__FUNCTION__);
 
         // 不直接写缓存 是因为数据库会有默认值， 直接写会造成数据不同步
         return $id;
@@ -357,6 +363,9 @@ class BaseDao
             throw new MysqlException($code, $this->getDb()->getLastError());
         }
 
+        // 记录log
+        $this->getDb()->saveLog(__FUNCTION__);
+
         return  $ids;
     }
 
@@ -385,6 +394,9 @@ class BaseDao
         if (empty($ids)) {
             return;
         }
+
+        // 记录log
+        $this->getDb()->saveLog(__FUNCTION__);
 
         $this->deleteByIds($ids);
     }
@@ -437,6 +449,8 @@ class BaseDao
             $code = 4013;
             throw new MysqlException($code);
         }
+        // 记录log
+        $this->getDb()->saveLog(__FUNCTION__);
     }
 
     /**
@@ -522,6 +536,8 @@ class BaseDao
             $data[] = $this->getBeanObj()->arrayToBean($row);
         }
 
+        // 记录log
+        $this->getDb()->saveLog(__FUNCTION__);
         return $data;
     }
 
@@ -682,6 +698,8 @@ class BaseDao
             $data[] = $this->getBeanObj()->arrayToBean($row);
         }
 
+        // 记录log
+        $this->getDb()->saveLog(__FUNCTION__);
         return $data;
     }
 
@@ -720,14 +738,10 @@ class BaseDao
     /**
      * @return null|string
      */
-    final public function getDb($dbType = AsaEsConst::DI_MYSQL_DEFAULT)
+    final public function getDb($dbType = AsaEsConst::DI_MYSQL_DEFAULT) :EsMysqliDb
     {
-        if (isset($this->db[$dbType])  && $this->db[$dbType] instanceof EsMysqliDb) {
-            return $this->db[$dbType];
-        }
-
-        $this->db[$dbType] = new EsMysqliDb($dbType);
-        return $this->db[$dbType];
+        $db = Di::getInstance()->get($dbType);
+        return $db;
     }
 
     /**
@@ -807,6 +821,8 @@ class BaseDao
             throw new MysqlException(4017, $this->getDb()->getLastError());
         }
 
+        // 记录log
+        $this->getDb()->saveLog(__FUNCTION__);
         return $result;
     }
 

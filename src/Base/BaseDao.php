@@ -78,7 +78,7 @@ class BaseDao
         }
 
         $isTransaction = $this->getDb()->isTransactionInProgress();
-        if(!$isTransaction){
+        if (!$isTransaction) {
             $redisObj = new EsRedis();
             $redisKey = $this->getBasicRedisHashKey();
 
@@ -512,10 +512,15 @@ class BaseDao
             $this->getDb()->groupBy($fields);
         }
 
-        // 排序规则
+        // 排序规则 如果为空则默认降序
+        if (empty($orderBys)) {
+            $orderBys = AppInfo::APP_DEFAULT_ORDER_BY;
+        }
+
         foreach ($orderBys as $fields => $orderType) {
             $this->getDb()->orderBy($fields, $orderType);
         }
+
 
         // 逻辑删除
         $logicDeleteField = $this->getLogicDeleteField();
@@ -674,6 +679,10 @@ class BaseDao
             $this->getDb()->groupBy($fields);
         }
 
+        // 排序规则 如果为空则默认降序
+        if (empty($orderBys)) {
+            $orderBys = AppInfo::APP_DEFAULT_ORDER_BY;
+        }
         // 排序规则
         foreach ($orderBys as $fields => $orderType) {
             $this->getDb()->orderBy($fields, $orderType);
@@ -768,7 +777,7 @@ class BaseDao
     final protected function autoWriteUid(array $autoType, array $params)
     {
         // 是否是http方式运行
-        if(!Env::isHttp()){
+        if (!Env::isHttp()) {
             return $params;
         }
 

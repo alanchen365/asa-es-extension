@@ -51,7 +51,7 @@ class EsMysqliDb extends \MysqliDb
 
         $saveData = [
             'request_id' => $requestId,
-            'database_query' =>  self::$_instance->getLastQuery(),
+            'database_query' => $this->getLastQuery(),
         ];
 
         // 本机和开发环境 打印SQL
@@ -60,7 +60,7 @@ class EsMysqliDb extends \MysqliDb
             $nowDate = Time::getNowDataTime();
             if ($env == "LOCAL" || $env == "DEVELOP") {
                 echo "\n==================== {$actionName} {$nowDate} ====================\n";
-                echo self::$_instance->getLastQuery()."\n";
+                echo $this->getLastQuery()."\n";
                 echo "==================== {$actionName} {$nowDate} ====================\n";
             }
         }

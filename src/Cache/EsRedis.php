@@ -14,7 +14,7 @@ class EsRedis
     private static $dbInstance;
 
     protected $options = [
-        'select' => 0,
+        'select' => 3,
         'timeout' => 0,
         'expire' => 0,
         'persistent' => false,

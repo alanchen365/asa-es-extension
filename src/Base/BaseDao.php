@@ -287,10 +287,7 @@ class BaseDao
         $this->getDb()->saveLog(__FUNCTION__);
 
         // 不直接写缓存 是因为数据库会有默认值， 直接写会造成数据不同步
-
         // 安全起见 删除一下对应id的缓存
-        $redisObj = Di::getInstance()->get(AsaEsConst::DI_REDIS_DEFAULT);
-        $redisKey =  $this->getBasicRedisHashKey();
         RedisUtility::clearModuleCache($this->getBeanObj()->getTableName(), [$id]);
         return $id;
     }
@@ -330,9 +327,6 @@ class BaseDao
         $this->getDb()->saveLog(__FUNCTION__);
 
         // 安全起见 删除一下对应id的缓存
-        $redisObj = Di::getInstance()->get(AsaEsConst::DI_REDIS_DEFAULT);
-        $redisKey =  $this->getBasicRedisHashKey();
-
         RedisUtility::clearModuleCache($this->getBeanObj()->getTableName(), $ids);
         return  $ids;
     }
@@ -417,6 +411,7 @@ class BaseDao
             $code = 4013;
             throw new MysqlException($code);
         }
+
         // 记录log
         $this->getDb()->saveLog(__FUNCTION__);
         RedisUtility::clearModuleCache($this->getBeanObj()->getTableName(), $ids);
@@ -522,11 +517,9 @@ class BaseDao
         // 看变量是否是该属性
         $params = BaseDao::clearIllegalParams($params);
 
-        $searchBinding = [];
         $whereKey = [];
         $whereValue = [];
-        $whereOrSql = '';
-
+        
         foreach ($params as $field => $value) {
             if (Tools::superEmpty($value)) {
                 $code = 1011;

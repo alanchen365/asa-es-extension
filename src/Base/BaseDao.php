@@ -13,6 +13,7 @@ use AsaEs\Logger\FileLogger;
 use AsaEs\Proxy\DaoProxy;
 use AsaEs\Utility\ArrayUtility;
 use AsaEs\Utility\Env;
+use AsaEs\Utility\RedisUtility;
 use AsaEs\Utility\Time;
 use AsaEs\Utility\Tools;
 use EasySwoole\Core\Component\Di;
@@ -54,17 +55,25 @@ class BaseDao
     /**
      * getById查询缓存
      */
-    public function getByIdCache(?int $id) :array
+    public function getByIdCache(?int $id) :?array
     {
         if (!isset($id)) {
             return [];
         }
 
-        $redisObj = new EsRedis();
+        $redisObj = Di::getInstance()->get(AsaEsConst::DI_REDIS_DEFAULT);
         $redisKey = $this->getBasicRedisHashKey();
 
         $rowJson = $redisObj->hGet($redisKey, $id);
         $row = json_decode($rowJson, true) ?? [];
+
+        // 如果查询出来是空 看看缓存中是否有key
+        if (empty($row)) {
+            if ($redisObj->hExists($redisKey, $id)) {
+                return null;
+            }
+        }
+
         return $row;
     }
 
@@ -73,13 +82,13 @@ class BaseDao
      */
     public function setByIdCache(?int $id, $row):void
     {
-        if (!isset($id) || empty($row)) {
+        if (!isset($id)) {
             return;
         }
 
         $isTransaction = $this->getDb()->isTransactionInProgress();
         if (!$isTransaction) {
-            $redisObj = new EsRedis();
+            $redisObj = Di::getInstance()->get(AsaEsConst::DI_REDIS_DEFAULT);
             $redisKey = $this->getBasicRedisHashKey();
 
             // 改造缓存方式
@@ -99,14 +108,14 @@ class BaseDao
         $hashKey = md5(json_encode($arguments));
         $redisKey =  EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), $functionName);
 
-        $redisObj = new EsRedis();
+        $redisObj = Di::getInstance()->get(AsaEsConst::DI_REDIS_DEFAULT);
         $rows = $redisObj->hGet($redisKey, $hashKey);
         $rows = unserialize($rows) ?? [];
 
         if (empty($rows)) {
             // key 是否存在
             if ($redisObj->hExists($redisKey, $hashKey)) {
-                return [];
+                return null;
             }
         }
 
@@ -124,22 +133,8 @@ class BaseDao
         $redisKey =  EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), $functionName);
         $hashKey = md5(json_encode($arguments));
 
-        $redisObj = new EsRedis();
+        $redisObj = Di::getInstance()->get(AsaEsConst::DI_REDIS_DEFAULT);
         $redisObj->hSet($redisKey, $hashKey, serialize($rows));
-    }
-
-    /**
-     * 清理列表缓存
-     */
-    public function delListCache()
-    {
-        $redisObj = new EsRedis();
-
-        $redisKeyGetAll =  EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_GET_ALL);
-        $redisKeySearchAll =  EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_SEARCH_ALL);
-
-        $redisObj->del($redisKeyGetAll);
-        $redisObj->del($redisKeySearchAll);
     }
 
     /**
@@ -197,45 +192,8 @@ class BaseDao
             throw new MysqlException($code, $this->getDb()->getLastError());
         }
 
-        // 批量更新缓存
-        $this->updateRedisByLua($ids, $params);
+        RedisUtility::clearModuleCache($this->getBeanObj()->getTableName(), $ids);
         $this->getDb()->saveLog(__FUNCTION__);
-    }
-
-    /**
-     * 一次性更新redis缓存 （如果key不存在则不更新）
-     */
-    final private function updateRedisByLua(array $ids, array $params)
-    {
-        $idsKeys = [];
-        $redisObj = new EsRedis();
-        $redisKey =  $this->getBasicRedisHashKey();
-
-//        foreach ($ids as $id) {
-//            $idsKeys[] = $this->getBasicRedisHashKey($id);
-//        }
-
-//        $lua = <<<eof
-        //local idsKeys = cjson.decode(KEYS[1]) or ''
-        //local data = {};
-        //for i, key in ipairs(idsKeys) do
-//    local flg = redis.call( 'EXISTS', key);
-//    if flg == 1 then
-//        data[i] = key;
-//    end
-        //end
-//
-        //return cjson.encode(data)
-        //eof;
-
-//        $idsKeys = $redisObj->eval($lua, [json_encode($idsKeys),json_encode($params)], 1);
-//        $idsKeys = json_decode($idsKeys, true) ?? [];
-
-        $pipe = $redisObj->multi(\Redis::PIPELINE);
-        foreach ($ids as $id) {
-            $pipe->hDel($redisKey, $id);
-        }
-        $pipe->exec();
     }
 
     /**
@@ -294,7 +252,7 @@ class BaseDao
         $this->getDb()->saveLog(__FUNCTION__);
 
         // 批量更新缓存
-        $this->updateRedisByLua($ids, $params);
+        RedisUtility::clearModuleCache($this->getBeanObj()->getTableName(), $ids);
     }
 
     /**
@@ -329,6 +287,11 @@ class BaseDao
         $this->getDb()->saveLog(__FUNCTION__);
 
         // 不直接写缓存 是因为数据库会有默认值， 直接写会造成数据不同步
+
+        // 安全起见 删除一下对应id的缓存
+        $redisObj = Di::getInstance()->get(AsaEsConst::DI_REDIS_DEFAULT);
+        $redisKey =  $this->getBasicRedisHashKey();
+        RedisUtility::clearModuleCache($this->getBeanObj()->getTableName(), [$id]);
         return $id;
     }
 
@@ -366,6 +329,11 @@ class BaseDao
         // 记录log
         $this->getDb()->saveLog(__FUNCTION__);
 
+        // 安全起见 删除一下对应id的缓存
+        $redisObj = Di::getInstance()->get(AsaEsConst::DI_REDIS_DEFAULT);
+        $redisKey =  $this->getBasicRedisHashKey();
+
+        RedisUtility::clearModuleCache($this->getBeanObj()->getTableName(), $ids);
         return  $ids;
     }
 
@@ -398,7 +366,7 @@ class BaseDao
         // 记录log
         $this->getDb()->saveLog(__FUNCTION__);
 
-        $this->deleteByIds($ids);
+        RedisUtility::clearModuleCache($this->getBeanObj()->getTableName(), $ids);
     }
 
     /**
@@ -407,7 +375,7 @@ class BaseDao
      */
     final public function deleteByIds(array $ids):void
     {
-        $redisObj = new EsRedis();
+        $redisObj = Di::getInstance()->get(AsaEsConst::DI_REDIS_DEFAULT);
         $pipe = $redisObj->multi(\Redis::PIPELINE);
 
         // 先删缓存 标注该条数据已删除 写入集合中 减少直接查库的可能 可能存在并发问题 后期可写入lua脚本
@@ -451,6 +419,7 @@ class BaseDao
         }
         // 记录log
         $this->getDb()->saveLog(__FUNCTION__);
+        RedisUtility::clearModuleCache($this->getBeanObj()->getTableName(), $ids);
     }
 
     /**
@@ -520,7 +489,6 @@ class BaseDao
         foreach ($orderBys as $fields => $orderType) {
             $this->getDb()->orderBy($fields, $orderType);
         }
-
 
         // 逻辑删除
         $logicDeleteField = $this->getLogicDeleteField();
@@ -840,7 +808,7 @@ class BaseDao
      */
     public function basicIsDeleted(?int $id) :bool
     {
-        $redisObj = new EsRedis();
+        $redisObj = Di::getInstance()->get(AsaEsConst::DI_REDIS_DEFAULT);
         return false;
         return (bool)$redisObj->sIsMember(EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_DELETED), $id);
     }

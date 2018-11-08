@@ -14,16 +14,16 @@ class Tools
      */
     public static function getLastNameSpaceName(string $nameSpace) :?string
     {
-        $nameSpaceArr = explode('\\',$nameSpace);
+        $nameSpaceArr = explode('\\', $nameSpace);
         return end($nameSpaceArr) ?? null;
     }
 
     /**
      * 去掉命名空间获取类名对象
      */
-    public static function getModelNameByClass(string $className): string
+    public static function getModelNameByClass(string $className, ?string $find = 'Dao', ?string $replace = 'Bean'): string
     {
-        return str_replace('Dao', 'Bean', $className);
+        return str_replace($find, $replace, $className);
     }
 
     /**

@@ -49,7 +49,7 @@ class EasySwooleEvent
         ProcessManager::getInstance()->addProcess(AsaEsConst::PROCESS_AUTO_RELOAD, Inotify::class);
         // 进程批量注入
         \App\Process\Router::run();
-        // 注入定时任务
+//         注入定时任务
         EsCrontab::run();
     }
 
@@ -124,8 +124,5 @@ class EasySwooleEvent
         } else {
             FileLogger::getInstance()->log($logStr, 'ACCESS');
         }
-
-        // 如果事物没有关闭 手动关闭
-
     }
 }

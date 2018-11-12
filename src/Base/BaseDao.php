@@ -491,7 +491,7 @@ class BaseDao
         }
 
         // 逻辑删除
-        $logicDeleteField = $this->getLogicDeleteField();
+        $logicDeleteField = $this->getLogicDeleteField($params);
         if ($logicDeleteField) {
             $this->getDb()->where($logicDeleteField, 0);
         }
@@ -657,7 +657,7 @@ class BaseDao
         }
 
         // 逻辑删除
-        $logicDeleteField = $this->getLogicDeleteField();
+        $logicDeleteField = $this->getLogicDeleteField($params);
         if ($logicDeleteField) {
             $this->getDb()->where($logicDeleteField, 0);
         }
@@ -825,11 +825,12 @@ class BaseDao
      * 获取逻辑删除列的名称
      * @return string
      */
-    private function getLogicDeleteField() :string
+    private function getLogicDeleteField(?array $params = []) :?string
     {
-        $logicDeleteField = '';
+        $logicDeleteField = null;
         foreach (AsaEsConst::MYSQL_AUTO_LOGICDELETE as $field) {
-            if (property_exists($this->getBeanObj(), $field)) {
+            // 存在删除属性 并且外部没有传入该属性 才不带 否则带
+            if (property_exists($this->getBeanObj(), $field)  && !isset($params[$field])) {
                 $logicDeleteField = $field;
             }
         }

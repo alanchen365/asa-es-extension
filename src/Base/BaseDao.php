@@ -272,7 +272,7 @@ class BaseDao
         $params = BaseDao::autoWriteUid(AsaEsConst::MYSQL_AUTO_INSERTUSER, $params);
 
         // 逻辑删除
-        $logicDeleteField = $this->getLogicDeleteField();
+        $logicDeleteField = $this->getLogicDeleteField($params);
         if ($logicDeleteField) {
             $params[$logicDeleteField] = 0;
         }
@@ -307,7 +307,7 @@ class BaseDao
             throw new MysqlException($code);
         }
 
-        $logicDeleteField = $this->getLogicDeleteField();
+        $logicDeleteField = $this->getLogicDeleteField($params);
         foreach ($params as $key => $param) {
             $params[$key] = BaseDao::clearIllegalParams($param);
             $params[$key] = BaseDao::autoWriteTime(AsaEsConst::MYSQL_AUTO_INSERTTIME, $params[$key]);
@@ -382,14 +382,14 @@ class BaseDao
         foreach ($ids as $key => $id) {
 
             // 如果该数据已经被删除 就不需要再查数据库了
-            if ($this->basicIsDeleted($id)) {
-                unset($ids[$key]);
-                continue;
-            }
+//            if ($this->basicIsDeleted($id)) {
+//                unset($ids[$key]);
+//                continue;
+//            }
 
             $redisKey = $this->getBasicRedisHashKey();
             $pipe->hDel($redisKey, $id);
-            $pipe->sAdd(EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_DELETED), $id);
+//            $pipe->sAdd(EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_DELETED), $id);
         }
         $pipe->exec();
 
@@ -806,12 +806,12 @@ class BaseDao
     /**
      * 基础数据是否已经被删除
      */
-    public function basicIsDeleted(?int $id) :bool
-    {
-        $redisObj = Di::getInstance()->get(AsaEsConst::DI_REDIS_DEFAULT);
-        return false;
-        return (bool)$redisObj->sIsMember(EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_DELETED), $id);
-    }
+//    public function basicIsDeleted(?int $id) :bool
+//    {
+//        $redisObj = Di::getInstance()->get(AsaEsConst::DI_REDIS_DEFAULT);
+//        return false;
+//        return (bool)$redisObj->sIsMember(EsRedis::getBeanKeyPre($this->getBeanObj()->getTableName(), AsaEsConst::REDIS_BASIC_DELETED), $id);
+//    }
 
     /**
      * 获取基础数据操作redis key

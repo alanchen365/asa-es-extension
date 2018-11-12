@@ -81,11 +81,11 @@ class DaoProxy
                             return $this->getClass()->getBeanObj()->arrayToBean($cacheRow);
                         }
 
-                        // 如果数据已被删除
-                        $isDelete = call_user_func_array([$this->class,'basicIsDeleted'], $arguments);
-                        if ($isDelete) {
-                            return $this->getClass()->getBeanObj()->arrayToBean([]);
-                        }
+//                        // 如果数据已被删除
+//                        $isDelete = call_user_func_array([$this->class,'basicIsDeleted'], $arguments);
+//                        if ($isDelete) {
+//                            return $this->getClass()->getBeanObj()->arrayToBean([]);
+//                        }
 
                         // 如果等于null 说明缓存中有这个数据 但是就是null
                         if($cacheRow === null){

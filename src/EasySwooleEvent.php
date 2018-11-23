@@ -9,6 +9,7 @@ use AsaEs\Exception\Service\SignException;
 use AsaEs\Exception\SystemException;
 use AsaEs\Logger\AccessLogger;
 use AsaEs\Logger\FileLogger;
+use AsaEs\Middleware\EmptyParamFilterMiddleware;
 use AsaEs\Process\Inotify;
 use AsaEs\Process\Timer;
 use AsaEs\Router\HttpRouter;
@@ -103,6 +104,9 @@ class EasySwooleEvent
                 $esRequest->setHeaderToken($tokenStr);
             }
         }
+        
+        // 空参数过滤中间那
+         EmptyParamFilterMiddleware::getInstance()->handle($request, $response);
     }
 
     public static function afterAction(Request $request, Response $response): void

@@ -172,6 +172,11 @@ class BaseController extends Controller
 
     public function onRequest($action): ?bool
     {
+        // 是否开启鉴权
+        if (!AppInfo::APP_TOKEN_AUTH_SWITCH) {
+            return true;
+        }
+
         // 路由鉴权
         $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
 

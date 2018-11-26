@@ -3,6 +3,8 @@
 namespace AsaEs\Utility;
 
 use App\AppConst\AppInfo;
+use App\AppConst\ListOperation;
+use AsaEs\AsaEsConst;
 use AsaEs\Config;
 use EasySwoole\Core\Component\Di;
 use ReflectionClass;
@@ -43,44 +45,45 @@ trait View
         return strtolower($resultsName.'_'.$type);
     }
 
+    /**
+     * 获取列表操作项判断 TODO 获取roid.
+     *
+     * @param string $name     配置文件中名称
+     * @param bool   $rDefault 当role_id不存在时都显示还是都不显示
+     *
+     * @return array
+     *
+     * @throws \ReflectionException
+     */
+    public function getListOperation(String $name, bool $rDefault = true): array
+    {
+        $reflect = new ReflectionClass(get_class(new ListOperation()));
+        $name = empty($name) ? 'DEFAULT' : strtoupper($name);
+        $operations = $reflect->getConstant($name);
+        if (false === $operations || !is_array($operations)) {
+            return [];
+        }
 
-//    /**
-//     * 获取列表操作项判断 TODO 获取roid.
-//     *
-//     * @param string $name     配置文件中名称
-//     * @param bool   $rDefault 当role_id不存在时都显示还是都不显示
-//     *
-//     * @return array
-//     *
-//     * @throws \ReflectionException
-//     */
-//    public function getListOperation(String $name, bool $rDefault = true): array
-//    {
-//        $reflect = new ReflectionClass(get_class(new ListOperation()));
-//        $name = empty($name) ? 'DEFAULT' : strtoupper($name);
-//        $operations = $reflect->getConstant($name);
-//        if (false === $operations || !is_array($operations)) {
-//            return [];
-//        }
-//
-//        //根据TOKEN获取rid
-//        $token = Di::getInstance()->get(AppInfo::APP_TOKEN)->getToken();
-//        $rId = $token->rid;
-//        $data = [];
-//        foreach ($operations as $k => $operation) {
-//            if ($rDefault) {
-//                if (!isset($operation['role_id']) || !empty(array_intersect($operation['role_id'], $rId))) {
-//                    unset($operation['role_id']);
-//                    $data[] = $operation;
-//                }
-//            } else {
-//                if (isset($operation['role_id']) && !empty(array_intersect($operation['role_id'], $rId))) {
-//                    unset($operation['role_id']);
-//                    $data[] = $operation;
-//                }
-//            }
-//        }
-//
-//        return $data;
-//    }
+        //根据TOKEN获取rid
+        $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
+        $tokenObj = $esRequest->getTokenObj();
+        $rId = $tokenObj->rids;
+
+        $data = [];
+        foreach ($operations as $k => $operation) {
+            if ($rDefault) {
+                if (!isset($operation['role_id']) || !empty(array_intersect($operation['role_id'], $rId))) {
+                    unset($operation['role_id']);
+                    $data[] = $operation;
+                }
+            } else {
+                if (isset($operation['role_id']) && !empty(array_intersect($operation['role_id'], $rId))) {
+                    unset($operation['role_id']);
+                    $data[] = $operation;
+                }
+            }
+        }
+
+        return $data;
+    }
 }

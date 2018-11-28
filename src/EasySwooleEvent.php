@@ -100,7 +100,7 @@ class EasySwooleEvent
             }
 
             // test swagger 模拟用户
-            if ($env == "TESTING" && $swaggerDomain == $origin) {
+            if ($swaggerDomain  &&  $origin  && $env == "TESTING" && $swaggerDomain == $origin) {
                 $esRequest->setHeaderToken($tokenStr);
             }
         }

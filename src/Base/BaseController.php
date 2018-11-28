@@ -201,6 +201,7 @@ class BaseController extends Controller
             if (!$tokenStr) {
                 $this->response()->withStatus(Status::CODE_UNAUTHORIZED);
                 $this->response()->end();
+                return false;
             }
 
             $tokenObj =  Token::decode($tokenStr);

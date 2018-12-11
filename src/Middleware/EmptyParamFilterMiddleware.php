@@ -27,10 +27,7 @@ class EmptyParamFilterMiddleware
             }
         }
 
-        if(!Tools::superEmpty($params)){
-            $request->withQueryParams($params);
-        }
-
+        $request->withQueryParams($params);
         return;
     }
 }

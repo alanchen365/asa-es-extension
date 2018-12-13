@@ -673,4 +673,31 @@ class ArrayUtility
 
         return $ret;
     }
+    
+    /**
+     * 提取一维或二维数组的指定一列或多列
+     * @param $arr
+     * @param $keys
+     * @return array
+     */
+    public static function arrayFilterKeys($arr, $keys){
+        if(empty($arr)){
+            return [];
+        }
+        $arr = (array)$arr;
+        //判断是否是一维数组
+        if(!isset($arr[0])){
+            foreach((array)$arr as $key => $value){
+                if(in_array($key,$keys)){
+                    $newArr[$key] = $value;
+                }
+            }
+        }else{
+            foreach($arr as $v){
+                extract((array) $v);
+                $newArr[] = compact($keys);
+            }
+        }
+        return $newArr;
+    }
 }

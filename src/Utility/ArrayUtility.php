@@ -700,4 +700,22 @@ class ArrayUtility
         }
         return $newArr;
     }
+
+    /**
+     * unset 数组中的空变量
+     */
+    public static function unsetEmpty(array $array){
+
+        if(empty($array)){
+            return [];
+        }
+
+        foreach ($array as $item => $value){
+            if(Tools::superEmpty($value)){
+                unset($array[$item]);
+            }
+        }
+
+        return $array;
+    }
 }

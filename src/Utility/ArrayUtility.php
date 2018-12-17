@@ -680,20 +680,21 @@ class ArrayUtility
      * @param $keys
      * @return array
      */
-    public static function arrayFilterKeys($arr, $keys){
-        if(empty($arr)){
+    public static function arrayFilterKeys($arr, $keys)
+    {
+        if (empty($arr)) {
             return [];
         }
         $arr = (array)$arr;
         //判断是否是一维数组
-        if(!isset($arr[0])){
-            foreach((array)$arr as $key => $value){
-                if(in_array($key,$keys)){
+        if (!isset($arr[0])) {
+            foreach ((array)$arr as $key => $value) {
+                if (in_array($key, $keys)) {
                     $newArr[$key] = $value;
                 }
             }
-        }else{
-            foreach($arr as $v){
+        } else {
+            foreach ($arr as $v) {
                 extract((array) $v);
                 $newArr[] = compact($keys);
             }
@@ -704,18 +705,37 @@ class ArrayUtility
     /**
      * unset 数组中的空变量
      */
-    public static function unsetEmpty(array $array){
-
-        if(empty($array)){
+    public static function unsetEmpty(array $array)
+    {
+        if (empty($array)) {
             return [];
         }
 
-        foreach ($array as $item => $value){
-            if(Tools::superEmpty($value)){
+        foreach ($array as $item => $value) {
+            if (Tools::superEmpty($value)) {
                 unset($array[$item]);
             }
         }
 
         return $array;
+    }
+
+    /**
+     * unset 数组中指定的value
+     */
+    public static function unsetValue(array $array, array $values = [])
+    {
+        foreach ($array as $item => $value) {
+            // 数组和对象不管
+            if (is_array($value) || is_object($value)) {
+                continue;
+            }
+
+            if(in_array($value,$values)){
+                unset($array[$item]);
+            }
+        }
+
+        return array_values($array) ?? [];
     }
 }

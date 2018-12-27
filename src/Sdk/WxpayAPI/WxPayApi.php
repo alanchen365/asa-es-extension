@@ -28,7 +28,7 @@ class WxPayApi
      * @throws WxPayException
      * @return 成功时返回，其他抛异常
      */
-    public static function unifiedOrder($config, $inputObj, $timeOut = 6)
+    public static function unifiedOrder($config, $inputObj, $timeOut = 10)
     {
         $url = "https://api.mch.weixin.qq.com/pay/unifiedorder";
         //检测必填参数
@@ -82,7 +82,7 @@ class WxPayApi
      * @throws WxPayException
      * @return 成功时返回，其他抛异常
      */
-    public static function orderQuery($config, $inputObj, $timeOut = 6)
+    public static function orderQuery($config, $inputObj, $timeOut = 10)
     {
         $url = "https://api.mch.weixin.qq.com/pay/orderquery";
         //检测必填参数
@@ -114,7 +114,7 @@ class WxPayApi
      * @throws WxPayException
      * @return 成功时返回，其他抛异常
      */
-    public static function closeOrder($config, $inputObj, $timeOut = 6)
+    public static function closeOrder($config, $inputObj, $timeOut = 10)
     {
         $url = "https://api.mch.weixin.qq.com/pay/closeorder";
         //检测必填参数
@@ -147,7 +147,7 @@ class WxPayApi
      * @throws WxPayException
      * @return 成功时返回，其他抛异常
      */
-    public static function refund($config, $inputObj, $timeOut = 6)
+    public static function refund($config, $inputObj, $timeOut = 10)
     {
         $url = "https://api.mch.weixin.qq.com/secapi/pay/refund";
         //检测必填参数
@@ -189,7 +189,7 @@ class WxPayApi
      * @throws WxPayException
      * @return 成功时返回，其他抛异常
      */
-    public static function refundQuery($config, $inputObj, $timeOut = 6)
+    public static function refundQuery($config, $inputObj, $timeOut = 10)
     {
         $url = "https://api.mch.weixin.qq.com/pay/refundquery";
         //检测必填参数
@@ -223,7 +223,7 @@ class WxPayApi
      * @throws WxPayException
      * @return 成功时返回，其他抛异常
      */
-    public static function downloadBill($config, $inputObj, $timeOut = 6)
+    public static function downloadBill($config, $inputObj, $timeOut = 10)
     {
         $url = "https://api.mch.weixin.qq.com/pay/downloadbill";
         //检测必填参数
@@ -293,7 +293,7 @@ class WxPayApi
      * @param int $timeOut
      * @throws WxPayException
      */
-    public static function reverse($config, $inputObj, $timeOut = 6)
+    public static function reverse($config, $inputObj, $timeOut = 10)
     {
         $url = "https://api.mch.weixin.qq.com/secapi/pay/reverse";
         //检测必填参数
@@ -366,7 +366,7 @@ class WxPayApi
      * @throws WxPayException
      * @return 成功时返回，其他抛异常
      */
-    public static function bizpayurl($config, $inputObj, $timeOut = 6)
+    public static function bizpayurl($config, $inputObj, $timeOut = 10)
     {
         if(!$inputObj->IsProduct_idSet()){
             throw new WxPayException("生成二维码，缺少必填参数product_id！");
@@ -394,7 +394,7 @@ class WxPayApi
      * @throws WxPayException
      * @return 成功时返回，其他抛异常
      */
-    public static function shorturl($config, $inputObj, $timeOut = 6)
+    public static function shorturl($config, $inputObj, $timeOut = 10)
     {
         $url = "https://api.mch.weixin.qq.com/tools/shorturl";
         //检测必填参数
@@ -438,7 +438,6 @@ class WxPayApi
         //如果返回成功则验证签名
         try {
             //获取通知的数据
-//            $xml = $GLOBALS['HTTP_RAW_POST_DATA'];
             $xml = $rawData;
             $result = WxPayNotifyResults::Init($config, $xml);
         } catch (WxPayException $e){
@@ -551,7 +550,7 @@ class WxPayApi
      * @param int $second   url执行超时时间，默认30s
      * @throws WxPayException
      */
-    private static function postXmlCurl($config, $xml, $url, $useCert = false, $second = 30)
+    private static function postXmlCurl($config, $xml, $url, $useCert = false, $second = 60)
     {
         $ch = curl_init();
         $curlVersion = curl_version();

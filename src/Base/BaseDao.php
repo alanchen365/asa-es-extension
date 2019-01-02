@@ -32,7 +32,7 @@ class BaseDao
      * 自动加缓存
      * @var bool
      */
-    protected $autoCache = true;
+    protected $autoCache = AppInfo::DAO_AOTO_CACHE;
 
     /**
      * db实例

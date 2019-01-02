@@ -2,6 +2,7 @@
 
 namespace AsaEs\Output;
 
+use App\AppConst\AppInfo;
 use AsaEs\AsaEsConst;
 use AsaEs\Logger\FileLogger;
 use EasySwoole\Config;
@@ -21,11 +22,10 @@ class Web
 
         // 成功逻辑
         if ($successFlg) {
-            $results->setCode(empty($code) ? 100000 : $code);
+            $results->setCode(empty($code) ? AppInfo::RESULTS_RETURN_SUCCES_CODE : $code);
             $data = $results->getData();
         } else {
             $results->setCode(empty($code) ? 0 : $code);
-
             $data = $results->getData();
         }
 

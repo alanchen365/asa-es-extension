@@ -50,7 +50,7 @@ class HttpRouter
          */
         $routeCollector->addGroup('/web', function (RouteCollector $route) {
 
-            $routeArray = $this->router["web"];
+            $routeArray = $this->router["web"] ?? [];
             foreach ($routeArray as $routerArray) {
                 foreach ($routerArray as $perfix =>  $routerFunction) {
                     $route->addGroup($perfix, $routerFunction);
@@ -63,7 +63,7 @@ class HttpRouter
          */
         $routeCollector->addGroup('/app', function (RouteCollector $route) {
 
-            $routeArray = $this->router["app"];
+            $routeArray = $this->router["app"] ?? [];
             foreach ($routeArray as $routerArray) {
                 foreach ($routerArray as $perfix =>  $routerFunction) {
                     $route->addGroup($perfix, $routerFunction);
@@ -76,7 +76,7 @@ class HttpRouter
          */
         $routeCollector->addGroup('/view', function (RouteCollector $route) {
 
-            $routeArray = $this->router["view"];
+            $routeArray = $this->router["view"] ?? [];
             foreach ($routeArray as $routerArray) {
                 foreach ($routerArray as $perfix =>  $routerFunction) {
                     $route->addGroup($perfix, $routerFunction);
@@ -89,7 +89,7 @@ class HttpRouter
          */
         $routeCollector->addGroup('/public', function (RouteCollector $route) {
 
-            $routeArray = $this->router["public"];
+            $routeArray = $this->router["public"] ?? [];
             foreach ($routeArray as $routerArray) {
                 foreach ($routerArray as $perfix =>  $routerFunction) {
                     $route->addGroup($perfix, $routerFunction);

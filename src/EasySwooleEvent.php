@@ -32,7 +32,9 @@ class EasySwooleEvent
         // 时区设置
         date_default_timezone_set('Asia/Shanghai');
         // 注册路由
-        HttpRouter::getInstance()->registered();
+        if(Config::getInstance()->getConf('ROUTER')){
+            HttpRouter::getInstance()->registered();
+        }
         // 注册配置文件
         Config::getInstance()->register();
         // 注册异常

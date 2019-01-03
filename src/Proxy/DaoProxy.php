@@ -114,7 +114,6 @@ class DaoProxy
                  * get all
                  */
                 if ($actionName == 'searchAll' || $actionName == 'getAll') {
-                    $functionName;
                     if ($actionName == 'searchAll') {
                         $functionName = AsaEsConst::REDIS_BASIC_SEARCH_ALL;
                     } else {

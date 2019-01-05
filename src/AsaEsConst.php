@@ -28,6 +28,12 @@ class AsaEsConst
     // 数据库查询的log
     const LOG_MYSQL_QUERY = 'MYSQL_QUERY';
 
+    // 慢日志log
+    const LOG_SLOW = 'SLOW';
+
+    // 访问log
+    const LOG_ACCESS = 'ACCESS';
+
     // request id
     const REQUEST_ID = 'request_id';
 

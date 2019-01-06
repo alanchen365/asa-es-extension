@@ -48,7 +48,8 @@ class BaseDao
     {
         // 数据填充
         $this->getDb()->orderBy($field, 'DESC');
-        $row = $this->getDb()->getOne($this->getBeanObj()->getTableName(), $this->getBeanObj()->getFields()) ?? [];
+        $fields =  $this->getBeanObj()->getFields();
+        $row = $this->getDb()->getOne($this->getBeanObj()->getTableName(), Db::setFieldsGraveAccent($fields)) ?? [];
         $this->getDb()->saveLog(__FUNCTION__);
         return $row ?? [];
     }

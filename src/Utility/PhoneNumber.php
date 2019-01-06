@@ -11,7 +11,11 @@ class PhoneNumber
      * @param null|string $replaceStr
      * @return string 138****5678
      */
-    public static function hiddenMobileArea(string $mobile,?string $replaceStr = '****') :string {
+    public static function hiddenMobileArea(?string $mobile,?string $replaceStr = '****') :string {
+
+        if(empty($mobile)){
+            return '';
+        }
 
         return substr_replace($mobile,$replaceStr,3,4);
     }

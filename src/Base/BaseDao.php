@@ -12,6 +12,7 @@ use AsaEs\Exception\Service\MysqlException;
 use AsaEs\Logger\FileLogger;
 use AsaEs\Proxy\DaoProxy;
 use AsaEs\Utility\ArrayUtility;
+use AsaEs\Utility\Db;
 use AsaEs\Utility\Env;
 use AsaEs\Utility\RedisUtility;
 use AsaEs\Utility\Time;
@@ -157,7 +158,8 @@ class BaseDao
         }
 
         // 数据填充
-        $row = $this->getDb()->getOne($this->getBeanObj()->getTableName(), $this->getBeanObj()->getFields()) ?? [];
+        $fields =  $this->getBeanObj()->getFields();
+        $row = $this->getDb()->getOne($this->getBeanObj()->getTableName(),Db::setFieldsGraveAccent($fields)) ?? [];
         // 记录log
         $this->getDb()->saveLog(__FUNCTION__);
         return $row ?? [];
@@ -501,7 +503,8 @@ class BaseDao
             $page = [0,AppInfo::APP_PAGE_MAX];
         }
 
-        $rows = $this->getDb()->get($this->getBeanObj()->getTableName(), $page, $this->getBeanObj()->getFields()) ?? [];
+        $fields =  $this->getBeanObj()->getFields();
+        $rows = $this->getDb()->get($this->getBeanObj()->getTableName(), $page,Db::setFieldsGraveAccent($fields)) ?? [];
 
         // 转成bean
         $data = [];
@@ -667,7 +670,8 @@ class BaseDao
             $page = [0,AppInfo::APP_PAGE_DEFAULT_NUM];
         }
 
-        $rows = $this->getDb()->get($this->getBeanObj()->getTableName(), $page, $this->getBeanObj()->getFields()) ?? [];
+        $fields =  $this->getBeanObj()->getFields();
+        $rows = $this->getDb()->get($this->getBeanObj()->getTableName(), $page, Db::setFieldsGraveAccent($fields)) ?? [];
 
         // 转成bean
         $data = [];

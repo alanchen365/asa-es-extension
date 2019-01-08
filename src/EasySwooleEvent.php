@@ -59,7 +59,7 @@ class EasySwooleEvent
         $request->withAttribute(AsaEsConst::LOG_ACCESS, microtime(true));
         // token动态注入
         Di::getInstance()->set(AsaEsConst::DI_REQUEST_OBJ, new \AsaEs\Utility\Request($request));
-        // 中间件注入
+        // 系统中间件注入
         Dispatch::run($request, $response);
     }
 

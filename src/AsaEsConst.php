@@ -12,46 +12,32 @@ class AsaEsConst
 {
     // 每个请求中的request对象
     const DI_REQUEST_OBJ = 'REQUEST_OBJ';
-
     // Mysql默认实例
     const DI_MYSQL_DEFAULT = "MYSQL_DEFAULT";
-
     // Redis默认实例
     const DI_REDIS_DEFAULT = 'REDIS_DEFAULT';
-
     // 服务热重启
     const PROCESS_AUTO_RELOAD = 'AUTO_RELOAD';
-
     // 入参和出参LOG分类标识
     const LOG_REQUEST_RESPONSE = 'REQUEST_RESPONSE';
-
     // 数据库查询的log
     const LOG_MYSQL_QUERY = 'MYSQL_QUERY';
-
     // 慢日志log
     const LOG_SLOW = 'SLOW';
-
     // 访问log
     const LOG_ACCESS = 'ACCESS';
-
     // request id
     const REQUEST_ID = 'request_id';
-
     // 框架级定时器
     const PROCESS_TIMER = "PROCESS_TIMER";
-
     // redis 默认过期时间  (一天)
     const REDIS_DEFAULT_EXPIRE_ONE_DAY = 60 * 60 * 24;
-
     // redis 基础数据分类
     const REDIS_BASIC_TYPE = 'BASIC';
-
     // redis 基础数据已删除的key
     const REDIS_BASIC_DELETED = 'BASIC_DELETED';
-
     // redis 基础数据源 search all 的列表
     const REDIS_BASIC_SEARCH_ALL = 'SEARCH_ALL';
-
     // redis 技术数据 get all 的列表
     const REDIS_BASIC_GET_ALL = 'GET_ALL';
 

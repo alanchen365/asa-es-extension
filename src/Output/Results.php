@@ -2,6 +2,9 @@
 
 namespace AsaEs\Output;
 
+use App\AppConst\AppInfo;
+use AsaEs\AsaEsConst;
+
 class Results
 {
     private $_code;
@@ -47,10 +50,10 @@ class Results
         $result = empty($this->_result) ? (object) [] : $this->_result;
 
         $data = [
-            'code' => $this->_code,
-            'result' => $result,
-            'msg' => $this->_msg,
-            'time' => date('Y-m-d H:i:s'),
+            AppInfo::RESULTS_RETURN_CODE_KEY => $this->_code,
+            AppInfo::RESULTS_RETURN_DATE_KEY => $result,
+            AppInfo::RESULTS_RETURN_MSG_KEY => $this->_msg,
+            AppInfo::RESULTS_RETURN_TIME_KEY => date(AppInfo::RESULTS_RETURN_TIME_FORMAT),
         ];
 
         if (empty($this->_result)) {

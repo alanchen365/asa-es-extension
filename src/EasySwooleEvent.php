@@ -5,6 +5,7 @@ namespace AsaEs;
 use App\AppConst\AppInfo;
 use App\EsCrontab;
 use AsaEs\Config\Router;
+use AsaEs\Exception\Service\MiddlewareException;
 use AsaEs\Exception\Service\SignException;
 use AsaEs\Exception\SystemException;
 use AsaEs\Logger\AccessLogger;
@@ -55,12 +56,16 @@ class EasySwooleEvent
 
     public static function onRequest(Request $request, Response $response): void
     {
-        // 记录访问时间
-        $request->withAttribute(AsaEsConst::LOG_ACCESS, microtime(true));
-        // token动态注入
-        Di::getInstance()->set(AsaEsConst::DI_REQUEST_OBJ, new \AsaEs\Utility\Request($request));
-        // 系统中间件注入
-        Dispatch::run($request, $response);
+        try{
+            // token动态注入
+            Di::getInstance()->set(AsaEsConst::DI_REQUEST_OBJ, new \AsaEs\Utility\Request($request));
+            // 系统中间件注入
+            Dispatch::run($request, $response);
+            // 记录访问时间
+            $request->withAttribute(AsaEsConst::LOG_ACCESS, microtime(true));
+        }catch (\Throwable $throwable){
+            throw new MiddlewareException($throwable->getCode(),$throwable->getMessage());
+        }
     }
 
     public static function afterAction(Request $request, Response $response): void

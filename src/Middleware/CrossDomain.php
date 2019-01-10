@@ -19,31 +19,26 @@ class CrossDomain
 
     public function handle(Request $request, Response $response):void
     {
-        try{
-            // 如果是option请求 则放过
-            if ('OPTIONS' == $request->getMethod()) {
-                $response->withHeader('Access-Control-Allow-Origin', '*');
-                $response->withHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
-                $response->withHeader('Access-Control-Allow-Credentials', 'true');
-                $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, token, identity');
+        // 如果是option请求 则放过
+        if ('OPTIONS' == $request->getMethod()) {
+            $response->withHeader('Access-Control-Allow-Origin', '*');
+            $response->withHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
+            $response->withHeader('Access-Control-Allow-Credentials', 'true');
+            $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, token, identity');
 
-                $response->withStatus(Status::CODE_OK);
-                $response->end();
-            }
+            $response->withStatus(Status::CODE_OK);
+            $response->end();
+        }
 
-            // 判断跨域
-            $corsDomain = Config::getInstance()->getConf('auth.CROSS_DOMAIN', true);
-            $origin = current($request->getHeader('origin') ?? null) ?? '';
-            $origin = rtrim($origin, '/');
-            if (ArrayUtility::arrayFlip($corsDomain, $origin)) {
-                $response->withHeader('Access-Control-Allow-Origin', $origin);
-                $response->withHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
-                $response->withHeader('Access-Control-Allow-Credentials', 'true');
-                $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, token, identity');
-            }
-
-        }catch (\Throwable $throwable){
-            throw new MiddlewareException($throwable->getCode(),$throwable->getMessage());
+        // 判断跨域
+        $corsDomain = Config::getInstance()->getConf('auth.CROSS_DOMAIN', true);
+        $origin = current($request->getHeader('origin') ?? null) ?? '';
+        $origin = rtrim($origin, '/');
+        if (ArrayUtility::arrayFlip($corsDomain, $origin)) {
+            $response->withHeader('Access-Control-Allow-Origin', $origin);
+            $response->withHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
+            $response->withHeader('Access-Control-Allow-Credentials', 'true');
+            $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, token, identity');
         }
     }
 }

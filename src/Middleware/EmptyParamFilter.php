@@ -17,21 +17,17 @@ class EmptyParamFilter
 
     public function handle(Request $request, Response $response):void
     {
-        try{
-            if($request->getMethod() != 'GET'){
-                return ;
-            }
-
-            $params = $request->getQueryParams() ?? [];
-            foreach ($params as $key => $val){
-                if(Tools::superEmpty($val)){
-                    unset($params[$key]);
-                }
-            }
-
-            $request->withQueryParams($params);
-        }catch (\Throwable $throwable){
-            throw new MiddlewareException($throwable->getCode(),$throwable->getMessage());
+        if($request->getMethod() != 'GET'){
+            return ;
         }
+
+        $params = $request->getQueryParams() ?? [];
+        foreach ($params as $key => $val){
+            if(Tools::superEmpty($val)){
+                unset($params[$key]);
+            }
+        }
+
+        $request->withQueryParams($params);
     }
 }

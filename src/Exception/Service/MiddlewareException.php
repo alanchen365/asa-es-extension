@@ -6,7 +6,7 @@
  * Time: 12:08.
  */
 
-namespace App\Utility\Exception;
+namespace AsaEs\Exception\Service;
 
 use AsaEs\Utility\Tools;
 use AsaEs\Exception\BaseException;

@@ -4,6 +4,7 @@ namespace AsaEs\Utility;
 
 use App\AppConst\AppInfo;
 use App\AppConst\ListOperation;
+use App\AppConst\Permissions\ButtonPermissions;
 use AsaEs\AsaEsConst;
 use AsaEs\Config;
 use EasySwoole\Core\Component\Di;
@@ -81,6 +82,33 @@ trait View
                     unset($operation['role_id']);
                     $data[] = $operation;
                 }
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * 获取车间按钮操作权限
+     */
+    public function getPermissions(String $name) :array
+    {
+        $reflect = new ReflectionClass(get_class(new ButtonPermissions()));
+        $operations = $reflect->getConstant($name);
+        if (false === $operations || !is_array($operations)) {
+            return [];
+        }
+
+        //根据TOKEN获取rid
+        $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
+        $tokenObj = $esRequest->getTokenObj();
+        $rId = $tokenObj->rids;
+
+        $data = [];
+        foreach ($operations as $k => $operation) {
+            if (isset($operation['role_id']) && !empty(array_intersect($operation['role_id'], $rId))) {
+                unset($operation['role_id']);
+                $data[] = $operation;
             }
         }
 

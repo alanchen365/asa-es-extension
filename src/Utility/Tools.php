@@ -4,6 +4,7 @@ namespace AsaEs\Utility;
 
 use EasySwoole\Config;
 use EasySwoole\Core\Component\Logger;
+use PhpParser\Node\Expr\Isset_;
 
 class Tools
 {
@@ -37,6 +38,9 @@ class Tools
     {
         // 如果是一个数组
         if (is_array($value)) {
+            if (count($value) == 1 && empty($value[0]) && $value[0] !== 0 && $value[0] !== '0') {
+                unset($value[0]);
+            }
             return empty($value) ? true : false;
         }
 

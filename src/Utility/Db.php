@@ -36,16 +36,24 @@ class Db
     /**
      * 增加查询字段转义字符
      */
-    public static function setFieldsGraveAccent(?array $fields) :array {
-
-        if(empty($fields)){
+    public static function setFieldsGraveAccent(?array $fields) :array
+    {
+        if (empty($fields)) {
             return [];
         }
 
-        foreach ($fields as $key => $field){
+        foreach ($fields as $key => $field) {
             $fields[$key] = "`{$field}`";
         }
 
         return $fields;
+    }
+
+    /**
+     * 增加查询字段转义字符
+     */
+    public static function setFieldsGraveAccentString(string $field) :string
+    {
+        return "`{$field}`";
     }
 }

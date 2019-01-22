@@ -155,12 +155,13 @@ class BaseDao
 
         $logicDeleteField = $this->getLogicDeleteField();
         if ($logicDeleteField) {
-            $this->getDb()->where($logicDeleteField, 0);
+            //$this->getDb()->where($logicDeleteField, 0);
+            $this->getDb()->where(Db::setFieldsGraveAccentString($logicDeleteField), 0);
         }
 
         // 数据填充
         $fields =  $this->getBeanObj()->getFields();
-        $row = $this->getDb()->getOne($this->getBeanObj()->getTableName(),Db::setFieldsGraveAccent($fields)) ?? [];
+        $row = $this->getDb()->getOne($this->getBeanObj()->getTableName(), Db::setFieldsGraveAccent($fields)) ?? [];
         // 记录log
         $this->getDb()->saveLog(__FUNCTION__);
         return $row ?? [];
@@ -220,7 +221,8 @@ class BaseDao
         $tableName = $this->getBeanObj()->getTableName();
         foreach ($originalFieldValues as $field => $value) {
             $value = !is_array($value) ? [$value] : $value;
-            $this->getDb()->where($field, $value, 'IN');
+            //$this->getDb()->where($field, $value, 'IN');
+            $this->getDb()->where(Db::setFieldsGraveAccentString($field), $value, 'IN');
         }
         $rows = $this->getDb()->get($tableName, null, 'id');
 
@@ -356,7 +358,8 @@ class BaseDao
         // 先找到需要更新哪些条数据
         foreach ($fieldValues as $field => $value) {
             $value = !is_array($value) ? [$value] : $value;
-            $this->getDb()->where($field, $value, 'IN');
+            //$this->getDb()->where($field, $value, 'IN');
+            $this->getDb()->where(Db::setFieldsGraveAccentString($field), $value, 'IN');
         }
         $rows = $this->getDb()->get($this->getBeanObj()->getTableName(), null, 'id');
 
@@ -447,7 +450,8 @@ class BaseDao
                 // ARRAY 绝对等于 绝对不等 BETWEEN
                 case 'NOT IN':
                     $value = !is_array($value) ? [$value] : $value;
-                    $this->getDb()->where($field, $value, $searchType);
+                    //$this->getDb()->where($field, $value, $searchType);
+                    $this->getDb()->where(Db::setFieldsGraveAccentString($field), $value, $searchType);
                     break;
 
                 case 'BETWEEN':
@@ -456,8 +460,8 @@ class BaseDao
                         $code = 1011;
                         throw new MysqlException($code, $field.'字段的BETWEEN规则传递有误');
                     }
-
-                    $this->getDb()->where($field, $value, $searchType);
+                    //$this->getDb()->where($field, $value, $searchType);
+                    $this->getDb()->where(Db::setFieldsGraveAccentString($field), $value, $searchType);
                     break;
 
                 // 单个值
@@ -465,17 +469,22 @@ class BaseDao
                 case '<':
                 case '>=':
                 case '<=':
-                    $this->getDb()->where($field, [$searchType => $value]);
-                    break;
+                    //$this->getDb()->where($field, [$searchType => $value]);
+                     $this->getDb()->where(Db::setFieldsGraveAccentString($field), [$searchType => $value]);
+
+                break;
 
                 // 单个值
                 case 'IS NOT':
                 case 'IS':
-                    $this->getDb()->where($field, null, $searchType);
-                    break;
+                    //$this->getDb()->where($field, null, $searchType);
+                    $this->getDb()->where(Db::setFieldsGraveAccentString($field), null, $searchType);
+
+                break;
                 default:
                     // 默认为in 防止抛错的
-                    is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->getDb()->where($field, $value);
+                    //is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->getDb()->where($field, $value);
+                    is_array($value) ? $this->getDb()->where(Db::setFieldsGraveAccentString($field), $value, $searchType) : $this->getDb()->where(Db::setFieldsGraveAccentString($field), $value);
             }
         }
 
@@ -496,7 +505,8 @@ class BaseDao
         // 逻辑删除
         $logicDeleteField = $this->getLogicDeleteField($params);
         if ($logicDeleteField) {
-            $this->getDb()->where($logicDeleteField, 0);
+            //$this->getDb()->where($logicDeleteField, 0);
+            $this->getDb()->where(Db::setFieldsGraveAccentString($logicDeleteField), 0);
         }
 
         // 如果分页没有传递 给一个默认分页
@@ -505,7 +515,7 @@ class BaseDao
         }
 
         $fields =  $this->getBeanObj()->getFields();
-        $rows = $this->getDb()->get($this->getBeanObj()->getTableName(), $page,Db::setFieldsGraveAccent($fields)) ?? [];
+        $rows = $this->getDb()->get($this->getBeanObj()->getTableName(), $page, Db::setFieldsGraveAccent($fields)) ?? [];
 
         // 转成bean
         $data = [];
@@ -608,34 +618,42 @@ class BaseDao
                     case 'NOT IN':
                     case 'BETWEEN':
                         $value = !is_array($value) ? [$value] : $value;
-                        $this->getDb()->where($field, $value, $searchType);
-                        break;
+                        //$this->getDb()->where($field, $value, $searchType);
+                        $this->getDb()->where(Db::setFieldsGraveAccentString($field), $value, $searchType);
+
+                    break;
 
                     case 'LIKE':
-                        $this->getDb()->where($field, "%{$value}%", "LIKE");
+                        //$this->getDb()->where($field, "%{$value}%", "LIKE");
+                        $this->getDb()->where(Db::setFieldsGraveAccentString($field), "%{$value}%", "LIKE");
                         break;
 
                     case 'LLIKE':
-                        $this->getDb()->where($field, "%{$value}", "LIKE");
+                        //$this->getDb()->where($field, "%{$value}", "LIKE");
+                        $this->getDb()->where(Db::setFieldsGraveAccentString($field), "%{$value}", "LIKE");
                         break;
 
                     case 'RLIKE':
-                        $this->getDb()->where($field, "{$value}%", "LIKE");
+                        //$this->getDb()->where($field, "{$value}%", "LIKE");
+                        $this->getDb()->where(Db::setFieldsGraveAccentString($field), "{$value}%", "LIKE");
                         break;
 
                     case '>':
                     case '<':
                     case '>=':
                     case '<=':
-                        $this->getDb()->where($field, [$searchType => $value]);
+                        //$this->getDb()->where($field, [$searchType => $value]);
+                        $this->getDb()->where(Db::setFieldsGraveAccentString($field), [$searchType => $value]);
                         break;
 
                     case 'IS NOT':
                     case 'IS':
-                        $this->getDb()->where($field, null, $searchType);
+                        //$this->getDb()->where($field, null, $searchType);
+                        $this->getDb()->where(Db::setFieldsGraveAccentString($field), null, $searchType);
                         break;
                     default:
-                        is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->getDb()->where($field, $value);
+                        //is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->getDb()->where($field, $value);
+                        is_array($value) ? $this->getDb()->where(Db::setFieldsGraveAccentString($field), $value, $searchType) : $this->getDb()->where($field, $value);
                 }
             }
         }
@@ -773,6 +791,7 @@ class BaseDao
     final protected function clearIllegalParams(array $params):array
     {
         foreach ($params as $field => $value) {
+            //$tmpField = str_replace('`', '', $field);
             if (!property_exists($this->getBeanObj(), $field)) {
                 unset($params[$field]);
             }

@@ -18,6 +18,8 @@ class AsaEsConst
     const DI_REDIS_DEFAULT = 'REDIS_DEFAULT';
     // 服务热重启
     const PROCESS_AUTO_RELOAD = 'AUTO_RELOAD';
+    // websock 进程
+    const PROCESS_WEBSOCK= 'PROCESS_WEBSOCK';
     // 入参和出参LOG分类标识
     const LOG_REQUEST_RESPONSE = 'REQUEST_RESPONSE';
     // 数据库查询的log
@@ -40,7 +42,6 @@ class AsaEsConst
     const REDIS_BASIC_SEARCH_ALL = 'SEARCH_ALL';
     // redis 技术数据 get all 的列表
     const REDIS_BASIC_GET_ALL = 'GET_ALL';
-
     // 控制器中列表返回类型
     const RESULTS_RETURN_TYPE_LIST = 'list';
     const RESULTS_RETURN_TYPE_OBJ = 'obj';

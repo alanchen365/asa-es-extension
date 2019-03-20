@@ -7,6 +7,7 @@ use AsaEs\Config;
 use AsaEs\Utility\ArrayUtility;
 use AsaEs\Utility\Tools;
 use EasySwoole\Core\AbstractInterface\Singleton;
+use EasySwoole\Core\Http\Message\Status;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
 

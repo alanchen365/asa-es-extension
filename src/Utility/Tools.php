@@ -38,7 +38,7 @@ class Tools
     {
         // 如果是一个数组
         if (is_array($value)) {
-            if (count($value) == 1 && empty($value[0]) && $value[0] !== 0 && $value[0] !== '0') {
+            if (count($value) == 1 && isset($value[0]) && $value[0] !== 0 && $value[0] !== '0' && empty($value[0])) {
                 unset($value[0]);
             }
             return empty($value) ? true : false;

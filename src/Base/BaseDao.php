@@ -861,4 +861,14 @@ class BaseDao
 
         return $logicDeleteField;
     }
+
+
+    /**
+     * 截断表
+     */
+    public function truncate(){
+
+        $sql = "truncate table `{$this->getBeanObj()->getTableName()}`";
+        return $this->getDb()->rawQueryOne($sql);
+    }
 }

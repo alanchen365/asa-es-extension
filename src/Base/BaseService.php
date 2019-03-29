@@ -155,4 +155,13 @@ class BaseService
     {
         return $this->getDaoObj()->updateByIds($ids, $params);
     }
+
+    /**
+     * 截断表
+     * @return mixed
+     */
+    public function truncate()
+    {
+        return $this->getDaoObj()->truncate();
+    }
 }

@@ -13,6 +13,11 @@ class ProcessRoute
 
     public static function run()
     {
+        // 注入老的进程
+        if(method_exists(\App\Process\Router::class,"run")){
+            \App\Process\Router::run();
+        }
+        
         // 动态获取路由
         $path = EASYSWOOLE_ROOT."/App/Module";
         $files = File::scanDir($path,File::TYPE_DIR) ?? [];

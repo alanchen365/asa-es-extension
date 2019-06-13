@@ -48,7 +48,7 @@ class EasySwooleEvent
         // 服务热重启
         ProcessManager::getInstance()->addProcess(AsaEsConst::PROCESS_AUTO_RELOAD, Inotify::class);
         // 进程批量注入
-        \App\Process\Router::run();
+        \AsaEs\Router\ProcessRoute::run();
         // 注入定时任务
         \AsaEs\Router\CrontabRoute::run();
     }

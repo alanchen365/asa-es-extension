@@ -12,7 +12,6 @@ class CrontabRoute
 
     public static function run()
     {
-
         // 注入老的定时任务
         if(method_exists(\App\EsCrontab::class,"run")){
             \App\EsCrontab::run();

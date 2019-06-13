@@ -2,6 +2,7 @@
 
 namespace AsaEs\Router;
 
+use AsaEs\AsaEsConst;
 use EasySwoole\Core\AbstractInterface\Singleton;
 use EasySwoole\Core\Utility\File;
 use FastRoute\RouteCollector;
@@ -26,10 +27,7 @@ class HttpRouter
      */
     public function registered():void
     {
-        $this->loadConfig('web');
-        $this->loadConfig('app');
-        $this->loadConfig('view');
-        $this->loadConfig('public');
+        $this->loadConfig();
     }
 
     /**
@@ -45,79 +43,63 @@ class HttpRouter
      */
     public function register(RouteCollector $routeCollector):void
     {
-        /**
-         * Web 路由
-         */
-        $routeCollector->addGroup('/web', function (RouteCollector $route) {
-            $routeArray = $this->router["web"] ?? [];
-            foreach ($routeArray as $routerArray) {
-                if (is_array($routerArray)) {
-                    foreach ($routerArray as $perfix =>  $routerFunction) {
-                        $route->addGroup($perfix, $routerFunction);
+        // 兼容老路由
+        foreach (AsaEsConst::HTTP_ROUTER_REGISTER_TYPE as $type){
+            $routeCollector->addGroup("/$type", function (RouteCollector $route) use($type) {
+                $routeArray = $this->router[$type] ?? [];
+                foreach ($routeArray as $routerArray) {
+                    if (is_array($routerArray)) {
+                        foreach ($routerArray as $perfix =>  $routerFunction) {
+                            $route->addGroup($perfix, $routerFunction);
+                        }
                     }
                 }
-            }
-        });
-
-        /**
-         * APP 路由
-         */
-        $routeCollector->addGroup('/app', function (RouteCollector $route) {
-            $routeArray = $this->router["app"] ?? [];
-            foreach ($routeArray as $routerArray) {
-                if (is_array($routerArray)) {
-                    foreach ($routerArray as $perfix =>  $routerFunction) {
-                        $route->addGroup($perfix, $routerFunction);
-                    }
-                }
-            }
-        });
-
-        /**
-         * view 路由
-         */
-        $routeCollector->addGroup('/view', function (RouteCollector $route) {
-            $routeArray = $this->router["view"] ?? [];
-            foreach ($routeArray as $routerArray) {
-                if (is_array($routerArray)) {
-                    foreach ($routerArray as $perfix =>  $routerFunction) {
-                        $route->addGroup($perfix, $routerFunction);
-                    }
-                }
-            }
-        });
-
-        /**
-         * 公开路由 该路径下的路由无需鉴权
-         */
-        $routeCollector->addGroup('/public', function (RouteCollector $route) {
-            $routeArray = $this->router["public"] ?? [];
-            foreach ($routeArray as $routerArray) {
-                foreach ($routerArray as $perfix =>  $routerFunction) {
-                    $route->addGroup($perfix, $routerFunction);
-                }
-            }
-        });
+            });
+        }
     }
 
     /**
      * 写入配置文件
      */
-    private function loadConfig(string $type) :void
+    private function loadConfig() :void
     {
-        $type = strtolower($type);
-        $path = EASYSWOOLE_ROOT."/App/HttpRouter/$type";
-        $files = File::scanDir($path) ?? [];
+        // 兼容老路由
+        foreach (AsaEsConst::HTTP_ROUTER_REGISTER_TYPE as $type){
 
-        foreach ($files as $file) {
-            $data = require_once $file;
+            $type = strtolower($type);
+            $path = EASYSWOOLE_ROOT."/App/HttpRouter/$type";
+            $files = File::scanDir($path) ?? [];
 
-            // 如果配置文件是空 就跳过
-            if (empty($data)) {
-                continue;
+            foreach ($files as $file) {
+                $data = require_once $file;
+
+                // 如果配置文件是空 就跳过
+                if (empty($data)) {
+                    continue;
+                }
+
+                $this->router[$type][] = $data;
             }
+        }
+
+        // 动态获取路由
+        $path = EASYSWOOLE_ROOT."/App/Module";
+        $files = File::scanDir($path,File::TYPE_DIR) ?? [];
+
+        // 获取路由文件下所有目录
+        foreach ($files as $dir) {
             
-            $this->router[$type][] = $data;
+            $routeFiles = File::scanDir($dir.'/Route',File::TYPE_FILE) ?? [];
+            foreach ($routeFiles as $item =>$file){
+                $data = require_once $file ?? [];
+
+//              如果配置文件是空 就跳过
+                if (empty($data)) {
+                    continue;
+                }
+
+                $this->router[basename($file,'.php')][] = $data;
+            }
         }
     }
 }

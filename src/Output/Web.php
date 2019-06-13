@@ -35,7 +35,7 @@ class Web
             'swoole_http_request' => (array)$requestObj->getSwooleRequest(),
             'response_code' =>$code,
             'response_msg' => $msg,
-            'raw_data' => $requestObj->getRawContent() ?? [],
+            'raw_data' => $requestObj->getRawContent(),
 //                'response_body' => $data
         ];
 

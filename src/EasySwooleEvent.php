@@ -3,7 +3,6 @@
 namespace AsaEs;
 
 use App\AppConst\AppInfo;
-use App\EsCrontab;
 use AsaEs\Config\Router;
 use AsaEs\Exception\Service\MiddlewareException;
 use AsaEs\Exception\Service\SignException;
@@ -50,8 +49,8 @@ class EasySwooleEvent
         ProcessManager::getInstance()->addProcess(AsaEsConst::PROCESS_AUTO_RELOAD, Inotify::class);
         // 进程批量注入
         \App\Process\Router::run();
-//         注入定时任务
-        EsCrontab::run();
+        // 注入定时任务
+        \AsaEs\Router\CrontabRoute::run();
     }
 
     public static function onRequest(Request $request, Response $response): void

@@ -42,8 +42,13 @@ class BaseValidate extends Validate
         }
 
         $class = new \ReflectionClass($namespace); // 建立 Person这个类的反射类
+        $searchData = $class->getConstant($beanSearchParam);
 
-        return $class->getConstant($beanSearchParam) ?? [];
+        if(Tools::superEmpty($searchData)){
+            $searchData = [];
+        }
+
+        return $searchData;
     }
 
     /**

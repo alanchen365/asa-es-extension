@@ -20,26 +20,36 @@ class CrossDomain
 
     public function handle(Request $request, Response $response):void
     {
-        // 如果是option请求 则放过
-        if ('OPTIONS' == $request->getMethod()) {
-            $response->withHeader('Access-Control-Allow-Origin', '*');
-            $response->withHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
-            $response->withHeader('Access-Control-Allow-Credentials', 'true');
-            $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, token, identity');
+        $env = $confVal = Config::getInstance()->getEnv();
+        $flg = false;   // 是否允许跨域
+        $origin = null; // 跨域的域名
 
-            $response->withStatus(Status::CODE_OK);
-            $response->end();
+        // 如果是生产环境，给指定域名做跨域
+        if($env == 'PRODUCTION'){
+
+            $corsDomain = Config::getInstance()->getConf('auth.CROSS_DOMAIN', true);
+            $origin = current($request->getHeader('origin') ?? null) ?? '';
+            $origin = rtrim($origin, '/');
+            if (ArrayUtility::arrayFlip($corsDomain, $origin)) {
+                $flg = true;
+            }
+        }else{
+            $origin = '*';
+            $flg = true;
         }
 
-        // 判断跨域
-        $corsDomain = Config::getInstance()->getConf('auth.CROSS_DOMAIN', true);
-        $origin = current($request->getHeader('origin') ?? null) ?? '';
-        $origin = rtrim($origin, '/');
-        if (ArrayUtility::arrayFlip($corsDomain, $origin)) {
+        //  允许跨域
+        if($flg){
             $response->withHeader('Access-Control-Allow-Origin', $origin);
             $response->withHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
             $response->withHeader('Access-Control-Allow-Credentials', 'true');
             $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, token, identity');
+        }
+
+        // 如果是option请求 直接返回
+        if ($flg && 'OPTIONS' == $request->getMethod()) {
+            $response->withStatus(Status::CODE_OK);
+            $response->end();
         }
     }
 }

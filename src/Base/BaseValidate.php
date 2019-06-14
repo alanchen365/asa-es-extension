@@ -2,6 +2,7 @@
 namespace AsaEs\Base;
 
 use AsaEs\Exception\AppException;
+use AsaEs\Utility\Tools;
 use think\Validate;
 use think\validate\ValidateRule;
 
@@ -24,7 +25,25 @@ class BaseValidate extends Validate
      */
     public function getSearchParam(): array
     {
-        return $this->searchParam;
+        $searchData = $this->searchParam;
+        if(!Tools::superEmpty($searchData)){
+            return $searchData;
+        }
+        
+        $namespaceArr = explode('\\', get_called_class());
+        $moduleName = $namespaceArr[2];
+        $className = str_replace("Validate","",$namespaceArr[4]);
+
+        $namespace = "App\Module\\".$moduleName."\Consts\\" . $moduleName . 'BeanConst';
+        $beanSearchParam = strtoupper($className) . "_BEAN_SEARCH_PARAM";
+
+        if(!class_exists($namespace)){
+            return [];
+        }
+
+        $class = new \ReflectionClass($namespace); // 建立 Person这个类的反射类
+
+        return $class->getConstant($beanSearchParam) ?? [];
     }
 
     /**

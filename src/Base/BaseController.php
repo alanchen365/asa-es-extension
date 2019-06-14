@@ -46,6 +46,12 @@ class BaseController extends Controller
     protected $validate;
 
     /**
+     * @var searchObj
+     */
+    protected $searchObj;
+
+
+    /**
      * 获取单条数据
      */
     public function getById()
@@ -241,5 +247,21 @@ class BaseController extends Controller
     public function setServiceObj($serviceObj): void
     {
         $this->serviceObj = $serviceObj;
+    }
+
+    /**
+     * @return searchObj
+     */
+    public function getSearchObj(): searchObj
+    {
+        return $this->searchObj;
+    }
+
+    /**
+     * @param searchObj $searchObj
+     */
+    public function setSearchObj(searchObj $searchObj): void
+    {
+        $this->searchObj = $searchObj;
     }
 }

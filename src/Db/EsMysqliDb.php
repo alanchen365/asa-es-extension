@@ -50,7 +50,6 @@ class EsMysqliDb extends \MysqliDb
         $requestId =  Env::isHttp() ? $requestObj->getRequestId() : "cli_running";
 
         $saveData = [
-
             'request_id' => $requestId,
             'database_query' => $this->getLastQuery(),
         ];

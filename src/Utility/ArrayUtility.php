@@ -739,11 +739,12 @@ class ArrayUtility
         return array_values($array) ?? [];
     }
 
+
     /**
      * 判断多个数组是否为空
      * 判断原则 有一个为空 就都为空
      */
-    public static function ArrayEmpty(array $array):void{
+    public static function ArrayEmpty(array $array):bool {
 
         foreach ($array as $value){
             if(Tools::superEmpty($value)){
@@ -753,6 +754,7 @@ class ArrayUtility
 
         return false;
     }
+
 
     /**
      * 保留数组中部分元素

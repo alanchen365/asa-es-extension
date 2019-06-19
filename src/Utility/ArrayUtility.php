@@ -673,7 +673,7 @@ class ArrayUtility
 
         return $ret;
     }
-    
+
     /**
      * 提取一维或二维数组的指定一列或多列
      * @param $arr
@@ -737,5 +737,20 @@ class ArrayUtility
         }
 
         return array_values($array) ?? [];
+    }
+
+    /**
+     * 判断多个数组是否为空
+     * 判断原则 有一个为空 就都为空
+     */
+    public static function ArrayEmpty(array $array = null){
+
+        foreach ($array as $value){
+            if(Tools::superEmpty($value)){
+                return true;
+            }
+        }
+
+        return false;
     }
 }

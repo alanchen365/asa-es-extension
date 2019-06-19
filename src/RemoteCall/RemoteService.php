@@ -95,6 +95,7 @@ class RemoteService
 
             $code = $res['code'] ?? -1;
             $msg = $res['msg'] ?? '第三方服务连接失败';
+            $result = $res['result'] ?? [];
 
             // 不忽略错误
             if(!$this->getisIgnoreErr()){
@@ -110,8 +111,8 @@ class RemoteService
                     throw new MsgException($code,$msg);
                 }
             }
-            
-            return $res;
+
+            return $result;
         }
     }
 }

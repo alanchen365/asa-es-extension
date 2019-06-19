@@ -753,4 +753,36 @@ class ArrayUtility
 
         return false;
     }
+
+    /**
+     * 判断多个数组是否为空
+     * 判断原则 有一个为空 就都为空
+     */
+    public static function ArrayEmpty(array $array):void{
+
+        foreach ($array as $value){
+            if(Tools::superEmpty($value)){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * 保留数组中部分元素
+     * @param array $array 原始数组
+     * @param array $keys 过滤掉的元素
+     */
+    public static function getArrByKeys(array $array,array $keys = []):array {
+
+        $nList = [];
+        foreach ($array as $item => $value){
+            if(ArrayUtility::arrayFlip($keys,$item)){
+                $nList = $array[$item];
+            }
+        }
+
+        return $nList;
+    }
 }

@@ -3,6 +3,8 @@
 namespace AsaEs\RemoteCall;
 
 use App\AppConst\RpcConst;
+use AsaEs\Config;
+use AsaEs\Exception\MsgException;
 use AsaEs\Exception\Service\CurlException;
 use AsaEs\Utility\Tools;
 use EasySwoole\Core\Utility\Curl\Response;
@@ -66,18 +68,17 @@ class RemoteService
 
             // 如果是rpc
             if($this->getRequestWay() == RemoteService::REQUEST_WAY_RPC){
-                $this->instance = new Rpc($arguments);
+                $reflect  = new \ReflectionClass(Rpc::class);
             }
 
             // 如果是curl
             if($this->getRequestWay() == RemoteService::REQUEST_WAY_CURL){
-                $this->instance = new Curl($arguments);
+                $reflect  = new \ReflectionClass(Curl::class);
             }
+
+            $this->instance = $reflect->newInstanceArgs($arguments);
         }
 
-        /**
-         * 发送请求
-         */
         if($actionName == 'request'){
 
             $relusts = call_user_func_array([$this->instance,'request'], $arguments);
@@ -89,20 +90,27 @@ class RemoteService
 
             // 如果是curl
             if($this->getRequestWay() == RemoteService::REQUEST_WAY_CURL){
-
                 $res = json_decode($relusts->getBody(), true) ?? [];
             }
 
-            $code = $curlBody['code'] ?? -1;
-            $msg = $curlBody['msg'] ?? '第三方服务连接失败';
+            $code = $res['code'] ?? -1;
+            $msg = $res['msg'] ?? '第三方服务连接失败';
 
             // 不忽略错误
             if(!$this->getisIgnoreErr()){
                 if ($code < 100000) {
+                    if(Config::getInstance()->getDebug()){
+                        // 打印错误
+
+                        echo "====== 第三方返回结果开始 ======\n";
+                        var_dump($res);
+                        echo "====== 第三方返回结果结束 ======\n";
+
+                    }
                     throw new MsgException($code,$msg);
                 }
             }
-            
+
             return $res;
         }
     }

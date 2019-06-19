@@ -25,6 +25,13 @@ class Config
     }
 
     /**
+     * 获取调试模式
+     */
+    public function getDebug(){
+        return strtoupper(\EasySwoole\Config::getInstance()->getConf('DEBUG'));
+    }
+
+    /**
      * 初始化配置文件
      */
     public function register()

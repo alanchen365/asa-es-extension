@@ -23,8 +23,11 @@ use AsaEs\Utility\Tools;
 use EasySwoole\Core\Component\Di;
 use http\Env;
 
-class BusinesslogService {
+class BusinesslogService extends BaseBaseservice {
 
+
+    // 写入日志http地址
+    const SET_LOG_URL = '/web/businesslog/businesslog';
 
     /**
      * 写入远程日志
@@ -66,10 +69,10 @@ class BusinesslogService {
         $res = null;
         if($requestWay == RemoteService::REQUEST_WAY_CURL){
             $remoteService->getInstance([],true, $isIgnoreErr);
-            $res = $remoteService->request("POST", EnvConst::BASESERVICE_ADDRESS.":20500/web/businesslog/businesslog", $requestParams,$isIgnoreErr);
-
+            $res = $remoteService->request("POST", BusinesslogService::getBaseserviceUrl(BusinesslogService::SET_LOG_URL), $requestParams,$isIgnoreErr);
+            
         }elseif (RemoteService::REQUEST_WAY_RPC){
-
+            // rpc 注入
             $remoteService->getInstance(RpcConst::BUSINESSLOG_RRC_SERVICE_CONF);
             $res = $remoteService->request(RpcConst::BUSINESSLOG_RRC_SERVICE_CONF['serviceName'],'Index','setLog',$requestParams);
         }

@@ -69,7 +69,7 @@ class BusinesslogService extends BaseBaseservice {
         $res = null;
         if($requestWay == RemoteService::REQUEST_WAY_CURL){
             $remoteService->getInstance([],true, $isIgnoreErr);
-            $res = $remoteService->request("POST", BusinesslogService::getBaseserviceUrl(BusinesslogService::SET_LOG_URL), $requestParams,$isIgnoreErr);
+            $res = $remoteService->request("POST", BusinesslogService::getBaseserviceUrl(BusinesslogService::SET_LOG_URL), ['body'=>$requestParams],$isIgnoreErr);
             
         }elseif (RemoteService::REQUEST_WAY_RPC){
             // rpc 注入

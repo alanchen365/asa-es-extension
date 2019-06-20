@@ -766,7 +766,7 @@ class ArrayUtility
         $nList = [];
         foreach ($array as $item => $value){
             if(ArrayUtility::arrayFlip($keys,$item)){
-                $nList = $array[$item];
+                $nList[$item] = $array[$item];
             }
         }
 

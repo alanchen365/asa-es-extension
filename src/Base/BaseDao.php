@@ -470,9 +470,9 @@ class BaseDao
                 case '>=':
                 case '<=':
                     //$this->getDb()->where($field, [$searchType => $value]);
-                     $this->getDb()->where(Db::setFieldsGraveAccentString($field), [$searchType => $value]);
+                    $this->getDb()->where(Db::setFieldsGraveAccentString($field), [$searchType => $value]);
 
-                break;
+                    break;
 
                 // 单个值
                 case 'IS NOT':
@@ -480,7 +480,7 @@ class BaseDao
                     //$this->getDb()->where($field, null, $searchType);
                     $this->getDb()->where(Db::setFieldsGraveAccentString($field), null, $searchType);
 
-                break;
+                    break;
                 default:
                     // 默认为in 防止抛错的
                     //is_array($value) ? $this->getDb()->where($field, $value, $searchType) : $this->getDb()->where($field, $value);
@@ -542,9 +542,12 @@ class BaseDao
         $whereOrSql = '';
 
         foreach ($params as $field => $value) {
+
+            // 如果为空 就注销参数 因为是searchall方法 所以搜索出来是模糊的也没问题
             if (Tools::superEmpty($value)) {
-                $code = 1011;
-                throw new MysqlException($code, $field.'的值不能为空');
+                unset($params[$field]);
+//                $code = 1011;
+//                throw new MysqlException($code, $field.'的值不能为空');
             }
 
             // 默认是 等号 链接起来
@@ -621,7 +624,7 @@ class BaseDao
                         //$this->getDb()->where($field, $value, $searchType);
                         $this->getDb()->where(Db::setFieldsGraveAccentString($field), $value, $searchType);
 
-                    break;
+                        break;
 
                     case 'LIKE':
                         //$this->getDb()->where($field, "%{$value}%", "LIKE");

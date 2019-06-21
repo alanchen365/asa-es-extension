@@ -21,6 +21,13 @@ class RbacService extends BaseBaseservice {
     // 添加门店和供应商地址
     const SET_USER_URL = '/api/rbac/user';
 
+    /**
+     * 登录
+     * @param string $account  账号
+     * @param string $password  密码
+     * @param bool|null $isIgnoreErr 是否忽略错误
+     * @return |null
+     */
     public static function login(string $account, string $password, ?bool $isIgnoreErr = true)
     {
         // 确定调用方式
@@ -49,19 +56,28 @@ class RbacService extends BaseBaseservice {
         return $res;
     }
 
-    public static function addUser(array $params, ?bool $isIgnoreErr = true)
+
+    /**
+     * 添加用户
+     * @param string $account  账户
+     * @param string $name 用户名
+     * @param string $password 密码
+     * @param bool|null $isIgnoreErr 是否忽略错误
+     * @return |null
+     */
+    public static function addUser(string $account, string $name, string $password, ?bool $isIgnoreErr = true)
     {
         // 确定调用方式
         $isRpc = RpcConst::RBAC_RRC_SERVICE_CONF['enable'] ?? false;
         $requestWay = $isRpc ? RemoteService::REQUEST_WAY_RPC : RemoteService::REQUEST_WAY_CURL;
 
         // 参数整理
-//        $requestParams = [
-//            'account' => $account,
-//            'password' => $password,
-//            'system_id' => blake2(AppInfo::APP_EN_NAME, EnvConst::BLAKE2_LENGTH, EnvConst::BLAKE2_KEY)
-//        ];
-        $params['system_id'] = blake2(AppInfo::APP_EN_NAME, EnvConst::BLAKE2_LENGTH, EnvConst::BLAKE2_KEY);
+        $requestParams = [
+            'account' => $account,
+            'name' => $name,
+            'password' => $password,
+            'system_id' => blake2(AppInfo::APP_EN_NAME, EnvConst::BLAKE2_LENGTH, EnvConst::BLAKE2_KEY)
+        ];
 
         // 实例化请求类
         $remoteService = new RemoteService($requestWay);
@@ -70,10 +86,10 @@ class RbacService extends BaseBaseservice {
         $res = null;
         if ($requestWay == RemoteService::REQUEST_WAY_CURL) {
             $remoteService->getInstance([],true, $isIgnoreErr);
-            $res = $remoteService->request("POST", RbacService::getBaseserviceUrl(RbacService::SET_USER_URL), ['body'=>json_encode($params)], $isIgnoreErr);
+            $res = $remoteService->request("POST", RbacService::getBaseserviceUrl(RbacService::SET_USER_URL), ['body'=>json_encode($requestParams)], $isIgnoreErr);
         } elseif (RemoteService::REQUEST_WAY_RPC) {
             $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-            $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'Index','addUser',$params);
+            $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'Index','addUser',$requestParams);
         }
         return $res;
     }

@@ -546,6 +546,7 @@ class BaseDao
             // 如果为空 就注销参数 因为是searchall方法 所以搜索出来是模糊的也没问题
             if (Tools::superEmpty($value)) {
                 unset($params[$field]);
+                continue;
 //                $code = 1011;
 //                throw new MysqlException($code, $field.'的值不能为空');
             }

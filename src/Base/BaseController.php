@@ -11,6 +11,7 @@ namespace AsaEs\Base;
 use App\AppConst\AppInfo;
 use App\AppConst\MysqlGroupBys;
 use App\AppConst\MysqlOrderBys;
+use App\AppConst\RpcConst;
 use App\Module\Logistics\Bean\LogisticsBean;
 use AsaEs\AsaEsConst;
 use AsaEs\Config;
@@ -19,6 +20,7 @@ use AsaEs\Exception\MsgException;
 use AsaEs\Exception\Service\SignException;
 use AsaEs\Output\Results;
 use AsaEs\Output\Web;
+use AsaEs\Sdk\Baseservice\RbacService;
 use AsaEs\Utility\ExceptionUtility;
 use AsaEs\Utility\ObjectUtility;
 use AsaEs\Utility\Request;
@@ -210,7 +212,24 @@ class BaseController extends Controller
                 return false;
             }
 
-            $tokenObj =  Token::decode($tokenStr);
+            // 决定是否走远程鉴权 如果开启RBAC的鉴权模式 就走远程
+            $rpcConstNamespace = "App\AppConst\RpcConst";
+            $rbacConstNamespace = 'AsaEs\Sdk\Baseservice\RbacService';
+            if(class_exists($rpcConstNamespace) && class_exists($rbacConstNamespace)){
+                $rpcConst= new \ReflectionClass($rpcConstNamespace);
+                $rbacService = new \ReflectionClass($rbacConstNamespace);
+
+                $rpcConf = $rpcConst->getConstant('BUSINESSLOG_RRC_SERVICE_CONF');
+                $isRpc = $rpcConf['enable'] ?? false;
+
+                if(!$isRpc){
+                    return false;
+                }
+                $tokenObj = (object)$rbacConstNamespace::jwtDecode($tokenStr,false);
+            }else{
+                $tokenObj =  Token::decode($tokenStr);
+            }
+
             $esRequest->setTokenObj($tokenObj);
         }
 

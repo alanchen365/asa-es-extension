@@ -45,12 +45,12 @@ class Rpc
             $client = new \EasySwoole\Core\Component\Rpc\Client();
             $client->addCall($serviceName,$serviceGroup,$action,json_encode($args ?? []))
                 ->setFailCall(function(\EasySwoole\Core\Component\Rpc\Client\ServiceResponse $response){
-
+//                    var_dump($response);
                     if(!$this->isIgnoreErr()){
                         // 如果请是调试模式 就显示具体错误信息
                         if(Config::getInstance()->getDebug()){
                             var_dump('rpc链接出错 错误信息如下');
-                            var_dump(['result' => $response->getResult(), 'status'=>$response->getStatus()]);
+                            var_dump(['rpc' => $response,'result' => $response->getResult(), 'status'=>$response->getStatus()]);
                         }
                             
                         $this->isError = true;
@@ -62,7 +62,7 @@ class Rpc
                 });
 
             // 开始调用
-            $client->call();
+            $client->call(RpcConst::RPC_TIME_OUT);
 
             if($this->isError){
                 throw new RpclException($this->errorCode,'远程服务调用失败');

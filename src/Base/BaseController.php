@@ -194,7 +194,7 @@ class BaseController extends Controller
         $requestUri = $server['server']['request_uri'];
 
         // 不鉴权域名
-        $whitelistsRoute = Config::getInstance()->getConf("auth.ROUTE_WHITE_LIST", true);
+        $whitelistsRoute = Config::getInstance()->getConf("auth.ROUTE_WHITE_LIST", true) ?? [];
 
         $flg = true;
         foreach ($whitelistsRoute as $url) {

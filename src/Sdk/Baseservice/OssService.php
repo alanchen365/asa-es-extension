@@ -84,8 +84,5 @@ class OssService extends BaseBaseservice {
         } catch (\Throwable $throwable) {
             throw new AppException($throwable->getCode(),$throwable->getMessage());
         }
-
-
-        return $res['area_names'] ?? [];
     }
 }

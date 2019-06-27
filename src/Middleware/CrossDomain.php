@@ -43,7 +43,7 @@ class CrossDomain
             $response->withHeader('Access-Control-Allow-Origin', $origin);
             $response->withHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
             $response->withHeader('Access-Control-Allow-Credentials', 'true');
-            $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, token, identity');
+            $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, system_id, token, identity');
         }
 
         // 如果是option请求 直接返回

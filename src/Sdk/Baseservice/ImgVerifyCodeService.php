@@ -9,7 +9,7 @@ use AsaEs\RemoteCall\RemoteService;
 use AsaEs\Utility\ArrayUtility;
 use AsaEs\Utility\Tools;
 
-class VerifyCodeService extends BaseBaseservice
+class ImgVerifyCodeService extends BaseBaseservice
 {
 
     /**
@@ -33,7 +33,7 @@ class VerifyCodeService extends BaseBaseservice
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::IMGPROCESSING_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::IMGPROCESSING_RRC_SERVICE_CONF['serviceName'], 'ImgVerifycode', __FUNCTION__, $requestParams);
+        $res = $remoteService->request(RpcConst::IMGPROCESSING_RRC_SERVICE_CONF['serviceName'], 'ImgVerifyCode', __FUNCTION__, $requestParams);
 
         return $res['code'] ?? [];
     }
@@ -59,7 +59,7 @@ class VerifyCodeService extends BaseBaseservice
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::IMGPROCESSING_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::IMGPROCESSING_RRC_SERVICE_CONF['serviceName'], 'ImgVerifycode', __FUNCTION__, $requestParams);
+        $res = $remoteService->request(RpcConst::IMGPROCESSING_RRC_SERVICE_CONF['serviceName'], 'ImgVerifyCode', __FUNCTION__, $requestParams);
 
         return $res;
     }
@@ -91,8 +91,8 @@ class VerifyCodeService extends BaseBaseservice
         // 验证码字体随机颜色
         $_color = imagecolorallocate($_image, mt_rand(1, 120), mt_rand(1, 120), mt_rand(1, 120));
         // 验证码使用随机字体   暂时不做
-        $ttf = __DIR__ . '/../../Font' . "MeccanoTornado.ttf";
-        
+        $ttf = __DIR__ . "/../../Font/MeccanoTornado.ttf";
+
         /**
          * 画杂点
          * 往图片上写不同颜色的字母或数字

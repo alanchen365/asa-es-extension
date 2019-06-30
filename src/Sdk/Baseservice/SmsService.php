@@ -19,11 +19,11 @@ class SmsService extends BaseBaseservice
      * @param string $templateCode
      * @param string $ip
      * @param int $length
-     * @param string $type
+     * @param string $businessType // 业务类型  登录 login 注册 re
      * @param bool $isIgnoreErr
      * @return array
      */
-    public static function sendSmsAli(int $mobile, string $signName, string $templateCode, string $ip, ?int $length, ?string $type = 'login', bool $isIgnoreErr = false): array
+    public static function sendVerifyCode(int $mobile, string $signName, string $templateCode, string $ip, int $length = 4, bool $isIgnoreErr = false): array
     {
         // 参数整理
         $requestParams = [
@@ -32,7 +32,6 @@ class SmsService extends BaseBaseservice
             'templateCode' => $templateCode,
             'ip' => $ip,
             'length' => $length,
-            'type' => $type,
             'system_id' => AppInfo::SYSTEM_ID,
         ];
 
@@ -53,7 +52,7 @@ class SmsService extends BaseBaseservice
      * @param bool $isIgnoreErr
      * @return array
      */
-    public static function smsAliVerify(int $mobile, string $code, bool $isIgnoreErr = false): array
+    public static function isVerifyCode(int $mobile, string $code, bool $isIgnoreErr = false): array
     {
         // 参数整理
         $requestParams = [
@@ -61,7 +60,7 @@ class SmsService extends BaseBaseservice
             'code' => $code,
             'system_id' => AppInfo::SYSTEM_ID,
         ];
-
+        
         // 实例化请求类
         $res = null;
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);

@@ -876,7 +876,6 @@ class BaseDao
         return $this->getDb()->rawQueryOne($sql);
     }
 
-
     /**
      * 批量插入忽略错误
      */
@@ -911,7 +910,7 @@ class BaseDao
                 return;
             }
 //            else if (!empty($columnsArr) && !Arrays::isValEqual(array_keys($one), $columnsArr)) {//键名不一致
-//                return false;
+//                return;
 //            }
             ksort($one);
             $columnsArr = array_keys($one);

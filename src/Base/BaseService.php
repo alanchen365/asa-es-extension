@@ -130,7 +130,7 @@ class BaseService
      */
     public function insertAllIgnoreErr(array $params): void
     {
-        return $this->getDaoObj()->insertAllIgnoreErr($params);
+        $this->getDaoObj()->insertAllIgnoreErr($params);
     }
 
     /**

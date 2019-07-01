@@ -501,4 +501,30 @@ class RbacService extends BaseBaseservice {
 
         return $res['button_permission_page'] ?? [];
     }
+
+    /**
+     * 返回拥有角色的用户ID数组
+     * @param array $userList
+     * @param int $roleId
+     * @param bool $isIgnoreErr
+     * @return array
+     */
+    public static function getUserListRoles(array $userIds, int $roleId, bool $isIgnoreErr = false)
+    {
+        // 参数整理
+        $requestParams = [
+            'user_ids' => $userIds,
+            'role_id' => $roleId,
+            'system_id' => AppInfo::SYSTEM_ID,
+        ];
+
+        // 实例化请求类
+        $res = null;
+        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+        $remoteService->setIsIgnoreErr($isIgnoreErr);
+        $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+
+        return $res ?? [];
+    }
 }

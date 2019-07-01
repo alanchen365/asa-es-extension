@@ -124,6 +124,16 @@ class BaseService
     }
 
     /**
+     * 批量插入忽略错误
+     * @param array $params
+     * @return array
+     */
+    public function insertAllIgnoreErr(array $params): void
+    {
+        return $this->getDaoObj()->insertAllIgnoreErr($params);
+    }
+
+    /**
      * 插入单条数据
      * @param array $params
      */

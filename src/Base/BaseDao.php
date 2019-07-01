@@ -875,4 +875,63 @@ class BaseDao
         $sql = "truncate table `{$this->getBeanObj()->getTableName()}`";
         return $this->getDb()->rawQueryOne($sql);
     }
+
+
+    /**
+     * 批量插入忽略错误
+     */
+    public function insertAllIgnoreErr(array $params) :void{
+
+        if (empty($params)) {
+            $code = 4012;
+            throw new MysqlException($code);
+        }
+
+        $logicDeleteField = $this->getLogicDeleteField($params);
+        foreach ($params as $key => $param) {
+            $params[$key] = BaseDao::clearIllegalParams($param);
+            $params[$key] = BaseDao::autoWriteTime(AsaEsConst::MYSQL_AUTO_INSERTTIME, $params[$key]);
+            $params[$key] = BaseDao::autoWriteUid(AsaEsConst::MYSQL_AUTO_INSERTUSER, $params[$key]);
+
+            // 逻辑删除
+            if ($logicDeleteField) {
+                $params[$key][$logicDeleteField] = 0;
+            }
+        }
+
+        // 拼接插入语句
+        if(Tools::superEmpty($params)){
+            return;
+        }
+
+        $valusSqlArr = [];//插入的值
+        $columnsArr = [];
+        foreach ($params AS $one) {
+            if (!is_array($one)) {//不是数组
+                return;
+            }
+//            else if (!empty($columnsArr) && !Arrays::isValEqual(array_keys($one), $columnsArr)) {//键名不一致
+//                return false;
+//            }
+            ksort($one);
+            $columnsArr = array_keys($one);
+            $value = implode("','", $one);
+            $valusSqlArr[] = "('$value')";
+        }
+        $valusSql = implode(',', $valusSqlArr);
+        $columnsSql = implode(',', $columnsArr);
+
+        $sql = "
+                INSERT IGNORE INTO {$this->getBeanObj()->getTableName()}({$columnsSql})
+                VALUES{$valusSql}
+        ";
+
+        $this->getDb()->rawQueryOne($sql);
+        if (0 !== $this->getDb()->getLastErrno()) {
+            throw new MysqlException(4017, $this->getDb()->getLastError());
+        }
+
+        // 记录log
+        $this->getDb()->saveLog(__FUNCTION__);
+    }
 }

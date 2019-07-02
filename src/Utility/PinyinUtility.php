@@ -6,7 +6,7 @@ namespace AsaEs\Utility;
 use Overtrue\Pinyin\Pinyin;
 
 /**
-  Composer : "overtrue/pinyin": "3.0"
+Composer : "overtrue/pinyin": "3.0"
  * github : https://github.com/overtrue/pinyin
  */
 class PinyinUtility
@@ -44,12 +44,12 @@ class PinyinUtility
      * @param string $string
      * @param string $option
      */
-    public static function completeSpellingString(string $string,?string $option=''):string {
+    public static function completeSpellingString(string $string,string $delimiter = '',?string $option='',bool $isUppercase = true):string {
 
         $pinyinObj = new Pinyin();
-        $str = $pinyinObj->convert($string) ? implode('', $pinyinObj->convert($string)) : "";
+        $str = $pinyinObj->convert($string) ? implode($delimiter, $pinyinObj->convert($string)) : "";
 
-        return $str ?? '';
+        return $isUppercase ?  strtoupper($str) : strtolower($str);
     }
 
     /**
@@ -58,11 +58,11 @@ class PinyinUtility
      * @param string $option
      * @return string
      */
-    public static function firstLetterString(string $string,string $delimiter = '',string $option = 'none') :string {
+    public static function firstLetterString(string $string,string $delimiter = '',string $option = '',bool $isUppercase = true) :string {
 
         $pinyinObj = new Pinyin();
-        $str = $pinyinObj->abbr($string,$delimiter) ? strtoupper($pinyinObj->abbr($string,$delimiter)) : "";
+        $str = $pinyinObj->abbr($string,$delimiter) ? $pinyinObj->abbr($string,$delimiter) : "";
 
-        return $str ?? '';
+        return $isUppercase ?  strtoupper($str) : strtolower($str);
     }
 }

@@ -44,7 +44,7 @@ class PinyinUtility
      * @param string $string
      * @param string $option
      */
-    public static function completeSpellingString(string $string,string $delimiter = '',?string $option='',bool $isUppercase = true):string {
+    public static function completeSpellingString(string $string,string $delimiter = '',bool $isUppercase = true,?string $option=''):string {
 
         $pinyinObj = new Pinyin();
         $str = $pinyinObj->convert($string) ? implode($delimiter, $pinyinObj->convert($string)) : "";
@@ -58,7 +58,7 @@ class PinyinUtility
      * @param string $option
      * @return string
      */
-    public static function firstLetterString(string $string,string $delimiter = '',string $option = '',bool $isUppercase = true) :string {
+    public static function firstLetterString(string $string,string $delimiter = '',bool $isUppercase = true,string $option = '') :string {
 
         $pinyinObj = new Pinyin();
         $str = $pinyinObj->abbr($string,$delimiter) ? $pinyinObj->abbr($string,$delimiter) : "";

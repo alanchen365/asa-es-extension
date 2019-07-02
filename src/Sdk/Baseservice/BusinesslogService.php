@@ -25,57 +25,33 @@ use http\Env;
 
 class BusinesslogService extends BaseBaseservice {
 
-
-    // 写入日志http地址
-    const SET_LOG_URL = '/web/businesslog/businesslog';
-
     /**
      * 写入远程日志
+     * @param int $userId 用户id
+     * @param string $userName 用户名
      * @param $trackingNo 第三方单号
      * @param string $trackingKey 模块的key
      * @param string $content 日志内容
      * @param bool|null $isIgnoreErr 是否忽略错误
-     * @param bool $isRpc 是否使用rpc方式调用
-     * @throws MsgException
      */
-    public static function set($trackingNo,string $trackingKey,string $content,?bool $isIgnoreErr = true){
-
-        // 确定调用方式
-        $isRpc = RpcConst::BUSINESSLOG_RRC_SERVICE_CONF['enable'] ?? false;
-        $requestWay = $isRpc ? RemoteService::REQUEST_WAY_RPC : RemoteService::REQUEST_WAY_CURL;
+    public static function setLog(int $userId,string $userName, array $trackingNo,string $trackingKey,string $content,?bool $isIgnoreErr = true): void
+    {
 
         // 参数整理
-        $userId = 1;
-        $userName = 'test';
-
-        // 如果单号不是数组 强制转一下
-        if(!is_array($trackingNo)){
-            $trackingNo = [$trackingNo];
-        }
-
         $requestParams = [
-            'system_id' => blake2(AppInfo::APP_EN_NAME, EnvConst::BLAKE2_LENGTH, EnvConst::BLAKE2_KEY),
             'user_id' => $userId,
             'create_username' => $userName,
             'tracking_no' => $trackingNo,
             'tracking_key' => $trackingKey,
             'content' => $content,
+            'system_id' => AppInfo::SYSTEM_ID,
         ];
-        
+
         // 实例化请求类
-        $remoteService = new RemoteService($requestWay);
-        $remoteService->setIsIgnoreErr($isIgnoreErr);
-
         $res = null;
-        if($requestWay == RemoteService::REQUEST_WAY_CURL){
-            $remoteService->getInstance([],true, $isIgnoreErr);
-            $res = $remoteService->request("POST", BusinesslogService::getBaseserviceUrl(BusinesslogService::SET_LOG_URL), ['body'=>$requestParams],$isIgnoreErr);
-            
-        }elseif (RemoteService::REQUEST_WAY_RPC){
-            // rpc 注入
-            $remoteService->getInstance(RpcConst::BUSINESSLOG_RRC_SERVICE_CONF);
-            $res = $remoteService->request(RpcConst::BUSINESSLOG_RRC_SERVICE_CONF['serviceName'],'Index','setLog',$requestParams);
-        }
-
+        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+        $remoteService->setIsIgnoreErr($isIgnoreErr);
+        $remoteService->getInstance(RpcConst::BUSINESSLOG_RRC_SERVICE_CONF);
+        $remoteService->request(RpcConst::BUSINESSLOG_RRC_SERVICE_CONF['serviceName'], 'Index', __FUNCTION__, $requestParams);
     }
 }

@@ -34,7 +34,7 @@ class BusinesslogService extends BaseBaseservice {
      * @param string $content 日志内容
      * @param bool|null $isIgnoreErr 是否忽略错误
      */
-    public static function setLog(int $userId,string $userName, array $trackingNo,string $trackingKey,string $content,?bool $isIgnoreErr = true): void
+    public static function setLog(string $trackingKey,array $trackingNo,string $content,int $userId,string $userName,?bool $isIgnoreErr = true): void
     {
 
         // 参数整理

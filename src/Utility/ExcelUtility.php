@@ -52,15 +52,15 @@ class ExcelUtility
     /**
      * 根据某个sheet的数据
     $excelConfig = [
-        'key' => [
-            'A' => 'code',      // 表格中第一列 对应数组中的索引
-            'B' => 'name',
-                //  'D' => 'tmp_worktype_name',
-                //  'E' => 'actual_num_weight',
-                //  'F' => 'actual_salary',
-                //  'G' => 'remark',
-         ],
-        'start_row' => 1    // 导出起始行 默认第一行
+    'key' => [
+    'A' => 'code',      // 表格中第一列 对应数组中的索引
+    'B' => 'name',
+    //  'D' => 'tmp_worktype_name',
+    //  'E' => 'actual_num_weight',
+    //  'F' => 'actual_salary',
+    //  'G' => 'remark',
+    ],
+    'start_row' => 1    // 导出起始行 默认第一行
     ];
      * @param PHPExcel_Worksheet $sheetObj
      * @param array $config
@@ -96,7 +96,7 @@ class ExcelUtility
      * @param  integer $offset      [description] 共计写几行
      * @return [type]               [description]
      */
-    public static function putCsv(string $csvFileName, array $resultArray ,array $haderText = [], $line = 1, $offset = 0){
+    public static function putXls(string $csvFileName, array $resultArray ,array $haderText = [], $line = 1, $offset = 0){
 
         $objPHPExcel = new \PHPExcel();
         $objPHPExcel->setActiveSheetIndex(0);
@@ -105,7 +105,7 @@ class ExcelUtility
             // 合并标题
             array_unshift($resultArray,$haderText);
         }
-            
+
         $indextoaz = array(
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'
         , 'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH', 'AI', 'AJ', 'AK', 'AL', 'AM', 'AN', 'AO', 'AP', 'AQ', 'AR', 'AS', 'AT', 'AU', 'AV', 'AW', 'AX', 'AY', 'AZ'

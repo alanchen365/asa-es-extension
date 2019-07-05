@@ -88,15 +88,16 @@ class ExcelUtility
     }
 
     /**
-     * [putCsv description]
+     * [putXls description]
      * @param  string  $csvFileName [description] 文件名
      * @param  array   $data     [description] 数组，每组数据都是使用，分割的字符串
      * @param  string  $haderText   [description] 标题（默认第一行）
      * @param  integer $line        [description] 从第几行开始写
      * @param  integer $offset      [description] 共计写几行
+     * @param  bool $isProtection      [description] 是否保护
      * @return [type]               [description]
      */
-    public static function putXls(string $csvFileName, array $resultArray ,array $haderText = [], $line = 1, $offset = 0){
+    public static function putXls(string $csvFileName, array $resultArray ,array $haderText = [], $line = 1,bool $isProtection = false){
 
         $objPHPExcel = new \PHPExcel();
         $objPHPExcel->setActiveSheetIndex(0);
@@ -126,6 +127,10 @@ class ExcelUtility
 //                $objPHPExcel->createSheet();
 //                $objPHPExcel->setactivesheetindex($row / 1000);
 //            }
+        }
+
+        if($isProtection){
+            $objPHPExcel->getSheet(0)->getProtection()->setSheet(true);
         }
 
         $objWriter = \PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel5');

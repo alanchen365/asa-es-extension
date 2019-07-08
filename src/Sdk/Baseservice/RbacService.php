@@ -95,6 +95,60 @@ class RbacService extends BaseBaseservice {
     }
 
     /**
+     * 登录
+     * @param string $account
+     * @param string $password
+     * @param string $openid
+     * @param string $accessToken
+     * @param bool|null $isIgnoreErr
+     * @return array
+     */
+    public static function loginWithOpenid(string $account, string $password, string $openid, string $accessToken, ?bool $isIgnoreErr = false): array
+    {
+        // 参数整理
+        $requestParams = [
+            'account' => $account,
+            'password' => $password,
+            'openid' => $openid,
+            'access_token' => $accessToken,
+            'system_id' => AppInfo::SYSTEM_ID,
+        ];
+
+        // 实例化请求类
+        $res = null;
+        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+        $remoteService->setIsIgnoreErr($isIgnoreErr);
+        $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+
+        return $res ?? [];
+    }
+
+    /**
+     * 微信登录后，根据openid获取登录信息
+     * @param string $openid
+     * @param bool|null $isIgnoreErr
+     * @return array
+     */
+    public static function getLoginInfoByOpenId(string $openid, ?bool $isIgnoreErr = false): array
+    {
+        // 参数整理
+        $requestParams = [
+            'openid' => $openid,
+            'system_id' => AppInfo::SYSTEM_ID,
+        ];
+
+        // 实例化请求类
+        $res = null;
+        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+        $remoteService->setIsIgnoreErr($isIgnoreErr);
+        $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+
+        return $res ?? [];
+    }
+
+    /**
      * 用户列表
      * @param string $account
      * @param string $password

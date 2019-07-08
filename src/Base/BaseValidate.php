@@ -2,6 +2,7 @@
 namespace AsaEs\Base;
 
 use AsaEs\Exception\AppException;
+use AsaEs\Utility\StringUtility;
 use AsaEs\Utility\Tools;
 use think\Validate;
 use think\validate\ValidateRule;
@@ -29,12 +30,14 @@ class BaseValidate extends Validate
         if(!Tools::superEmpty($searchData)){
             return $searchData;
         }
-        
+
         $namespaceArr = explode('\\', get_called_class());
         $moduleName = $namespaceArr[2];
         $className = str_replace("Validate","",$namespaceArr[4]);
 
         $namespace = "App\Module\\".$moduleName."\Consts\\" . $moduleName . 'BeanConst';
+        // 驼峰转下划线
+        $className = StringUtility::humpToLine($className);
         $beanSearchParam = strtoupper($className) . "_BEAN_SEARCH_PARAM";
 
         if(!class_exists($namespace)){
@@ -66,7 +69,7 @@ class BaseValidate extends Validate
                 $data[$verifyKey] = $userInputData[$verifyKey];
             }
         }
-        
+
         return $data;
     }
 

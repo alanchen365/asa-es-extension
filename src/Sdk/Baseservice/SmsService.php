@@ -72,19 +72,19 @@ class SmsService extends BaseBaseservice
     /**
      * 验证阿里短信
      * @param int $mobile
-     * @param string $code
+     * @param string $msg
      * @param bool $isIgnoreErr
      * @return array
      */
-    public static function isVerifyCode(int $mobile, string $code, bool $isIgnoreErr = false): array
+    public static function isVerifyCode(int $mobile, string $msg, bool $isIgnoreErr = false): array
     {
         // 参数整理
         $requestParams = [
             'mobile' => $mobile,
-            'code' => $code,
+            'msg' => $msg,
             'system_id' => AppInfo::SYSTEM_ID,
         ];
-        
+
         // 实例化请求类
         $res = null;
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);

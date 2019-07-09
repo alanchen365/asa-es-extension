@@ -67,4 +67,23 @@ class OcrService extends BaseBaseservice {
 
         return $res['idcard_obj'] ?? [];
     }
+
+    public static function discernOpenAccount(string $image,int $imageType = 1,bool $isIgnoreErr = false) :array {
+
+        // 参数整理
+        $requestParams = [
+            'image' => $image,
+            'img_type' => $imageType,
+            'system_id' => AppInfo::SYSTEM_ID,
+        ];
+
+        // 实例化请求类
+        $res = null;
+        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+        $remoteService->setIsIgnoreErr($isIgnoreErr);
+        $remoteService->getInstance(RpcConst::TRACKING_RRC_SERVICE_CONF);
+        $res = $remoteService->request(RpcConst::TRACKING_RRC_SERVICE_CONF['serviceName'],'Ocr',__FUNCTION__,$requestParams);
+
+        return $res['open_account_obj'] ?? [];
+    }
 }

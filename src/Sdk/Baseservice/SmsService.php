@@ -46,8 +46,12 @@ class SmsService extends BaseBaseservice
     }
 
 
-    public static function sendMessage(int $mobile, string $msg, string $signName, string $templateCode, string $ip, bool $isIgnoreErr = false): array
+    public static function sendMessage($mobile, string $msg, string $signName, string $templateCode, string $ip, bool $isIgnoreErr = false): array
     {
+        if(!is_array($mobile)){
+            $mobile = [$mobile];
+        }
+        
         // 参数整理
         $requestParams = [
             'mobile' => $mobile,

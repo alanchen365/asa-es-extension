@@ -74,11 +74,10 @@ class OssService extends BaseBaseservice {
                 'hash' => $result['x-oss-hash-crc64ecma'] ?? '',
                 'host' => $result['oss-requestheaders']['Host'] ?? '',
                 'original' => $file->getClientFilename(),
-                'location' => "/".$location,
+                'location' => $location,
                 'ext' => $ext,
             ];
             $res = $remoteService->request(RpcConst::TRACKING_RRC_SERVICE_CONF['serviceName'],'Oss','insertUprcord',$requestParams);
-
 
             return $res['oss-file'];
         } catch (\Throwable $throwable) {
@@ -98,7 +97,7 @@ class OssService extends BaseBaseservice {
             $requestParams = [
                 'system_id' => AppInfo::SYSTEM_ID,
             ];
-        
+
             $ext = pathinfo($original, PATHINFO_EXTENSION);
             $tmpFilename = empty($tmpFilename) ? date('YmdHis').".{$ext}" : $tmpFilename.".{$ext}";
 
@@ -130,7 +129,7 @@ class OssService extends BaseBaseservice {
                 'hash' => $result['x-oss-hash-crc64ecma'] ?? '',
                 'host' => $result['oss-requestheaders']['Host'] ?? '',
                 'original' => $tmpFilename,
-                'location' => "/".$location,
+                'location' => $location,
                 'ext' => $ext,
             ];
 

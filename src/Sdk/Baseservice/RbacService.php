@@ -234,20 +234,20 @@ class RbacService extends BaseBaseservice {
      */
     public static function delUserById(int $userId,?bool $isIgnoreErr = false):?array
     {
-       // 参数整理
-       $requestParams = [
-           'id' => $userId,
-           'system_id' => AppInfo::SYSTEM_ID,
-       ];
+        // 参数整理
+        $requestParams = [
+            'id' => $userId,
+            'system_id' => AppInfo::SYSTEM_ID,
+        ];
 
-       // 实例化请求类
-       $res = null;
-       $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
-       $remoteService->setIsIgnoreErr($isIgnoreErr);
-       $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-       $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        // 实例化请求类
+        $res = null;
+        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+        $remoteService->setIsIgnoreErr($isIgnoreErr);
+        $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
 
-       return $res;
+        return $res;
     }
 
     /**
@@ -557,9 +557,31 @@ class RbacService extends BaseBaseservice {
     #########################  菜单相关结束 #########################
 
     /**
+     * 获取某个用户的页面按钮操作权限
+     */
+    public static function getViewButtonPermission(int $userId,string $group,bool $isIgnoreErr = false):array {
+
+        // 参数整理
+        $requestParams = [
+            'group' => $group,
+            'system_id' => AppInfo::SYSTEM_ID,
+            'id' => $userId,
+        ];
+
+        // 实例化请求类
+        $res = null;
+        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+        $remoteService->setIsIgnoreErr($isIgnoreErr);
+        $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+
+        return $res['view_button_permission'] ?? [];
+    }
+
+    /**
      * 获取页面元素
      */
-    public static function getButtonPermissionPageByUserId(int $userId,string $group,bool $isIgnoreErr = false):array {
+    public static function getTableButtonPermission(int $userId,string $group,bool $isIgnoreErr = false):array {
 
         // 参数整理
         $requestParams = [

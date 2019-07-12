@@ -14,6 +14,7 @@ class UpushService extends BaseBaseservice
 
     /**
      * 发送友盟推送 广播
+     * @param string $key
      * @param string $displayType
      * @param string $ticker
      * @param string $title
@@ -24,10 +25,11 @@ class UpushService extends BaseBaseservice
      * @param bool $isIgnoreErr
      * @return array
      */
-    public static function sendUpush(string $displayType, string $ticker, string $title, string $text, string $iosAlert, ?string $custom, ?string $afterOpen = 'go_app', bool $isIgnoreErr = false): array
+    public static function send(string $key, string $displayType, string $ticker, string $title, string $text, string $iosAlert, ?string $custom, ?string $afterOpen = 'go_app', bool $isIgnoreErr = false): array
     {
         // 参数整理
         $requestParams = [
+            'key' => $key,
             'display_type' => $displayType,
             'ticker' => $ticker,
             'title' => $title,
@@ -50,6 +52,7 @@ class UpushService extends BaseBaseservice
 
     /**
      * 发送友盟推送 组播
+     * @param string $key
      * @param string $displayType
      * @param string $ticker
      * @param string $title
@@ -62,7 +65,7 @@ class UpushService extends BaseBaseservice
      * @param bool $isIgnoreErr
      * @return array
      */
-    public static function sendUpushGroup(string $displayType, string $ticker, string $title, string $text, string $iosAlert, ?string $notLaunchFrom, ?string $launchFrom, ?string $custom, ?string $afterOpen = 'go_app', bool $isIgnoreErr = false): array
+    public static function sendGroup(string $key, string $displayType, string $ticker, string $title, string $text, string $iosAlert, ?string $notLaunchFrom, ?string $launchFrom, ?string $custom, ?string $afterOpen = 'go_app', bool $isIgnoreErr = false): array
     {
         // 一段时间内不活跃
         if (!empty($notLaunchFrom)) {
@@ -96,6 +99,7 @@ class UpushService extends BaseBaseservice
 
         // 参数整理
         $requestParams = [
+            'key' => $key,
             'display_type' => $displayType,
             'ticker' => $ticker,
             'title' => $title,
@@ -119,6 +123,7 @@ class UpushService extends BaseBaseservice
 
     /**
      * 发送友盟推送 Android单播
+     * @param string $key
      * @param string $displayType
      * @param string $ticker
      * @param string $title
@@ -129,10 +134,11 @@ class UpushService extends BaseBaseservice
      * @param bool $isIgnoreErr
      * @return array
      */
-    public static function sendUpushAndroid(string $displayType, string $ticker, string $title, string $text, string $deviceTokens, ?string $custom, ?string $afterOpen = 'go_app', bool $isIgnoreErr = false): array
+    public static function sendAndroid(string $key, string $displayType, string $ticker, string $title, string $text, string $deviceTokens, ?string $custom, ?string $afterOpen = 'go_app', bool $isIgnoreErr = false): array
     {
         // 参数整理
         $requestParams = [
+            'key' => $key,
             'display_type' => $displayType,
             'ticker' => $ticker,
             'title' => $title,
@@ -155,15 +161,17 @@ class UpushService extends BaseBaseservice
 
     /**
      * 发送友盟推送 IOS单播
+     * @param string $key
      * @param string $iosAlert
      * @param string $iosDeviceTokens
      * @param bool $isIgnoreErr
      * @return array
      */
-    public static function sendUpushIOS(string $iosAlert, string $iosDeviceTokens, bool $isIgnoreErr = false): array
+    public static function sendIOS(string $key, string $iosAlert, string $iosDeviceTokens, bool $isIgnoreErr = false): array
     {
         // 参数整理
         $requestParams = [
+            'key' => $key,
             'ios_alert' => $iosAlert,
             'ios_device_tokens' => $iosDeviceTokens,
             'system_id' => AppInfo::SYSTEM_ID,

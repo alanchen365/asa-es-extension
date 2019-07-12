@@ -41,8 +41,20 @@ class EasySwooleEvent
         Config::getInstance()->register();
         // 注册异常
         Di::getInstance()->set(SysConst::HTTP_EXCEPTION_HANDLER, SystemException::class);
+
+        // 创建日志目录
+        $logDir = Config::getInstance()->getConf('LOG_DIR');
+        if(!is_dir($logDir)){
+            mkdir($logDir,0777,true);
+        }
+
+        // 创建tmp目录
+        $tmpDir = Config::getInstance()->getConf('TEMP_DIR');
+        if(!is_dir($tmpDir)){
+            mkdir($tmpDir,0777,true);
+        }
     }
-    
+
     public static function mainServerCreate(ServerManager $server, EventRegister $register): void
     {
         // 服务热重启

@@ -4,6 +4,7 @@ namespace AsaEs\Utility;
 
 use AsaEs\AsaEsConst;
 use AsaEs\Config;
+use AsaEs\Exception\AppException;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Http\Message\UploadFile;
 use EasySwoole\Core\Swoole\ServerManager;
@@ -49,15 +50,16 @@ class ImportExcelUtility
     /**
      * 根据某个sheet的数据
     $excelConfig = [
-        'key' => [
-            'A' => 'code',      // 表格中第一列 对应数组中的索引
-            'B' => 'name',
-                //  'D' => 'tmp_worktype_name',
-                //  'E' => 'actual_num_weight',
-                //  'F' => 'actual_salary',
-                //  'G' => 'remark',
-         ],
-        'start_row' => 1    // 导出起始行 默认第一行
+    'key' => [
+    'A' => 'code',      // 表格中第一列 对应数组中的索引
+    'B' => 'name',
+    //  'D' => 'tmp_worktype_name',
+    //  'E' => 'actual_num_weight',
+    //  'F' => 'actual_salary',
+    //  'G' => 'remark',
+    ],
+    'start_row' => 1    // 导出起始行 默认第一行
+    'return_row_number' => false    // 是否返回行号
     ];
      * @param PHPExcel_Worksheet $sheetObj
      * @param array $config
@@ -67,21 +69,30 @@ class ImportExcelUtility
     public function getSheetData(\PHPExcel_Worksheet $sheetObj,array $config): array
     {
         $sheetData = [];
-        $highestRowCount = $sheetObj->getHighestRow();   //取得总行数
+        $totalRowCount = $sheetObj->getHighestRow();   //取得总行数
 
-        for($row = $config['start_row'] ?? 1 ;$row <= $highestRowCount;$row++){
+        if($totalRowCount == 0){
+            throw new AppException(1000,'导入文件的内容不能为空');
+        }
+
+        for($row = $config['start_row'] ?? 1 ;$row <= $totalRowCount;$row++){
             $tmp = [];
             $highestColumnCount = $sheetObj->getHighestColumn(); // 获得总列数
-            for ($column = 'A' ;$column<= $highestColumnCount;$column++){
+            for ($column = 'A' ;$column != $highestColumnCount;$column++){
                 $key = $config['key'][$column] ?? null;
                 if(isset($key)){
                     $tmp[$key] = $sheetObj->getCell($column.$row)->getValue();
                 }
             }
+
+            if($config['start_row'] ?? false){
+                $tmp['row_number'] = $row;
+            }
+
             $sheetData[] = $tmp;
         }
 
         return $sheetData ?? [];
     }
-    
+
 }

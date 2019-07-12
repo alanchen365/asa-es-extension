@@ -2,6 +2,7 @@
 
 namespace AsaEs\Logger;
 
+use AsaEs\Utility\Time;
 use EasySwoole\Config;
 use EasySwoole\Core\AbstractInterface\LoggerWriterInterface;
 use EasySwoole\Core\AbstractInterface\Singleton;
@@ -24,29 +25,38 @@ class FileLogger extends BaseLogger
         $this->defaultDir = Config::getInstance()->getConf('LOG_DIR');
     }
 
-    public function log(string $str, $category = 'default'):FileLogger
+    public function log($data, $category = 'default'):FileLogger
     {
-        // 动态转大写
-        $category = strtoupper($category);
-        if ($this->loggerWriter instanceof LoggerWriterInterface) {
-            $this->loggerWriter->writeLog($str, $category, time());
-        } else {
-            $str = date("y-m-d H:i:s")."\n{$str}\n\n";
-
-            $ym = date('ym');
-            $d = date('d', time());
-//            $h = date('A', time());
-
-            $filePath = $this->defaultDir . "/{$category}/";
-//            $fileName = $filePath. "/{$d}_{$h}.log";
-            $fileName = $filePath. "/{$ym}{$d}.log";
-
-            clearstatcache();
-            if(!is_dir($filePath)){
-                $this->createDirectory($filePath);
-            }
-            file_put_contents($fileName, $str, FILE_APPEND|LOCK_EX);
+        if(!is_string($data)){
+            $data = json_encode($data);
         }
+
+        // 时间处理
+        $ym = date('ym');
+        $d = date('d', time());
+
+        // 是否是json
+        $jsonArray = json_decode($data,true);
+
+        if(json_last_error() != JSON_ERROR_NONE){
+            // 如果不是json, 就单独处理
+            $data = [
+                'create_time' => Time::getNowDataTime(),
+                'string' => $data,
+            ];
+            $data = json_encode($data);
+        }
+
+        // 换行
+        $data = $data."\n";
+        $filePath = $this->defaultDir . "/{$category}/";
+        $fileName = $filePath. "/{$ym}{$d}.log";
+
+        clearstatcache();
+        if(!is_dir($filePath)){
+            $this->createDirectory($filePath);
+        }
+        file_put_contents($fileName, $data, FILE_APPEND|LOCK_EX);
         return $this;
     }
 

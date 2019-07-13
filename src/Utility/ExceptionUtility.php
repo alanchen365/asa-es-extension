@@ -18,7 +18,7 @@ class ExceptionUtility
     public static function simplifyTrace(?array $trace)
     {
         $traceCount = count($trace);
-        return array_splice($trace, 0, $traceCount-12);
+        return array_splice($trace, 0, $traceCount-13);
     }
 
     /**
@@ -26,24 +26,41 @@ class ExceptionUtility
      */
     public static function getExceptionData(\Throwable $throwable, ?int $code = 0, ?string $msg = '')
     {
-        $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
         $msg = empty($msg)  ? $throwable->getMessage() : $msg;
         $code = empty($code) ?  $throwable->getCode() : $code;
 
-        $data = [
-            'code' =>$code,
+        $headerServer = [];
+        $defaultData = [
+            'code' => $code,
             'msg' => empty($msg) ? Msg::get($code) : $msg,
             'file' => $throwable->getFile(),
             'line' => $throwable->getLine(),
             'trace' => ExceptionUtility::simplifyTrace($throwable->getTrace()),
+            'time' => Time::getNowDataTime()
         ];
 
         // 是否是http方式运行
         if (Env::isHttp()) {
-            $data['raw_content']= $requestObj->getRawContent();
-            $data['swoole_request']= $requestObj->getSwooleRequest();
-            $data[AsaEsConst::REQUEST_ID]= $requestObj->getRequestId();
+            $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
+            $rawContent= $requestObj->getRawContent();
+            $swooleRequest= $requestObj->getSwooleRequest();
+
+            $headerServer1 = array_merge($swooleRequest['header'] ?? [] , $swooleRequest['server'] ??[]);
+            $headerServer2 = [
+                'fd' => $swooleRequest['fd'] ?? null,
+                'request' => $swooleRequest['request'] ?? null,
+                'cookie' => $swooleRequest['cookie'] ?? null,
+                'get_params' => $swooleRequest['get'] ?? null,
+                'post_params' => $swooleRequest['post'] ?? null,
+                'json_params' => $rawContent,
+                'files_params' => $swooleRequest['files'] ?? null,
+                'tmpfiles' => $swooleRequest['tmpfiles'] ?? null,
+            ];
+
+            $headerServer = array_merge($headerServer1,$headerServer2);
+            $headerServer[AsaEsConst::REQUEST_ID]= $requestObj->getRequestId();
         }
-        return $data ?? [];
+
+        return array_merge($defaultData,$headerServer) ?? [];
     }
 }

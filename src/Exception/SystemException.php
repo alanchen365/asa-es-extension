@@ -7,10 +7,10 @@ use AsaEs\Logger\FileLogger;
 use AsaEs\Output\Msg;
 use AsaEs\Output\Results;
 use AsaEs\Output\Web;
+use AsaEs\Utility\ArrayUtility;
 use AsaEs\Utility\Env;
 use AsaEs\Utility\ExceptionUtility;
 use AsaEs\Utility\Tools;
-use EasySwoole\Config;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Http\AbstractInterface\ExceptionHandlerInterface;
 use EasySwoole\Core\Http\Request;
@@ -38,21 +38,22 @@ class SystemException implements ExceptionHandlerInterface
             $msg = Msg::get($code);
             // 还为空的话 ， 就给个默认了
             if (empty($msg)) {
-                $msg = '服务器竟然出现了错误,请稍后再试';
+                $msg = '服务器异常,请稍后再试';
             }
         }
 
-        // 记录log
+        // 获取异常信息
         $exceptionData = ExceptionUtility::getExceptionData($exception, $code, $msg);
-        if (\AsaEs\Config::getInstance()->getConf('DEBUG') && Env::isHttp()) {
-            $response->write(json_encode(ExceptionUtility::getExceptionData($exception) ?? []));
+        $env = $confVal = \AsaEs\Config::getInstance()->getEnv();
+        if ($env == 'LOCAL' && \AsaEs\Config::getInstance()->getConf('DEBUG') && Env::isHttp()) {
+            $response->write(json_encode($exceptionData ?? []));
             $response->withHeader('Content-type', 'application/json;charset=utf-8');
             $response->end();
             return;
         }
 
         if(Env::isHttp()){
-            Web::failBody($response, $results, $exception->getCode(), "服务器竟然出现了错误,请稍后再试");
+            Web::failBody($response, $results, $exception->getCode(), "服务器异常,请稍后再试");
         }
 
         FileLogger::getInstance()->log(json_encode($exceptionData), strtoupper("RUNNING_ERROR"));

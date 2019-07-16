@@ -2,6 +2,7 @@
 
 namespace AsaEs\Logger;
 
+use AsaEs\Utility\StringUtility;
 use AsaEs\Utility\Time;
 use EasySwoole\Config;
 use EasySwoole\Core\AbstractInterface\LoggerWriterInterface;
@@ -25,38 +26,36 @@ class FileLogger extends BaseLogger
         $this->defaultDir = Config::getInstance()->getConf('LOG_DIR');
     }
 
+    /**
+     * 日志统一写文件
+     * @param $data
+     * @param string $category
+     * @return FileLogger
+     */
     public function log($data, $category = 'default'):FileLogger
     {
-        if(!is_string($data)){
-            $data = json_encode($data);
-        }
+        // 日志分类名称 驼峰转下划线 转小写
+        $category = strtolower($category);
 
-        // 时间处理
-        $ym = date('ym');
-        $d = date('d', time());
+        // 构造日志bean
+        $fileLogBean = new FileLogBean();
 
-        // 是否是json
-        $jsonArray = json_decode($data,true);
+        $fileLogBean->setFileBasePath($this->defaultDir);
+        $fileLogBean->setCategory($category);
+        $fileLogBean->setFileName('Ymd');
 
-        if(json_last_error() != JSON_ERROR_NONE){
-            // 如果不是json, 就单独处理
-            $data = [
-                'create_time' => Time::getNowDataTime(),
-                'string' => $data,
-            ];
-            $data = json_encode($data);
-        }
+        $fileLogBean->setCreateTime(Time::getNowDataTime());
+        $fileLogBean->setMessage($data);
 
-        // 换行
-        $data = $data."\n";
-        $filePath = $this->defaultDir . "/{$category}/";
-        $fileName = $filePath. "/{$ym}{$d}.log";
+        $logString = $fileLogBean->__toString()."\n";
+        $filePath =  $fileLogBean->getFileBasePath() . '/' . $fileLogBean->getCategory();
+        $fileFullName = $filePath . '/' . $fileLogBean->getFileName();
 
         clearstatcache();
         if(!is_dir($filePath)){
             $this->createDirectory($filePath);
         }
-        file_put_contents($fileName, $data, FILE_APPEND|LOCK_EX);
+        file_put_contents($fileFullName, $logString, FILE_APPEND|LOCK_EX);
         return $this;
     }
 

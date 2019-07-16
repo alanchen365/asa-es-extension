@@ -39,28 +39,6 @@ class ExceptionUtility
             'time' => Time::getNowDataTime()
         ];
 
-        // 是否是http方式运行
-        if (Env::isHttp()) {
-            $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
-            $rawContent= $requestObj->getRawContent();
-            $swooleRequest= $requestObj->getSwooleRequest();
-
-            $headerServer1 = array_merge($swooleRequest['header'] ?? [] , $swooleRequest['server'] ??[]);
-            $headerServer2 = [
-                'fd' => $swooleRequest['fd'] ?? null,
-                'request' => $swooleRequest['request'] ?? null,
-                'cookie' => $swooleRequest['cookie'] ?? null,
-                'get_params' => $swooleRequest['get'] ?? null,
-                'post_params' => $swooleRequest['post'] ?? null,
-                'json_params' => $rawContent,
-                'files_params' => $swooleRequest['files'] ?? null,
-                'tmpfiles' => $swooleRequest['tmpfiles'] ?? null,
-            ];
-
-            $headerServer = array_merge($headerServer1,$headerServer2);
-            $headerServer[AsaEsConst::REQUEST_ID]= $requestObj->getRequestId();
-        }
-
-        return array_merge($defaultData,$headerServer) ?? [];
+        return $defaultData;
     }
 }

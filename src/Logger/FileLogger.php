@@ -45,7 +45,7 @@ class FileLogger extends BaseLogger
         $fileLogBean->setFileName('Ymd');
 
         $fileLogBean->setCreateTime(Time::getNowDataTime());
-        $fileLogBean->setMessage($data);
+        $fileLogBean->setLogMessage($data);
 
         $logString = $fileLogBean->__toString()."\n";
         $filePath =  $fileLogBean->getFileBasePath() . '/' . $fileLogBean->getCategory();

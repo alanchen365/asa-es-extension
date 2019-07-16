@@ -13,7 +13,7 @@ class FileLogBean extends SplBean
 
     protected $category; // 日志分类
 
-    protected $message; // 日志详情
+    protected $log_message; // 日志详情
 
     protected $create_time; // 创建时间
 
@@ -60,24 +60,24 @@ class FileLogBean extends SplBean
     /**
      * @return mixed
      */
-    public function getMessage()
+    public function getLogMessage()
     {
-        return $this->message;
+        return $this->log_message;
     }
 
     /**
-     * @param mixed $message
+     * @param mixed $log_message
      */
-    public function setMessage($message): void
+    public function setLogMessage($log_message): void
     {
         $_data = [];
-        $_data = json_decode($message,true);
+        $_data = json_decode($log_message,true);
         if(json_last_error() != JSON_ERROR_NONE){
-            $_data = [$message];
+            $_data = [$log_message];
         }
 
         $_data['request_data'] = BaseLogger::getRequestLogData();
-        $this->message = $_data;
+        $this->log_message = $_data;
     }
 
     /**

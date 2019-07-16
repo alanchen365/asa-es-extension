@@ -3,16 +3,19 @@
 namespace AsaEs\Logger;
 
 
+use App\AppConst\AppInfo;
 use EasySwoole\Core\Component\Spl\SplBean;
 
 class FileLogBean extends SplBean
 {
 
+    protected $project_name = AppInfo::APP_EN_NAME; // 所属项目
+
     protected $category; // 日志分类
 
     protected $message; // 日志详情
 
-    protected $create_time;
+    protected $create_time; // 创建时间
 
     private $requestLog;
 

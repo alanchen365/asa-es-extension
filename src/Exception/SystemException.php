@@ -3,6 +3,7 @@
 namespace AsaEs\Exception;
 
 use AsaEs\AsaEsConst;
+use AsaEs\Logger\BaseLogger;
 use AsaEs\Logger\FileLogger;
 use AsaEs\Output\Msg;
 use AsaEs\Output\Results;
@@ -32,7 +33,7 @@ class SystemException implements ExceptionHandlerInterface
         $results = new Results();
         $msg = $exception->getMessage();
         $code = $exception->getCode();
-        
+
         // 如果错误为空，拿着错误码去msg查一下
         if (empty($msg)) {
             $msg = Msg::get($code);
@@ -46,6 +47,9 @@ class SystemException implements ExceptionHandlerInterface
         $exceptionData = ExceptionUtility::getExceptionData($exception, $code, $msg);
         $env = $confVal = \AsaEs\Config::getInstance()->getEnv();
         if ($env == 'LOCAL' && \AsaEs\Config::getInstance()->getConf('DEBUG') && Env::isHttp()) {
+
+            // 获取请求信息
+            $exceptionData['request_data'] = BaseLogger::getRequestLogData();
             $response->write(json_encode($exceptionData ?? []));
             $response->withHeader('Content-type', 'application/json;charset=utf-8');
             $response->end();

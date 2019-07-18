@@ -33,7 +33,7 @@ class Web
         $saveData = [
             'response_code' =>$code,
             'response_msg' => $msg,
-            'response_body' => $data
+//            'response_body' => $data
         ];
 
         // 异步写文件

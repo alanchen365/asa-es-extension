@@ -646,4 +646,54 @@ class RbacService extends BaseBaseservice {
 
         return $res ?? [];
     }
+
+    /**
+     * 返回拥有角色的用户ID数组
+     * @param array $userIds
+     * @param array $roleIds
+     * @param bool $isIgnoreErr
+     * @return array
+     */
+    public static function getUserIdsInRoleIds(array $userIds, array $roleIds, bool $isIgnoreErr = false) {
+        // 参数整理
+        $requestParams = [
+            'user_ids' => $userIds,
+            'role_ids' => $roleIds,
+            'system_id' => AppInfo::SYSTEM_ID,
+        ];
+
+        // 实例化请求类
+        $res = null;
+        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+        $remoteService->setIsIgnoreErr($isIgnoreErr);
+        $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+
+        return $res['user_ids'] ?? [];
+    }
+
+    /**
+     * 修改用户的角色
+     * @param int $userId
+     * @param int $roleId
+     * @param bool $isIgnoreErr
+     * @return array
+     */
+    public static function updateUserRole(int $userId, int $roleId, bool $isIgnoreErr = false) {
+        // 参数整理
+        $requestParams = [
+            'user_id' => $userId,
+            'role_id' => $roleId,
+            'system_id' => AppInfo::SYSTEM_ID,
+        ];
+
+        // 实例化请求类
+        $res = null;
+        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+        $remoteService->setIsIgnoreErr($isIgnoreErr);
+        $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+
+        return $res ?? [];
+    }
 }

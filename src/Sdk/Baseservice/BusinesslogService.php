@@ -19,6 +19,7 @@ use AsaEs\RemoteCall\Curl;
 use AsaEs\RemoteCall\RemoteService;
 use AsaEs\Utility\ArrayUtility;
 use AsaEs\Utility\Blake;
+use AsaEs\Utility\Time;
 use AsaEs\Utility\Tools;
 use EasySwoole\Core\Component\Di;
 use http\Env;
@@ -45,6 +46,7 @@ class BusinesslogService extends BaseBaseservice {
             'tracking_key' => $trackingKey,
             'content' => $content,
             'system_id' => AppInfo::SYSTEM_ID,
+            'create_time' => Time::getNowDataTime(),
         ];
 
         // 实例化请求类

@@ -3,7 +3,11 @@
 namespace AsaEs\Router;
 
 use App\EsCrontab;
+use AsaEs\AsaEsConst;
+use AsaEs\Config;
 use AsaEs\Logger\FileLogger;
+use AsaEs\Utility\Env;
+use EasySwoole\Core\Component\Crontab\CronTab;
 use EasySwoole\Core\Swoole\Process\ProcessManager;
 use EasySwoole\Core\Utility\File;
 
@@ -30,7 +34,7 @@ class CrontabRoute
             if(empty($moduleName)){
                 continue;
             }
-            
+
             // 文件是否存在
             $crontabFile = $dir . "/Crontab/".$moduleName.'Crontab.php';;
             if(!file_exists($crontabFile)){
@@ -40,5 +44,13 @@ class CrontabRoute
             $moduleClass = '\App\Module\\'.$moduleName.'\Crontab\\'.$moduleName.'Crontab';
             $moduleClass::run();
         }
+
+        //每日1点1分执行 定时删除日志脚本
+        CronTab::getInstance()->addRule('AutoClearLog', '1 1 * * *', function (){
+
+            $logDir = Config::getInstance()->getConf('LOG_DIR');
+
+            Env::clearLog($logDir,AsaEsConst::AUTO_CLEAR_LOG_DAY,AsaEsConst::AUTO_CLEAR_LOG_FILTER);
+        });
     }
 }

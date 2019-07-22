@@ -586,7 +586,7 @@ class RbacService extends BaseBaseservice {
         $requestParams = [
             'group' => $group,
             'system_id' => AppInfo::SYSTEM_ID,
-            'id' => $userId,
+            'user_id' => $userId,
         ];
 
         // 实例化请求类

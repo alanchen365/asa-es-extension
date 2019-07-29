@@ -32,8 +32,12 @@ class AsaEsConst
     const REQUEST_ID = 'request_id';
     // 框架级定时器
     const PROCESS_TIMER = "PROCESS_TIMER";
-    // redis 默认过期时间  (一天)
-    const REDIS_DEFAULT_EXPIRE_ONE_DAY = 60 * 60 * 24;
+    // 日志超过几天自动删除 (默认30天)
+    const AUTO_CLEAR_LOG_DAY = (60 * 60 * 24) * 30;
+    // 日志删除排除文件
+    const AUTO_CLEAR_LOG_FILTER = ['swoole.log'];
+    // redis 默认过期时间  (1天)
+    const REDIS_DEFAULT_EXPIRE_ONE_DAY = (60 * 60 * 24) * 1;
     // redis 基础数据分类
     const REDIS_BASIC_TYPE = 'BASIC';
     // redis 基础数据已删除的key

@@ -35,9 +35,8 @@ class BusinesslogService extends BaseBaseservice {
      * @param string $content 日志内容
      * @param bool|null $isIgnoreErr 是否忽略错误
      */
-    public static function setLog(string $trackingKey,array $trackingNo,string $content,int $userId,string $userName,?bool $isIgnoreErr = true,?array $otherData = [],?string $createTime = null): void
+    public static function setLog(string $trackingKey,array $trackingNo,string $content,int $userId,string $userName,?string $createTime = null,?array $otherData = [],?bool $isIgnoreErr = true): void
     {
-
         if(!$createTime){
             $createTime = Time::getNowDataTime();
         }

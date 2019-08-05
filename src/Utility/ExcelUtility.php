@@ -4,6 +4,7 @@ namespace AsaEs\Utility;
 
 use AsaEs\AsaEsConst;
 use AsaEs\Config;
+use AsaEs\Exception\MsgException;
 use AsaEs\Sdk\Baseservice\OssService;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Http\Message\UploadFile;

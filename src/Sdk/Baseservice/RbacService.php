@@ -371,11 +371,12 @@ class RbacService extends BaseBaseservice {
         return $res ?? [];
     }
 
-    public static function addRole(string $name, string $description, array $menuIds = [], array $elementIds = [],?bool $isIgnoreErr = false)
+    public static function addRole(string $name, string $description, array $menuIds = [], array $elementIds = [], ?string $key = null,?bool $isIgnoreErr = false)
     {
         // 参数整理
         $requestParams = [
             'name' => $name,
+            'key' => $key,
             'description' => $description,
             'menu_ids' => $menuIds,
             'element_ids' => $elementIds,

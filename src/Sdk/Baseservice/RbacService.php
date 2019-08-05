@@ -371,7 +371,7 @@ class RbacService extends BaseBaseservice {
         return $res ?? [];
     }
 
-    public static function addRole(string $name, string $description, array $menuIds = [], array $elementIds = [], ?string $key = null,?bool $isIgnoreErr = false)
+    public static function addRole(string $name, ?string $key = null,string $description, array $menuIds = [], array $elementIds = [],?bool $isIgnoreErr = false)
     {
         // 参数整理
         $requestParams = [
@@ -414,12 +414,13 @@ class RbacService extends BaseBaseservice {
         return $res;
     }
 
-    public static function updateRoleById(int $roleId,?string $name, ?string $description, array $menuIds = [] , array $elementIds = [], ?bool $isIgnoreErr = false):void
+    public static function updateRoleById(int $roleId,?string $name, ?string $key = null,?string $description, array $menuIds = [] , array $elementIds = [], ?bool $isIgnoreErr = false):void
     {
         // 参数整理
         $requestParams = [
             'description' => $description,
             'name' => $name,
+            'key' => $key,
             'menu_ids' => $menuIds,
             'element_ids' => $elementIds,
         ];
@@ -464,12 +465,13 @@ class RbacService extends BaseBaseservice {
 
 
     #########################  菜单相关开始 #########################
-    public static function getMenuList(?int $pageNo,?string $name,?bool $isIgnoreErr = false):array
+    public static function getMenuList(?int $pageNo,?string $name,?int $parentId =null, ?bool $isIgnoreErr = false):array
     {
         // 参数整理
         $requestParams = [
             'page_no' => $pageNo,
             'name' => $name,
+            'parent_id' => $parentId,
             'system_id' => AppInfo::SYSTEM_ID,
         ];
 
@@ -488,9 +490,9 @@ class RbacService extends BaseBaseservice {
         // 参数整理
         $requestParams = [
             'name' => $name,
-            '$domain' => $domain,
+            'domain' => $domain,
             'url' => $url,
-            'parentId' => $parentId,
+            'parent_id' => $parentId,
             'level' => $level,
             'icon' => $icon,
             'sort' => $sort,

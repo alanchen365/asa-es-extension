@@ -699,4 +699,22 @@ class RbacService extends BaseBaseservice {
 
         return $res ?? [];
     }
+
+    public static function getRoleListByAccount(string $account, ?bool $isIgnoreErr = false)
+    {
+        // 参数整理
+        $requestParams = [
+            'account' => $account,
+            'system_id' => AppInfo::SYSTEM_ID,
+        ];
+
+        // 实例化请求类
+        $res = null;
+        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+        $remoteService->setIsIgnoreErr($isIgnoreErr);
+        $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+
+        return $res ?? [];
+    }
 }

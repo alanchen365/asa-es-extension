@@ -76,6 +76,8 @@ class ExcelUtility
         for($row = $config['start_row'] ?? 1 ;$row <= $highestRowCount;$row++){
             $tmp = [];
             $highestColumnCount = $sheetObj->getHighestColumn(); // 获得总列数
+            $highestColumnCount++;
+
             for ($column = 'A' ;$column<= $highestColumnCount;$column++){
                 $key = $config['key'][$column] ?? null;
                 if(isset($key)){

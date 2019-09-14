@@ -219,19 +219,50 @@ class BaseController extends Controller
                 $rpcConst= new \ReflectionClass($rpcConstNamespace);
                 $rbacService = new \ReflectionClass($rbacConstNamespace);
 
-                $rpcConf = $rpcConst->getConstant('BUSINESSLOG_RRC_SERVICE_CONF');
+                $rpcConf = $rpcConst->getConstant('RBAC_RRC_SERVICE_CONF');
                 $isRpc = $rpcConf['enable'] ?? false;
 
-                if(!$isRpc){
-                    return false;
+                if($isRpc){
+                    $tokenObj = (object)$rbacConstNamespace::jwtDecode($tokenStr,false);
+                }else{
+                    // 没有启用rpc的时候走本地鉴权
+                    $tokenObj =  Token::decode($tokenStr);
                 }
-                $tokenObj = (object)$rbacConstNamespace::jwtDecode($tokenStr,false);
             }else{
                 $tokenObj =  Token::decode($tokenStr);
             }
 
             $esRequest->setTokenObj($tokenObj);
         }
+
+//        // 需要鉴权
+//        if ($flg) {
+//            if (!$tokenStr) {
+//                $this->response()->withStatus(Status::CODE_UNAUTHORIZED);
+//                $this->response()->end();
+//                return false;
+//            }
+//
+//            // 决定是否走远程鉴权 如果开启RBAC的鉴权模式 就走远程
+//            $rpcConstNamespace = "App\AppConst\RpcConst";
+//            $rbacConstNamespace = 'AsaEs\Sdk\Baseservice\RbacService';
+//            if(class_exists($rpcConstNamespace) && class_exists($rbacConstNamespace)){
+//                $rpcConst= new \ReflectionClass($rpcConstNamespace);
+//                $rbacService = new \ReflectionClass($rbacConstNamespace);
+//
+//                $rpcConf = $rpcConst->getConstant('BUSINESSLOG_RRC_SERVICE_CONF');
+//                $isRpc = $rpcConf['enable'] ?? false;
+//
+//                if(!$isRpc){
+//                    return false;
+//                }
+//                $tokenObj = (object)$rbacConstNamespace::jwtDecode($tokenStr,false);
+//            }else{
+//                $tokenObj =  Token::decode($tokenStr);
+//            }
+//
+//            $esRequest->setTokenObj($tokenObj);
+//        }
 
         return true;
     }

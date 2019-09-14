@@ -78,6 +78,8 @@ class ImportExcelUtility
         for($row = $config['start_row'] ?? 1 ;$row <= $totalRowCount;$row++){
             $tmp = [];
             $highestColumnCount = $sheetObj->getHighestColumn(); // 获得总列数
+            $highestColumnCount++;
+
             for ($column = 'A' ;$column != $highestColumnCount;$column++){
                 $key = $config['key'][$column] ?? null;
                 if(isset($key)){

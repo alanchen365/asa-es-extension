@@ -46,7 +46,8 @@ class SystemException implements ExceptionHandlerInterface
         // 获取异常信息
         $exceptionData = ExceptionUtility::getExceptionData($exception, $code, $msg);
         $env = $confVal = \AsaEs\Config::getInstance()->getEnv();
-        if ($env == 'LOCAL' && \AsaEs\Config::getInstance()->getConf('DEBUG') && Env::isHttp()) {
+
+        if ($env != 'PRODUCTION' && \AsaEs\Config::getInstance()->getConf('DEBUG') && Env::isHttp()) {
 
             // 获取请求信息
             $exceptionData['request_data'] = BaseLogger::getRequestLogData();

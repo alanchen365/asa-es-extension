@@ -103,9 +103,10 @@ class RemoteService
                     if(Config::getInstance()->getDebug()){
                         // 打印错误
 
-                        echo "====== 第三方返回结果开始 ======\n";
-                        var_dump($res);
+                        echo "====== 传递给第三方参数 ======\n";
+                        var_dump($arguments);
                         echo "====== 第三方返回结果结束 ======\n";
+                        var_dump($res);
 
                     }
                     throw new MsgException($code,$msg);

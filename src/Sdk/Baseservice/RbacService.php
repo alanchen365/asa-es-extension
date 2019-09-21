@@ -75,12 +75,13 @@ class RbacService extends BaseBaseservice {
      * @param bool|null $isIgnoreErr 是否忽略错误
      * @return |null
      */
-    public static function login(string $account, string $password, ?bool $isIgnoreErr = false):array
+    public static function login(string $account, string $password, ?bool $isIgnoreErr = false,?string $platform):array
     {
         // 参数整理
         $requestParams = [
             'account' => $account,
             'password' => $password,
+            'platform' => $platform,
             'system_id' => AppInfo::SYSTEM_ID,
         ];
 

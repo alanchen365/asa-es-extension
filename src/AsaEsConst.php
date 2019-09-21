@@ -53,7 +53,11 @@ class AsaEsConst
     // 路由前缀 app（手机app） web (H5) view(套php模板) public(公用无需鉴权) api(待定) pc (pc端)
     const HTTP_ROUTER_REGISTER_TYPE = ['app', 'web',  'view', 'public', 'api', 'pc'];
     // 平台 app（手机app） web (H5) view(套php模板) public(公用无需鉴权) api(待定) pc (pc端)
-    const TOKEN_TYPE = ['app','web','pc'];
+    const TOKEN_TYPE = [
+        'app' => '8ikj2s9j',
+        'web' => '2s8i9jkj',
+        'pc' => 's9kj2j8i',
+    ];
 
     // 分页参数
     const PAGE_KEY = 'page_no';

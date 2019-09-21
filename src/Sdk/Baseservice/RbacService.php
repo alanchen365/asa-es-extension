@@ -73,15 +73,16 @@ class RbacService extends BaseBaseservice {
      * @param string $account  账号
      * @param string $password  密码
      * @param bool|null $isIgnoreErr 是否忽略错误
+     * @param string|null $tokenType token类型  解释 pc | app
      * @return |null
      */
-    public static function login(string $account, string $password, ?bool $isIgnoreErr = false,?string $platform):array
+    public static function login(string $account, string $password, ?bool $isIgnoreErr = false,?string $tokenType):array
     {
         // 参数整理
         $requestParams = [
             'account' => $account,
             'password' => $password,
-            'platform' => $platform,
+            'token_type' => $tokenType,
             'system_id' => AppInfo::SYSTEM_ID,
         ];
 

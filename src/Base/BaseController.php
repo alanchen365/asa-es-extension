@@ -178,94 +178,6 @@ class BaseController extends Controller
         return $this->pageParam(intval($pageNo), intval($pageNum));
     }
 
-    public function onRequest($action): ?bool
-    {
-        // 是否开启鉴权
-        if (!AppInfo::APP_TOKEN_AUTH_SWITCH) {
-            return true;
-        }
-
-        // 路由鉴权
-        $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
-
-        // 路由白名单
-        $tokenStr = $esRequest->getHeaderToken() ?? '';
-        $server = $esRequest->getSwooleRequest();
-        $requestUri = $server['server']['request_uri'];
-
-        // 不鉴权域名
-        $whitelistsRoute = Config::getInstance()->getConf("auth.ROUTE_WHITE_LIST", true) ?? [];
-
-        $flg = true;
-        foreach ($whitelistsRoute as $url) {
-            $tmpUrl = substr($requestUri, 0, strlen($url));
-            if ($tmpUrl === $url && !empty($url)) {
-                $flg = false;
-            }
-        }
-
-        // 需要鉴权
-        if ($flg) {
-            if (!$tokenStr) {
-                $this->response()->withStatus(Status::CODE_UNAUTHORIZED);
-                $this->response()->end();
-                return false;
-            }
-
-            // 决定是否走远程鉴权 如果开启RBAC的鉴权模式 就走远程
-            $rpcConstNamespace = "App\AppConst\RpcConst";
-            $rbacConstNamespace = 'AsaEs\Sdk\Baseservice\RbacService';
-            if(class_exists($rpcConstNamespace) && class_exists($rbacConstNamespace)){
-                $rpcConst= new \ReflectionClass($rpcConstNamespace);
-                $rbacService = new \ReflectionClass($rbacConstNamespace);
-
-                $rpcConf = $rpcConst->getConstant('RBAC_RRC_SERVICE_CONF');
-                $isRpc = $rpcConf['enable'] ?? false;
-
-                if($isRpc){
-                    $tokenObj = (object)$rbacConstNamespace::jwtDecode($tokenStr,false);
-                }else{
-                    // 没有启用rpc的时候走本地鉴权
-                    $tokenObj =  Token::decode($tokenStr);
-                }
-            }else{
-                $tokenObj =  Token::decode($tokenStr);
-            }
-
-            $esRequest->setTokenObj($tokenObj);
-        }
-
-//        // 需要鉴权
-//        if ($flg) {
-//            if (!$tokenStr) {
-//                $this->response()->withStatus(Status::CODE_UNAUTHORIZED);
-//                $this->response()->end();
-//                return false;
-//            }
-//
-//            // 决定是否走远程鉴权 如果开启RBAC的鉴权模式 就走远程
-//            $rpcConstNamespace = "App\AppConst\RpcConst";
-//            $rbacConstNamespace = 'AsaEs\Sdk\Baseservice\RbacService';
-//            if(class_exists($rpcConstNamespace) && class_exists($rbacConstNamespace)){
-//                $rpcConst= new \ReflectionClass($rpcConstNamespace);
-//                $rbacService = new \ReflectionClass($rbacConstNamespace);
-//
-//                $rpcConf = $rpcConst->getConstant('BUSINESSLOG_RRC_SERVICE_CONF');
-//                $isRpc = $rpcConf['enable'] ?? false;
-//
-//                if(!$isRpc){
-//                    return false;
-//                }
-//                $tokenObj = (object)$rbacConstNamespace::jwtDecode($tokenStr,false);
-//            }else{
-//                $tokenObj =  Token::decode($tokenStr);
-//            }
-//
-//            $esRequest->setTokenObj($tokenObj);
-//        }
-
-        return true;
-    }
 
     /**
      * @return validate
@@ -313,5 +225,100 @@ class BaseController extends Controller
     public function setSearchObj(searchObj $searchObj): void
     {
         $this->searchObj = $searchObj;
+    }
+
+    /**
+     * 是否需要鉴权
+     * @return bool
+     */
+    protected function isAuth():bool{
+
+        $isAuth = true;
+
+        // 是否开启鉴权
+        if (!AppInfo::APP_TOKEN_AUTH_SWITCH) {
+            $isAuth = true;
+            return true;
+        }
+
+        // 路由鉴权
+        $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
+
+        // 路由白名单
+        $server = $esRequest->getSwooleRequest();
+        $requestUri = $server['server']['request_uri'];
+
+        // 不鉴权域名
+        $whitelistsRoute = Config::getInstance()->getConf("auth.ROUTE_WHITE_LIST", true) ?? [];
+
+        $isAuth = true;
+        foreach ($whitelistsRoute as $url) {
+            $tmpUrl = substr($requestUri, 0, strlen($url));
+            if ($tmpUrl === $url && !empty($url)) {
+                $isAuth = false;
+            }
+        }
+
+        return $isAuth;
+    }
+
+    /**
+     * token 类型的鉴权
+     * @param string $tokenType
+     * @return bool
+     * @throws SignException
+     */
+    protected function tokenTypeAuth(string $tokenType):bool {
+
+        // 鉴权
+        $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
+        $tokenObj = $esRequest->getTokenObj();
+
+        $tokenTypeConf = array_flip(AsaEsConst::TOKEN_TYPE);
+        if($tokenType != $tokenTypeConf[$tokenObj->token_type]){
+            throw new SignException(3003);
+        }
+
+        return true;
+    }
+
+    public function onRequest($action): ?bool
+    {
+        // 判断当前url是否需要鉴权
+        $isAuth = $this->isAuth();
+
+        // 需要鉴权
+        if ($isAuth) {
+
+            $esRequest = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
+            $tokenStr = $esRequest->getHeaderToken() ?? '';
+            if (!$tokenStr) {
+                $this->response()->withStatus(Status::CODE_UNAUTHORIZED);
+                $this->response()->end();
+                return false;
+            }
+
+            // 决定是否走远程鉴权 如果开启RBAC的鉴权模式 就走远程
+            $rpcConstNamespace = "App\AppConst\RpcConst";
+            $rbacConstNamespace = 'AsaEs\Sdk\Baseservice\RbacService';
+            if(class_exists($rpcConstNamespace) && class_exists($rbacConstNamespace)){
+                $rpcConst= new \ReflectionClass($rpcConstNamespace);
+                $rbacService = new \ReflectionClass($rbacConstNamespace);
+
+                $rpcConf = $rpcConst->getConstant('BUSINESSLOG_RRC_SERVICE_CONF');
+                $isRpc = $rpcConf['enable'] ?? false;
+
+                if(!$isRpc){
+                    return false;
+                }
+                $tokenObj = (object)$rbacConstNamespace::jwtDecode($tokenStr,false);
+            }else{
+                $tokenObj =  Token::decode($tokenStr);
+            }
+
+            $esRequest->setTokenObj($tokenObj);
+        }
+
+        return true;
     }
 }

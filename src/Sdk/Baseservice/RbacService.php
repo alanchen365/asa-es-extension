@@ -76,7 +76,7 @@ class RbacService extends BaseBaseservice {
      * @param string|null $tokenType token类型  解释 pc | app
      * @return |null
      */
-    public static function login(string $account, string $password, ?bool $isIgnoreErr = false,?string $tokenType):array
+    public static function login(string $account, string $password, ?bool $isIgnoreErr = false,?string $tokenType = null):array
     {
         // 参数整理
         $requestParams = [
@@ -105,7 +105,7 @@ class RbacService extends BaseBaseservice {
      * @param bool|null $isIgnoreErr
      * @return array
      */
-    public static function loginWithOpenid(string $account, string $password, string $openid, string $accessToken, ?bool $isIgnoreErr = false): array
+    public static function loginWithOpenid(string $account, string $password, string $openid, string $accessToken, ?bool $isIgnoreErr = false,?string $tokenType = null): array
     {
         // 参数整理
         $requestParams = [
@@ -114,6 +114,7 @@ class RbacService extends BaseBaseservice {
             'openid' => $openid,
             'access_token' => $accessToken,
             'system_id' => AppInfo::SYSTEM_ID,
+            'token_type' => $tokenType,
         ];
 
         // 实例化请求类
@@ -132,12 +133,13 @@ class RbacService extends BaseBaseservice {
      * @param bool|null $isIgnoreErr
      * @return array
      */
-    public static function getLoginInfoByOpenId(string $openid, ?bool $isIgnoreErr = false): array
+    public static function getLoginInfoByOpenId(string $openid, ?bool $isIgnoreErr = false,?string $tokenType = null): array
     {
         // 参数整理
         $requestParams = [
             'openid' => $openid,
             'system_id' => AppInfo::SYSTEM_ID,
+            'token_type' => $tokenType,
         ];
 
         // 实例化请求类

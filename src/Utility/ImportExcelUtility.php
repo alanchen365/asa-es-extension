@@ -5,6 +5,7 @@ namespace AsaEs\Utility;
 use AsaEs\AsaEsConst;
 use AsaEs\Config;
 use AsaEs\Exception\AppException;
+use AsaEs\Exception\MsgException;
 use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Http\Message\UploadFile;
 use EasySwoole\Core\Swoole\ServerManager;
@@ -84,6 +85,9 @@ class ImportExcelUtility
                 $key = $config['key'][$column] ?? null;
                 if(isset($key)){
                     $tmp[$key] = $sheetObj->getCell($column.$row)->getValue();
+                    if (is_object($tmp[$key])) {
+                        throw new AppException(1000,'第' . $row . '行数据格式存在问题，请检查或清除格式');
+                    }
                 }
             }
 

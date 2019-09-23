@@ -82,6 +82,9 @@ class ExcelUtility
                 $key = $config['key'][$column] ?? null;
                 if(isset($key)){
                     $tmp[$key] = $sheetObj->getCell($column.$row)->getValue();
+                    if (is_object($tmp[$key])) {
+                        throw new MsgException(1000,'第' . $row . '行数据格式存在问题，请检查或清除格式');
+                    }
                 }
             }
             $sheetData[] = $tmp;

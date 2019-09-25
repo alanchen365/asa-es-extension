@@ -237,8 +237,8 @@ class BaseController extends Controller
 
         // 是否开启鉴权
         if (!AppInfo::APP_TOKEN_AUTH_SWITCH) {
-            $isAuth = true;
-            return true;
+            $isAuth = false;
+            return $isAuth;
         }
 
         // 路由鉴权

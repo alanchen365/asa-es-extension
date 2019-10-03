@@ -87,16 +87,16 @@ class Request
      */
     public function getTokenObj()
     {
-//        // 设置默认值 防止外部调用报错
-        if(Tools::superEmpty($this->tokenObj->uid ?? null)){
-
-            // 对象为空
-            if($this->tokenObj == null){
-                $this->tokenObj = new \stdClass();
-            }
-
-            $this->tokenObj->uid = null;
-        }
+////        // 设置默认值 防止外部调用报错
+//        if(Tools::superEmpty($this->tokenObj->uid ?? null)){
+//
+//            // 对象为空
+//            if($this->tokenObj == null){
+//                $this->tokenObj = new \stdClass();
+//            }
+//
+//            $this->tokenObj->uid = null;
+//        }
 
         return $this->tokenObj;
     }

@@ -87,6 +87,12 @@ class Request
      */
     public function getTokenObj()
     {
+        // 设置默认值 防止外部调用报错
+        if(Tools::superEmpty($this->tokenObj)){
+            $obj = (object)['uid'=>null];
+            $this->tokenObj = $obj;
+        }
+
         return $this->tokenObj;
     }
 

@@ -95,7 +95,7 @@ class WeixinMpService extends BaseBaseservice
      * @param bool $isIgnoreErr
      * @return int
      */
-    public function sendTemplate(string $toUser, string $templateId, array $data, string $url = '', array $miniprogram = [], bool $isIgnoreErr = false): int{
+    public function sendTemplate($toUser, string $templateId, array $data, string $url = '', array $miniprogram = [], bool $isIgnoreErr = false): int{
 
         // 参数整理
         $requestParams = [

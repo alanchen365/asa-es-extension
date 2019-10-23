@@ -305,7 +305,7 @@ class BaseController extends Controller
                 $rpcConst= new \ReflectionClass($rpcConstNamespace);
                 $rbacService = new \ReflectionClass($rbacConstNamespace);
 
-                $rpcConf = $rpcConst->getConstant('BUSINESSLOG_RRC_SERVICE_CONF');
+                $rpcConf = $rpcConst->getConstant('RBAC_RRC_SERVICE_CONF');
                 $isRpc = $rpcConf['enable'] ?? false;
 
                 if(!$isRpc){

@@ -297,6 +297,24 @@ class BaseController extends Controller
                 $this->response()->end();
                 return false;
             }
+//
+//            // 决定是否走远程鉴权 如果开启RBAC的鉴权模式 就走远程
+//            $rpcConstNamespace = "App\AppConst\RpcConst";
+//            $rbacConstNamespace = 'AsaEs\Sdk\Baseservice\RbacService';
+//            if(class_exists($rpcConstNamespace) && class_exists($rbacConstNamespace)){
+//                $rpcConst= new \ReflectionClass($rpcConstNamespace);
+//                $rbacService = new \ReflectionClass($rbacConstNamespace);
+//
+//                $rpcConf = $rpcConst->getConstant('RBAC_RRC_SERVICE_CONF');
+//                $isRpc = $rpcConf['enable'] ?? false;
+//
+//                if(!$isRpc){
+//                    return false;
+//                }
+//                $tokenObj = (object)$rbacConstNamespace::jwtDecode($tokenStr,false);
+//            }else{
+//                $tokenObj =  Token::decode($tokenStr);
+//            }
 
             // 决定是否走远程鉴权 如果开启RBAC的鉴权模式 就走远程
             $rpcConstNamespace = "App\AppConst\RpcConst";
@@ -304,14 +322,14 @@ class BaseController extends Controller
             if(class_exists($rpcConstNamespace) && class_exists($rbacConstNamespace)){
                 $rpcConst= new \ReflectionClass($rpcConstNamespace);
                 $rbacService = new \ReflectionClass($rbacConstNamespace);
-
                 $rpcConf = $rpcConst->getConstant('RBAC_RRC_SERVICE_CONF');
                 $isRpc = $rpcConf['enable'] ?? false;
-
-                if(!$isRpc){
-                    return false;
+                if($isRpc){
+                    $tokenObj = (object)$rbacConstNamespace::jwtDecode($tokenStr,false);
+                }else{
+                    // 没有启用rpc的时候走本地鉴权
+                    $tokenObj =  Token::decode($tokenStr);
                 }
-                $tokenObj = (object)$rbacConstNamespace::jwtDecode($tokenStr,false);
             }else{
                 $tokenObj =  Token::decode($tokenStr);
             }

@@ -12,17 +12,47 @@ use AsaEs\Utility\Tools;
 class ConfigService extends BaseBaseservice
 {
 
+//    /**
+//     * 设置配置
+//     * @param int $key
+//     * @param string $value
+//     * @param bool $isIgnoreErr
+//     * @return array
+//     */
+//    public static function setConfig(string $key, string $value, bool $isIgnoreErr = false): array
+//    {
+//        // 参数整理
+//        $requestParams = [
+//            'key' => $key,
+//            'value' => $value,
+//            'system_id' => AppInfo::SYSTEM_ID,
+//        ];
+//
+//        // 实例化请求类
+//        $res = null;
+//        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+//        $remoteService->setIsIgnoreErr($isIgnoreErr);
+//        $remoteService->getInstance(RpcConst::TAOKE_RRC_SERVICE_CONF);
+//        $res = $remoteService->request(RpcConst::TAOKE_RRC_SERVICE_CONF['serviceName'], 'Config', __FUNCTION__, $requestParams);
+//
+//        return $res;
+//    }
+
     /**
      * 设置配置
-     * @param int $key
+     * @param string $componentKey
+     * @param string $name
+     * @param string $key
      * @param string $value
      * @param bool $isIgnoreErr
      * @return array
      */
-    public static function setConfig(string $key, string $value, bool $isIgnoreErr = false): array
+    public static function setConfig(string $componentKey, string $name, string $key, string $value, bool $isIgnoreErr = false): array
     {
         // 参数整理
         $requestParams = [
+            'component_key' => $componentKey,
+            'name' => $name,
             'key' => $key,
             'value' => $value,
             'system_id' => AppInfo::SYSTEM_ID,
@@ -37,4 +67,6 @@ class ConfigService extends BaseBaseservice
 
         return $res;
     }
+
+
 }

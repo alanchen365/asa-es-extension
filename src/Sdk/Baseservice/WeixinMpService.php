@@ -132,4 +132,27 @@ class WeixinMpService extends BaseBaseservice
         return $res['sign_obj'] ?? [];
     }
 
+    /**
+     * 只通过OpenId获取用户信息
+     * @param string $code
+     * @param string $accessToken
+     * @param bool $isIgnoreErr
+     * @return array
+     */
+    public function getUserInfoByOnlyOpenId(string $openId, bool $isIgnoreErr = false): array{
+
+        // 参数整理
+        $requestParams = [
+            'system_id' => AppInfo::SYSTEM_ID,
+            'openid' => $openId,
+        ];
+
+        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+        $remoteService->setIsIgnoreErr($isIgnoreErr);
+        $remoteService->getInstance(RpcConst::WEIXIN_MP_RRC_SERVICE_CONF);
+        $res = $remoteService->request(RpcConst::WEIXIN_MP_RRC_SERVICE_CONF['serviceName'], 'WeixinLogin', __FUNCTION__, $requestParams);
+
+        return $res['userInfoObj'] ?? [];
+    }
+
 }

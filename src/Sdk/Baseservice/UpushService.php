@@ -22,10 +22,11 @@ class UpushService extends BaseBaseservice
      * @param string $iosAlert
      * @param string $custom
      * @param string $afterOpen
+     * @param int $pushId
      * @param bool $isIgnoreErr
      * @return array
      */
-    public static function send(string $key, string $displayType, string $ticker, string $title, string $text, string $iosAlert, ?string $custom, ?string $afterOpen = 'go_app', bool $isIgnoreErr = false): array
+    public static function send(string $key, string $displayType, string $ticker, string $title, string $text, string $iosAlert, string $custom, ?string $afterOpen = 'go_app', ?string $pushId, bool $isIgnoreErr = false): array
     {
         // 参数整理
         $requestParams = [
@@ -37,6 +38,7 @@ class UpushService extends BaseBaseservice
             'ios_alert' => $iosAlert,
             'custom' => $custom,
             'after_open' => $afterOpen,
+            'push_id' => $pushId,
             'system_id' => AppInfo::SYSTEM_ID,
         ];
 

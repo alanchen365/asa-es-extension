@@ -79,7 +79,9 @@ class AsaEsConst
     // Mysql 更新用户
     const MYSQL_AUTO_UPDATEUSER = [
         'update_user',
+        'update_user_id',
         'modify_user',
+        'modify_user_id',
     ];
 
     //  Mysql 删除时间
@@ -90,6 +92,7 @@ class AsaEsConst
     // mysql 删除用户
     const MYSQL_AUTO_DELETEUSER = [
         'delete_user',
+        'delete_user_id',
     ];
 
     // mysql 添加时间
@@ -100,5 +103,6 @@ class AsaEsConst
     // mysql 添加用户
     const MYSQL_AUTO_INSERTUSER = [
         'create_user',
+        'create_user_id',
     ];
 }

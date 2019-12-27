@@ -174,4 +174,12 @@ class BaseService
     {
         return $this->getDaoObj()->truncate();
     }
+
+    /**
+     * 获取最后一条记录
+     */
+    public function getByLast()
+    {
+        return $this->getDaoObj()->getByLast();
+    }
 }

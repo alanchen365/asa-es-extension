@@ -933,4 +933,26 @@ class BaseDao
         // 记录log
         $this->getDb()->saveLog(__FUNCTION__);
     }
+
+    /**
+     * 获取自增编号
+     * @return int|null
+     */
+    public function getAutoIncrement():?int{
+
+        $sql = "select auto_increment from information_schema.tables where table_name= '{$this->getBeanObj()->getTableName()}'";
+        $res = $this->getDb()->rawQueryOne($sql);
+
+        return $res['auto_increment'] ?? null;
+    }
+
+    /**
+     * 设置自增编号
+     * @param int $autoIncrement
+     */
+    public function setAutoIncrement(int $autoIncrement):void{
+
+        $sql = "alter table {$this->getBeanObj()->getTableName()} auto_increment={$autoIncrement}";
+         $this->getDb()->rawQueryOne($sql);
+    }
 }

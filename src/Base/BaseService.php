@@ -182,4 +182,21 @@ class BaseService
     {
         return $this->getDaoObj()->getByLast();
     }
+
+    /**
+     * 获取自增编号
+     * @return mixed
+     */
+    public function getAutoIncrement(){
+        return $this->getDaoObj()->getAutoIncrement();
+    }
+
+    /**
+     * 设置自增编号
+     * @param int $autoIncrement
+     * @return mixed
+     */
+    public function setAutoIncrement(int $autoIncrement){
+        return $this->getDaoObj()->setAutoIncrement($autoIncrement);
+    }
 }

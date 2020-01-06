@@ -17,63 +17,26 @@ use AsaEs\Utility\Tools;
 
 class ShorturlService extends BaseBaseservice {
 
-    /**
-     * 随机生成短网址
-     * @param bool $isIgnoreErr
-     * @param string $customize
-     * @param string $url
-     * @param string|null $baseUrl
-     * @param string|null $ip
-     * @return array
-     */
-    public static function rand(bool $isIgnoreErr = false,string $url,string $baseUrl, string $ip = null):array
-    {
-        // 参数整理
+
+    public static function alias(bool $isIgnoreErr = false, $aliasData = []){
+
+        $aliasParams = [];
+
+        // 参数解析
+        foreach ($aliasData as $key => $alias){
+
+            $aliasParams[] = [
+                'alias' => $alias['alias'] ?? null, // 非必填 如果不填系统自动生成
+                'url' => $alias['url'] ?? null, // 必填
+                'ip' => $alias['ip'] ?? null,   //  可为空
+                'system_id' => AppInfo::SYSTEM_ID,  // 必填
+                'base_url' => $alias['base_url']?? null,    // 基础url 必填
+            ];
+        }
+
         $requestParams = [
             'system_id' => AppInfo::SYSTEM_ID,
-            'url' => $url,
-            'base_url' => $baseUrl,
-            'ip' => $ip,
-        ];
-
-        // 实例化请求类
-        $res = null;
-        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
-        $remoteService->setIsIgnoreErr($isIgnoreErr);
-        $remoteService->getInstance(RpcConst::TRACKING_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::TRACKING_RRC_SERVICE_CONF['serviceName'],'Shorturl',__FUNCTION__,$requestParams);
-
-        return $res ?? [];
-    }
-
-
-    public static function customize(bool $isIgnoreErr = false, string $customize,string $url,string $baseUrl, string $ip = null):array
-    {
-        // 参数整理
-        $requestParams = [
-            'system_id' => AppInfo::SYSTEM_ID,
-            'customize' => $customize,
-            'url' => $url,
-            'base_url' => $baseUrl,
-            'ip' => $ip,
-        ];
-
-        // 实例化请求类
-        $res = null;
-        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
-        $remoteService->setIsIgnoreErr($isIgnoreErr);
-        $remoteService->getInstance(RpcConst::TRACKING_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::TRACKING_RRC_SERVICE_CONF['serviceName'],'Shorturl',__FUNCTION__,$requestParams);
-
-        return $res ?? [];
-    }
-
-    public static function unCustomize(bool $isIgnoreErr = false, string $customize):array
-    {
-        // 参数整理
-        $requestParams = [
-            'system_id' => AppInfo::SYSTEM_ID,
-            'customize' => $customize,
+            'alias_params' => $aliasParams,
         ];
 
         // 实例化请求类

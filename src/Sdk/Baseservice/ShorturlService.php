@@ -21,10 +21,8 @@ class ShorturlService extends BaseBaseservice {
     public static function alias(bool $isIgnoreErr = false, $aliasData = []){
 
         $aliasParams = [];
-
         // 参数解析
         foreach ($aliasData as $key => $alias){
-
             $aliasParams[] = [
                 'alias' => $alias['alias'] ?? null, // 非必填 如果不填系统自动生成
                 'url' => $alias['url'] ?? null, // 必填

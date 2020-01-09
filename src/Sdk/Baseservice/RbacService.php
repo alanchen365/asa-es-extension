@@ -159,11 +159,12 @@ class RbacService extends BaseBaseservice {
      * @param bool|null $isIgnoreErr
      * @return |null
      */
-    public static function getUserList(?int $pageNo,?string $account, ?string $name, ?array $roleIds = [] , ?bool $isIgnoreErr = false):array
+    public static function getUserList(?int $pageNo,?string $account, ?string $name, ?array $roleIds = [] , ?bool $isIgnoreErr = false, ?int $pageNum = null):array
     {
         // 参数整理
         $requestParams = [
             'page_no' => $pageNo,
+            'page_num' => $pageNum,
             'account' => $account,
             'name' => $name,
             'role_ids' => $roleIds,

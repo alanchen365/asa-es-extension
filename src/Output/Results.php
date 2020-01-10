@@ -4,6 +4,8 @@ namespace AsaEs\Output;
 
 use App\AppConst\AppInfo;
 use AsaEs\AsaEsConst;
+use AsaEs\Utility\Env;
+use EasySwoole\Core\Component\Di;
 
 class Results
 {
@@ -49,12 +51,18 @@ class Results
     {
         $result = empty($this->_result) ? (object) [] : $this->_result;
 
+
         $data = [
             AppInfo::RESULTS_RETURN_CODE_KEY => $this->_code,
             AppInfo::RESULTS_RETURN_DATE_KEY => $result,
             AppInfo::RESULTS_RETURN_MSG_KEY => $this->_msg,
             AppInfo::RESULTS_RETURN_TIME_KEY => date(AppInfo::RESULTS_RETURN_TIME_FORMAT),
         ];
+
+        if(Env::isHttp()){
+            $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
+            $data['request_id'] = $requestObj->getRequestId();
+        }
 
         if (empty($this->_result)) {
             unset($data['data']);

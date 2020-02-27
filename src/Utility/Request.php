@@ -131,7 +131,7 @@ class Request
      */
     public function setRequestId(): void
     {
-        $this->requestId = Md5::toMd5(Random::randStr(16), time());
+        $this->requestId = Md5::toMd5(Random::randStr(16).time());
     }
 
     /**

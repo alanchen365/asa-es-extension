@@ -6,6 +6,14 @@ class ArrayUtility
 {
 
     /**
+     * 判断是否是索引数组
+     */
+    public static function isAssoc(array $arr): bool
+    {
+        return array_keys($arr) !== range(0, count($arr) - 1);
+    }
+
+    /**
      * 判断一个一位数组中的id是是否是null（不过滤9） 如果等于null 最终判断注销后的数组是否为空
      */
     public static function emptyIds(array $ids)

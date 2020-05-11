@@ -140,4 +140,27 @@ class OssService extends BaseBaseservice {
             throw new AppException($throwable->getCode(),$throwable->getMessage());
         }
     }
+
+
+    /**
+     * 获取OSS临时授权信息
+     * @param bool $isIgnoreErr
+     * @return array
+     */
+    public static function getOssStsInfo(bool $isIgnoreErr = false) :array {
+
+        // 参数整理
+        $requestParams = [
+            'system_id' => AppInfo::SYSTEM_ID,
+        ];
+
+        // 实例化请求类
+        $res = null;
+        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+        $remoteService->setIsIgnoreErr($isIgnoreErr);
+        $remoteService->getInstance(RpcConst::TRACKING_RRC_SERVICE_CONF);
+        $res = $remoteService->request(RpcConst::TRACKING_RRC_SERVICE_CONF['serviceName'],'Oss','getOssStsInfo',$requestParams);
+
+        return $res ?? [];
+    }
 }

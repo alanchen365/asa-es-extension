@@ -55,11 +55,12 @@ class BusinesslogService extends BaseBaseservice {
         ];
 
         // 实例化请求类
-        $res = null;
-        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
-        $remoteService->setIsIgnoreErr($isIgnoreErr);
-        $remoteService->getInstance(RpcConst::BUSINESSLOG_RRC_SERVICE_CONF);
-        $remoteService->request(RpcConst::BUSINESSLOG_RRC_SERVICE_CONF['serviceName'], 'Index', __FUNCTION__, $requestParams);
+//        $res = null;
+//        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+//        $remoteService->setIsIgnoreErr($isIgnoreErr);
+//        $remoteService->getInstance(RpcConst::BUSINESSLOG_RRC_SERVICE_CONF);
+//        $remoteService->request(RpcConst::BUSINESSLOG_RRC_SERVICE_CONF['serviceName'], 'Index', __FUNCTION__, $requestParams);
+        BusinesslogService::setLogs([$requestParams], $isIgnoreErr);
     }
 
     /**

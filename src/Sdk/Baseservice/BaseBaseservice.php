@@ -19,7 +19,7 @@ class BaseBaseservice {
      * @return string
      */
     public static function getBaseserviceUrl($path = ''){
-        return EnvConst::BASESERVICE_PROTOCOL . "://" . EnvConst::BASESERVICE_ADDRESS . ":" . EnvConst::BASESERVICE_PROT . $path;
+        return EnvConst::BASESERVICE_PROTOCOL . "://" . EnvConst::BASESERVICE_HOST . ":" . EnvConst::BASESERVICE_PROT . $path;
     }
 
 }

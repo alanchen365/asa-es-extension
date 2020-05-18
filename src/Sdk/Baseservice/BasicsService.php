@@ -9,7 +9,6 @@
 namespace AsaEs\Sdk\Baseservice;
 
 use App\AppConst\AppInfo;
-use App\AppConst\BasicsConst;
 use App\AppConst\EnvConst;
 use App\AppConst\RpcConst;
 use AsaEs\RemoteCall\RemoteService;

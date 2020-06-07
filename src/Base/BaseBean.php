@@ -1,6 +1,7 @@
 <?php
 namespace AsaEs\Base;
 
+use AsaEs\Exception\AppException;
 use AsaEs\Utility\Tools;
 
 class BaseBean
@@ -158,8 +159,14 @@ class BaseBean
         return $data;
     }
 
-    public function __call($actionName, $arguments){
-        return null;
+    public function __call($actionName, $arguments)
+    {
+        $modelName = Tools::getLastNameSpaceName(get_called_class());
+
+        $ref = new \ReflectionClass($this);
+        if (!($ref->hasMethod($actionName) && $ref->getMethod($actionName)->isPublic() && !$ref->getMethod($actionName)->isStatic())) {
+            throw new AppException(1013, "你调用了{$modelName}中的{$actionName}()方法,但它不存在");
+        }
     }
 
     /**

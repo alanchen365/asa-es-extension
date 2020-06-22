@@ -45,12 +45,12 @@ class CrontabRoute
             $moduleClass::run();
         }
 
-        //每日1点1分执行 定时删除日志脚本
-        CronTab::getInstance()->addRule('AutoClearLog', '1 1 * * *', function (){
-
-            $logDir = Config::getInstance()->getConf('LOG_DIR');
-
-            Env::clearLog($logDir,AsaEsConst::AUTO_CLEAR_LOG_DAY,AsaEsConst::AUTO_CLEAR_LOG_FILTER);
-        });
+//        //每日1点1分执行 定时删除日志脚本
+//        CronTab::getInstance()->addRule('AutoClearLog', '1 1 * * *', function (){
+//
+//            $logDir = Config::getInstance()->getConf('LOG_DIR');
+//
+//            Env::clearLog($logDir,AsaEsConst::AUTO_CLEAR_LOG_DAY,AsaEsConst::AUTO_CLEAR_LOG_FILTER);
+//        });
     }
 }

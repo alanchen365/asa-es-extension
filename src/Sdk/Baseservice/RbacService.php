@@ -16,7 +16,8 @@ use AsaEs\RemoteCall\RemoteService;
 use AsaEs\Utility\ArrayUtility;
 use AsaEs\Utility\Tools;
 
-class RbacService extends BaseBaseservice {
+class RbacService extends BaseBaseservice
+{
 
 
     /**
@@ -25,7 +26,8 @@ class RbacService extends BaseBaseservice {
      * @param bool $isIgnoreErr
      * @return array
      */
-    public static function userInfo(int $userId,bool $isIgnoreErr = false) :array {
+    public static function userInfo(int $userId, bool $isIgnoreErr = false): array
+    {
 
         // 参数整理
         $requestParams = [
@@ -38,14 +40,14 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res ?? [];
     }
 
     #########################  jwt 相关开始 #########################
 
-    public static function jwtDecode(string $token, bool $isIgnoreErr = false):array
+    public static function jwtDecode(string $token, bool $isIgnoreErr = false): array
     {
         // 参数整理
         $requestParams = [
@@ -58,7 +60,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res['token'] ?? [];
     }
@@ -70,13 +72,13 @@ class RbacService extends BaseBaseservice {
 
     /**
      * 登录
-     * @param string $account  账号
-     * @param string $password  密码
+     * @param string $account 账号
+     * @param string $password 密码
      * @param bool|null $isIgnoreErr 是否忽略错误
      * @param string|null $tokenType token类型  解释 pc | app
      * @return |null
      */
-    public static function login(string $account, string $password, ?bool $isIgnoreErr = false,?string $tokenType = null):array
+    public static function login(string $account, string $password, ?bool $isIgnoreErr = false, ?string $tokenType = null): array
     {
         // 参数整理
         $requestParams = [
@@ -91,7 +93,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res ?? [];
     }
@@ -105,7 +107,7 @@ class RbacService extends BaseBaseservice {
      * @param bool|null $isIgnoreErr
      * @return array
      */
-    public static function loginWithOpenid(string $account, string $password, string $openid, string $accessToken, ?bool $isIgnoreErr = false,?string $tokenType = null): array
+    public static function loginWithOpenid(string $account, string $password, string $openid, string $accessToken, ?bool $isIgnoreErr = false, ?string $tokenType = null): array
     {
         // 参数整理
         $requestParams = [
@@ -122,7 +124,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res ?? [];
     }
@@ -133,7 +135,7 @@ class RbacService extends BaseBaseservice {
      * @param bool|null $isIgnoreErr
      * @return array
      */
-    public static function getLoginInfoByOpenId(string $openid, ?bool $isIgnoreErr = false,?string $tokenType = null): array
+    public static function getLoginInfoByOpenId(string $openid, ?bool $isIgnoreErr = false, ?string $tokenType = null): array
     {
         // 参数整理
         $requestParams = [
@@ -147,7 +149,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res ?? [];
     }
@@ -159,7 +161,7 @@ class RbacService extends BaseBaseservice {
      * @param bool|null $isIgnoreErr
      * @return |null
      */
-    public static function getUserList(?int $pageNo,?string $account, ?string $name, ?array $roleIds = [] , ?bool $isIgnoreErr = false, ?int $pageNum = null):array
+    public static function getUserList(?int $pageNo, ?string $account, ?string $name, ?array $roleIds = [], ?bool $isIgnoreErr = false, ?int $pageNum = null): array
     {
         // 参数整理
         $requestParams = [
@@ -176,20 +178,20 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res ?? [];
     }
 
     /**
      * 添加用户
-     * @param string $account  账户
+     * @param string $account 账户
      * @param string $name 用户名
      * @param string $password 密码
      * @param bool|null $isIgnoreErr 是否忽略错误
      * @return |null
      */
-    public static function addUser(string $account, string $name, string $password, array $roleIds = [],?bool $isIgnoreErr = false)
+    public static function addUser(string $account, string $name, string $password, array $roleIds = [], ?bool $isIgnoreErr = false)
     {
         // 参数整理
         $requestParams = [
@@ -205,12 +207,44 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res;
     }
 
-    public static function addUserAll(array $accountList, string $name, string $password, array $roleIds = [],?bool $isIgnoreErr = false)
+    /**
+     * 添加组用户
+     * @param string $account
+     * @param string $name
+     * @param string $password
+     * @param int $groupId
+     * @param array $roleIds
+     * @param bool|null $isIgnoreErr
+     * @return null
+     */
+    public static function addGroupUser(string $account, string $name, string $password, int $groupId, array $roleIds = [], ?bool $isIgnoreErr = false)
+    {
+        // 参数整理
+        $requestParams = [
+            'account' => $account,
+            'name' => $name,
+            'password' => $password,
+            'system_id' => AppInfo::SYSTEM_ID,
+            'group_id' => $groupId,
+            'role_ids' => $roleIds,
+        ];
+
+        // 实例化请求类
+        $res = null;
+        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+        $remoteService->setIsIgnoreErr($isIgnoreErr);
+        $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
+        return $res;
+    }
+
+
+    public static function addUserAll(array $accountList, string $name, string $password, array $roleIds = [], ?bool $isIgnoreErr = false)
     {
         // 参数整理
         $requestParams = [
@@ -226,7 +260,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res;
     }
@@ -237,7 +271,7 @@ class RbacService extends BaseBaseservice {
      * @param bool|null $isIgnoreErr
      * @return array|null
      */
-    public static function getUserById(int $userId,?bool $isIgnoreErr = false):?array
+    public static function getUserById(int $userId, ?bool $isIgnoreErr = false): ?array
     {
         // 参数整理
         $requestParams = [
@@ -250,7 +284,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res;
     }
@@ -258,7 +292,7 @@ class RbacService extends BaseBaseservice {
     /**
      * 删除用户单条
      */
-    public static function delUserById(int $userId,?bool $isIgnoreErr = false):?array
+    public static function delUserById(int $userId, ?bool $isIgnoreErr = false): ?array
     {
         // 参数整理
         $requestParams = [
@@ -271,7 +305,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res;
     }
@@ -279,7 +313,7 @@ class RbacService extends BaseBaseservice {
     /**
      * 修改用户单条
      */
-    public static function updateUserById(int $userId,?string $account, ?string $name, ?string $password ,?array $roleIds , ?bool $isIgnoreErr = false):void
+    public static function updateUserById(int $userId, ?string $account, ?string $name, ?string $password, ?array $roleIds, ?bool $isIgnoreErr = false): void
     {
         // 参数整理
         $requestParams = [
@@ -291,7 +325,7 @@ class RbacService extends BaseBaseservice {
 
         // 过滤空数组
         $requestParams = ArrayUtility::unsetEmpty($requestParams);
-        if(Tools::superEmpty($requestParams)){
+        if (Tools::superEmpty($requestParams)) {
             return;
         }
 
@@ -304,13 +338,14 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
     }
 
     /**
      * 修改密码
      */
-    public static function changePwd(int $userId, string $oldPass, string $password, ?bool $isIgnoreErr = false) {
+    public static function changePwd(int $userId, string $oldPass, string $password, ?bool $isIgnoreErr = false)
+    {
         // 参数整理
         $requestParams = [
             'user_id' => $userId,
@@ -324,7 +359,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res ?? [];
     }
@@ -333,7 +368,8 @@ class RbacService extends BaseBaseservice {
     /**
      * 重置密码
      */
-    public static function resetPwd(int $userId, string $password, ?bool $isIgnoreErr = false) {
+    public static function resetPwd(int $userId, string $password, ?bool $isIgnoreErr = false)
+    {
         // 参数整理
         $requestParams = [
             'user_id' => $userId,
@@ -346,7 +382,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res ?? [];
     }
@@ -354,7 +390,7 @@ class RbacService extends BaseBaseservice {
     /**
      * 物理删除用户
      */
-    public static function deleteUsersPhysically(array $userIds,?bool $isIgnoreErr = false):?array
+    public static function deleteUsersPhysically(array $userIds, ?bool $isIgnoreErr = false): ?array
     {
         // 参数整理
         $requestParams = [
@@ -367,7 +403,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res;
     }
@@ -377,7 +413,7 @@ class RbacService extends BaseBaseservice {
 
     #########################  角色相关开始 #########################
 
-    public static function getRoleList(?int $pageNo,?string $name,?string $description, ?bool $isIgnoreErr = false):array
+    public static function getRoleList(?int $pageNo, ?string $name, ?string $description, ?bool $isIgnoreErr = false): array
     {
         // 参数整理
         $requestParams = [
@@ -392,12 +428,12 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'Role',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'Role', __FUNCTION__, $requestParams);
 
         return $res ?? [];
     }
 
-    public static function addRole(string $name, ?string $key = null,string $description, array $menuIds = [], array $elementIds = [],?bool $isIgnoreErr = false)
+    public static function addRole(string $name, ?string $key = null, string $description, array $menuIds = [], array $elementIds = [], ?bool $isIgnoreErr = false)
     {
         // 参数整理
         $requestParams = [
@@ -417,12 +453,12 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'Role',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'Role', __FUNCTION__, $requestParams);
 
         return $res;
     }
 
-    public static function getRoleById(int $roleId, ?bool $isIgnoreErr = false):?array
+    public static function getRoleById(int $roleId, ?bool $isIgnoreErr = false): ?array
     {
         // 参数整理
         $requestParams = [
@@ -435,12 +471,12 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'Role',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'Role', __FUNCTION__, $requestParams);
 
         return $res;
     }
 
-    public static function updateRoleById(int $roleId,?string $name, ?string $key = null,?string $description, array $menuIds = [] , array $elementIds = [], ?bool $isIgnoreErr = false):void
+    public static function updateRoleById(int $roleId, ?string $name, ?string $key = null, ?string $description, array $menuIds = [], array $elementIds = [], ?bool $isIgnoreErr = false): void
     {
         // 参数整理
         $requestParams = [
@@ -453,7 +489,7 @@ class RbacService extends BaseBaseservice {
 
         // 过滤空数组
         $requestParams = ArrayUtility::unsetEmpty($requestParams);
-        if(Tools::superEmpty($requestParams)){
+        if (Tools::superEmpty($requestParams)) {
             return;
         }
 
@@ -466,10 +502,10 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'Role',__FUNCTION__,$requestParams);
+        $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'Role', __FUNCTION__, $requestParams);
     }
 
-    public static function delRoleById(int $roleId, ?bool $isIgnoreErr = false):?array
+    public static function delRoleById(int $roleId, ?bool $isIgnoreErr = false): ?array
     {
         // 参数整理
         $requestParams = [
@@ -482,7 +518,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'Role',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'Role', __FUNCTION__, $requestParams);
 
         return $res;
     }
@@ -491,7 +527,7 @@ class RbacService extends BaseBaseservice {
 
 
     #########################  菜单相关开始 #########################
-    public static function getMenuList(?int $pageNo,?string $name,?int $parentId =null, ?bool $isIgnoreErr = false):array
+    public static function getMenuList(?int $pageNo, ?string $name, ?int $parentId = null, ?bool $isIgnoreErr = false): array
     {
         // 参数整理
         $requestParams = [
@@ -506,12 +542,12 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'Menu',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'Menu', __FUNCTION__, $requestParams);
 
         return $res ?? [];
     }
 
-    public static function addMenu(string $name, string $domain, string $url , int $parentId, int $level, string $icon, int $sort, string $status,?bool $isIgnoreErr = false)
+    public static function addMenu(string $name, string $domain, string $url, int $parentId, int $level, string $icon, int $sort, string $status, ?bool $isIgnoreErr = false)
     {
         // 参数整理
         $requestParams = [
@@ -534,12 +570,12 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'Menu',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'Menu', __FUNCTION__, $requestParams);
 
         return $res;
     }
 
-    public static function getMenuById(int $menuId, ?bool $isIgnoreErr = false):?array
+    public static function getMenuById(int $menuId, ?bool $isIgnoreErr = false): ?array
     {
         // 参数整理
         $requestParams = [
@@ -552,12 +588,12 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'Menu',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'Menu', __FUNCTION__, $requestParams);
 
         return $res;
     }
 
-    public static function updateMenuById(int $menuId,?string $name, ?string $domain, ?string $url , ?int $parentId, ?int $level, ?string $icon, ?int $sort, ?string $status,?bool $isIgnoreErr = false):void
+    public static function updateMenuById(int $menuId, ?string $name, ?string $domain, ?string $url, ?int $parentId, ?int $level, ?string $icon, ?int $sort, ?string $status, ?bool $isIgnoreErr = false): void
     {
         // 参数整理
         $requestParams = [
@@ -573,7 +609,7 @@ class RbacService extends BaseBaseservice {
 
         // 过滤空数组
         $requestParams = ArrayUtility::unsetEmpty($requestParams);
-        if(Tools::superEmpty($requestParams)){
+        if (Tools::superEmpty($requestParams)) {
             return;
         }
 
@@ -586,10 +622,10 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'Menu',__FUNCTION__,$requestParams);
+        $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'Menu', __FUNCTION__, $requestParams);
     }
 
-    public static function delMenuById(int $menuId, ?bool $isIgnoreErr = false):void
+    public static function delMenuById(int $menuId, ?bool $isIgnoreErr = false): void
     {
         // 参数整理
         $requestParams = [
@@ -602,7 +638,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'Menu',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'Menu', __FUNCTION__, $requestParams);
     }
 
 
@@ -611,7 +647,8 @@ class RbacService extends BaseBaseservice {
     /**
      * 获取某个用户的页面按钮操作权限
      */
-    public static function getViewButtonPermission(int $userId,string $group,bool $isIgnoreErr = false):array {
+    public static function getViewButtonPermission(int $userId, string $group, bool $isIgnoreErr = false): array
+    {
 
         // 参数整理
         $requestParams = [
@@ -625,7 +662,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res['view_button_permission'] ?? [];
     }
@@ -673,7 +710,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res ?? [];
     }
@@ -685,7 +722,8 @@ class RbacService extends BaseBaseservice {
      * @param bool $isIgnoreErr
      * @return array
      */
-    public static function getUserIdsInRoleIds(array $userIds, array $roleIds, bool $isIgnoreErr = false) {
+    public static function getUserIdsInRoleIds(array $userIds, array $roleIds, bool $isIgnoreErr = false)
+    {
         // 参数整理
         $requestParams = [
             'user_ids' => $userIds,
@@ -698,7 +736,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res['user_ids'] ?? [];
     }
@@ -710,7 +748,8 @@ class RbacService extends BaseBaseservice {
      * @param bool $isIgnoreErr
      * @return array
      */
-    public static function updateUserRole(int $userId, int $roleId, bool $isIgnoreErr = false) {
+    public static function updateUserRole(int $userId, int $roleId, bool $isIgnoreErr = false)
+    {
         // 参数整理
         $requestParams = [
             'user_id' => $userId,
@@ -723,7 +762,7 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res ?? [];
     }
@@ -741,14 +780,15 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res ?? [];
     }
 
 
     /** 获取用户的角色 */
-    public static function getRoleListWithUsers(array $userIds, bool $isIgnoreErr = false) {
+    public static function getRoleListWithUsers(array $userIds, bool $isIgnoreErr = false)
+    {
         // 参数整理
         $requestParams = [
             'user_ids' => $userIds,
@@ -760,9 +800,22 @@ class RbacService extends BaseBaseservice {
         $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
         $remoteService->setIsIgnoreErr($isIgnoreErr);
         $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
-        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'],'User',__FUNCTION__,$requestParams);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], 'User', __FUNCTION__, $requestParams);
 
         return $res['user_ids'] ?? [];
     }
 
+    public static function callMethod(string $className, string $methodName, array $requestParams, bool $isIgnoreErr = false): array
+    {
+        // 参数整理
+        $requestParams['system_id'] = AppInfo::SYSTEM_ID;
+        $className = substr(strrchr($className, "\\"), 1);
+        // 实例化请求类
+        $res = null;
+        $remoteService = new RemoteService(RemoteService::REQUEST_WAY_RPC);
+        $remoteService->setIsIgnoreErr($isIgnoreErr);
+        $remoteService->getInstance(RpcConst::RBAC_RRC_SERVICE_CONF);
+        $res = $remoteService->request(RpcConst::RBAC_RRC_SERVICE_CONF['serviceName'], $className, $methodName, $requestParams);
+        return $res ?? [];
+    }
 }

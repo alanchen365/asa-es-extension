@@ -92,6 +92,8 @@ class Curl
                 'errMsg' => $errMsg,
                 'errNo' => $errNo,
                 'request' => $request,
+                'getBody' => $responseObj->getBody(),
+                'getCurlInfo' => $responseObj->getCurlInfo(),
             ];
 
             $env = $confVal = Config::getInstance()->getEnv();

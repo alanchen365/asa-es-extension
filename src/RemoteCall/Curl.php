@@ -2,7 +2,9 @@
 
 namespace AsaEs\RemoteCall;
 
+use AsaEs\Config;
 use AsaEs\Exception\Service\CurlException;
+use AsaEs\Logger\FileLogger;
 use AsaEs\Utility\Tools;
 use EasySwoole\Core\Utility\Curl\Response;
 use EasySwoole\Core\Utility\Curl\Request;
@@ -17,7 +19,7 @@ class Curl
     // 是否忽略错误
     protected $isIgnoreErr = false;
 
-    public function __construct(?array $config = [], ?bool $isMerge = true,?bool $isIgnoreErr = false)
+    public function __construct(?array $config = [], ?bool $isMerge = true, ?bool $isIgnoreErr = false)
     {
         $this->config = $config;
         $this->isMerge = $isMerge;
@@ -26,7 +28,7 @@ class Curl
     /**
      * @param string $method
      * @param string $url
-     * @param array  $params
+     * @param array $params
      */
     public function request(string $method, string $url, array $params = null): Response
     {
@@ -83,6 +85,24 @@ class Curl
             $errNo = $responseObj->getErrorNo();
             $errMsg = $responseObj->getError();
 
+            /** 为curl记录日志 */
+            $logData = [
+                'func_get_args' => func_get_args(),
+                'responseObj' => $responseObj,
+                'errMsg' => $errMsg,
+                'errNo' => $errNo,
+                'request' => $request,
+            ];
+
+            $env = $confVal = Config::getInstance()->getEnv();
+            if ($env == 'PRODUCTION') {
+                // 打印
+                FileLogger::getInstance()->log(json_encode($logData), "curl_request");
+            } else {
+                // 生产环境 就记录日志
+                FileLogger::getInstance()->console(json_encode($logData), 1);
+            }
+
             if (isset($errNo) && $errNo > 0 && !$this->isIgnoreErr) {
                 throw new CurlException(2008, $errMsg);
             }
@@ -96,7 +116,7 @@ class Curl
     /**
      * 获取配置
      */
-    public function getConfig() :array
+    public function getConfig(): array
     {
         return $this->config;
     }

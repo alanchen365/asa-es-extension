@@ -24,6 +24,14 @@ class CrossDomain
         $flg = false;   // 是否允许跨域
         $origin = null; // 跨域的域名
 
+        $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, app_code, system_id, token, identity');
+
+        // 如果是option请求 直接返回
+        if ('OPTIONS' == $request->getMethod()) {
+            $response->withStatus(Status::CODE_OK);
+            $response->end();
+        }
+
         // 如果是生产环境，给指定域名做跨域
         if ($env == 'PRODUCTION') {
 
@@ -43,13 +51,6 @@ class CrossDomain
             $response->withHeader('Access-Control-Allow-Origin', $origin);
             $response->withHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
             $response->withHeader('Access-Control-Allow-Credentials', 'true');
-            $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, app_code, system_id, token, identity');
-        }
-
-        // 如果是option请求 直接返回
-        if ($flg && 'OPTIONS' == $request->getMethod()) {
-            $response->withStatus(Status::CODE_OK);
-            $response->end();
         }
     }
 }

@@ -18,14 +18,14 @@ class CrossDomain
 {
     use Singleton;
 
-    public function handle(Request $request, Response $response):void
+    public function handle(Request $request, Response $response): void
     {
         $env = $confVal = Config::getInstance()->getEnv();
         $flg = false;   // 是否允许跨域
         $origin = null; // 跨域的域名
 
         // 如果是生产环境，给指定域名做跨域
-        if($env == 'PRODUCTION'){
+        if ($env == 'PRODUCTION') {
 
             $corsDomain = Config::getInstance()->getConf('auth.CROSS_DOMAIN', true);
             $origin = current($request->getHeader('origin') ?? null) ?? '';
@@ -33,17 +33,17 @@ class CrossDomain
             if (ArrayUtility::arrayFlip($corsDomain, $origin)) {
                 $flg = true;
             }
-        }else{
+        } else {
             $origin = '*';
             $flg = true;
         }
 
         //  允许跨域
-        if($flg){
+        if ($flg) {
             $response->withHeader('Access-Control-Allow-Origin', $origin);
             $response->withHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, PUT, OPTIONS');
             $response->withHeader('Access-Control-Allow-Credentials', 'true');
-            $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, system_id, token, identity');
+            $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, app_code, system_id, token, identity');
         }
 
         // 如果是option请求 直接返回

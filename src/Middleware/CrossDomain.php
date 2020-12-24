@@ -24,7 +24,7 @@ class CrossDomain
         $flg = false;   // 是否允许跨域
         $origin = null; // 跨域的域名
 
-        $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, app_code, system_id, token, identity, app_code');
+        $response->withHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, app_code, system_id, token, identity');
 
         // 如果是option请求 直接返回
         if ('OPTIONS' == $request->getMethod()) {

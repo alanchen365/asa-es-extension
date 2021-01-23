@@ -33,6 +33,9 @@ class EasySwooleEvent
     {
         // 时区设置
         date_default_timezone_set('Asia/Shanghai');
+
+        ini_set('serialize_precision', 14);
+
         // 注册路由
         if (Config::getInstance()->getConf('ROUTER')) {
             HttpRouter::getInstance()->registered();
@@ -44,14 +47,14 @@ class EasySwooleEvent
 
         // 创建日志目录
         $logDir = Config::getInstance()->getConf('LOG_DIR');
-        if(!is_dir($logDir)){
-            mkdir($logDir,0777,true);
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0777, true);
         }
 
         // 创建tmp目录
         $tmpDir = Config::getInstance()->getConf('TEMP_DIR');
-        if(!is_dir($tmpDir)){
-            mkdir($tmpDir,0777,true);
+        if (!is_dir($tmpDir)) {
+            mkdir($tmpDir, 0777, true);
         }
     }
 
@@ -67,20 +70,20 @@ class EasySwooleEvent
 
     public static function onRequest(Request $request, Response $response): void
     {
-        try{
+        try {
             // token动态注入
             Di::getInstance()->set(AsaEsConst::DI_REQUEST_OBJ, new \AsaEs\Utility\Request($request));
             // 系统中间件注入
             Dispatch::run($request, $response);
             // 记录访问时间
             $request->withAttribute(AsaEsConst::LOG_ACCESS, microtime(true));
-        }catch (\Throwable $throwable){
-            throw new MiddlewareException($throwable->getCode(),$throwable->getMessage());
+        } catch (\Throwable $throwable) {
+            throw new MiddlewareException($throwable->getCode(), $throwable->getMessage());
         }
     }
 
     public static function afterAction(Request $request, Response $response): void
     {
-        AccessLog::getInstance()->handle($request,$response);
+        AccessLog::getInstance()->handle($request, $response);
     }
 }

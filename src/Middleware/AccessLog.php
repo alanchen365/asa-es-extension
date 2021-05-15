@@ -7,6 +7,7 @@ use App\Utility\Exception\MiddlewareException;
 use AsaEs\AsaEsConst;
 use AsaEs\Config;
 use AsaEs\Exception\AppException;
+use AsaEs\Logger\BaseLogger;
 use AsaEs\Logger\FileLogger;
 use AsaEs\Utility\ArrayUtility;
 use AsaEs\Utility\Tools;
@@ -15,6 +16,7 @@ use EasySwoole\Core\Component\Di;
 use EasySwoole\Core\Http\Request;
 use EasySwoole\Core\Http\Response;
 use EasySwoole\Core\Swoole\ServerManager;
+use Es3\Utility\File;
 
 /**
  * 跨域配置
@@ -23,7 +25,7 @@ class AccessLog
 {
     use Singleton;
 
-    public function handle(Request $request, Response $response):void
+    public function handle(Request $request, Response $response): void
     {
         try {
             //从请求里获取之前增加的时间戳
@@ -35,14 +37,32 @@ class AccessLog
             $requestObj = Di::getInstance()->get(AsaEsConst::DI_REQUEST_OBJ);
 
             //拼接一个简单的日志
-            $runTime = round(floatval($runTime * 1000), 2);
-            $logStr = $ip['remote_ip'] . ' | ' . $runTime . ' ms | ' . $request->getUri() . ' | ' . $requestObj->getRequestId() . ' | ' . $request->getHeader('user-agent')[0];
+            $runTime = round(floatval($runTime * 1000), 0);
+            $accessLog = [
+                AppInfo::APP_EN_NAME,
+                AppInfo::APP_NAME,
+                $requestObj->getRequestId(),
+                $request->getMethod(),
+                $request->getUri(),
+                $ip['remote_ip'] ?? 'unknown',
+                "{$runTime} ms",
+                $request->getHeader('user-agent')[0] ?? '',
+                json_encode(BaseLogger::getRequestLogData()),
+                json_encode(debug_backtrace()),
+            ];
 
-            //判断一下当执行时间大于1秒记录到 slowlog 文件中，否则记录到 access 文件
-            if ($runTime < round(600, 2)) {
-                FileLogger::getInstance()->log($logStr, AsaEsConst::LOG_ACCESS);
-            } else {
-                FileLogger::getInstance()->log($logStr, AsaEsConst::LOG_SLOW);
+            /** 正常日志 */
+            FileLogger::getInstance()->log($accessLog, AsaEsConst::LOG_ACCESS);
+
+            $accessLog = implode($accessLog, '  |   ');
+            if ($runTime > round(1 * 1000, 0)) {
+                $logPath = \EasySwoole\Config::getInstance()->getConf('LOG_DIR') . "/" . AsaEsConst::LOG_SLOW;
+                $fileDate = date('Ymd', time());
+                $filePath = "{$logPath}/{$fileDate}.log";
+
+                clearstatcache();
+                is_dir($logPath) ? null : File::createDirectory($logPath, 0777);
+                file_put_contents($filePath, "{$accessLog}", FILE_APPEND | LOCK_EX);
             }
         } catch (\Throwable $throwable) {
             throw new MiddlewareException($throwable->getCode(), $throwable->getMessage());

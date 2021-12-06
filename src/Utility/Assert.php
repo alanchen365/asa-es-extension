@@ -1,6 +1,6 @@
 <?php
 
-namespace Es3\Utility;
+namespace AsaEs\Utility;
 
 
 use AsaEs\Exception\MsgException;
